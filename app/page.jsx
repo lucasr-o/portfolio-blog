@@ -5,7 +5,7 @@ import PostPreview from "@/components/PostPreview";
 import SecurityTerminal from "@/components/SecurityTerminal";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
-import { latestPost } from "@/data/posts";
+import { getPublicContent } from "@/lib/public-content";
 import { credentials, education, experience, profile, site, terminalSteps } from "@/data/profile";
 import { createPersonSchema } from "@/lib/structured-data";
 import styles from "./home.module.css";
@@ -23,7 +23,9 @@ export const metadata = {
   },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const { posts } = await getPublicContent();
+  const latestPost = posts[0];
   return (
     <>
       <JsonLd data={createPersonSchema()} />
@@ -67,10 +69,10 @@ export default function HomePage() {
           </ol>
         </section>
 
-        <section className={`container ${styles.latest}`} aria-labelledby="latest-title">
+        {latestPost && <section className={`container ${styles.latest}`} aria-labelledby="latest-title">
           <div className={`${styles.sectionHeader} reveal-on-scroll`}><p className="eyebrow">Latest writing</p><h2 id="latest-title">Notes from the work.</h2></div>
           <div className="reveal-on-scroll"><PostPreview post={latestPost} featured headingLevel={3} /></div>
-        </section>
+        </section>}
 
         <section className={`container ${styles.section}`} id="about" tabIndex="-1" aria-labelledby="about-title">
           <div className={`${styles.sectionHeader} reveal-on-scroll`}><p className="eyebrow">About</p><h2 id="about-title">Practical security, shared clearly.</h2></div>

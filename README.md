@@ -1,8 +1,8 @@
-# lucas-reis.dev
+# lucas-reis.com
 
 Static portfolio and blog for Lucas Reis, built with Next.js, React, and JavaScript.
 
-The project intentionally keeps the content local, exports plain static files, and limits client-side JavaScript to the progressive terminal animation.
+The public application exports static HTML and assets, with small client components for the terminal and scroll reveals. The separate Node-based CMS lives in `apps/cms`; it is never exported to S3. Deployment and GitHub authoring are being implemented in the OpenSpec change `portfolio-blog` and are not live yet.
 
 ## Requirements
 
@@ -12,11 +12,26 @@ The project intentionally keeps the content local, exports plain static files, a
 ## Local development
 
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
 pnpm dev
 ```
 
 Open `http://localhost:3000`.
+
+In a second terminal, run `pnpm dev:cms` for the editorial service at `http://127.0.0.1:3001`. It binds to loopback for local development. Build it separately with `pnpm build:cms`, then run `pnpm start:cms`. The production container will use its own internal port; it must not expose a host port on the Pi.
+
+Open `/keystatic` on the CMS server. Development uses local files by default, so saves modify this checkout. Production always uses GitHub storage and requires a configured GitHub App; `.env.example` lists its variables, not working credentials. Never expose the development server through the Tunnel. Browser tests use a separate temporary content directory and port 3002.
+
+## Workspace
+
+- `app/`, `components/`, `public/`: existing public site, built into `out/`.
+- `apps/cms/`: Keystatic server and saved-revision previews (separate build).
+- `packages/blog-content/`: shared editorial validation, publication selection and media manifest.
+- `packages/blog-ui/`: server-rendered Markdown and article presentation, shared by site and preview.
+- `content/posts/`: YAML article records with raw Markdown strings.
+- `content/media/`: original editorial uploads, outside the public directory.
+
+The CMS does not edit the portfolio. The existing Overleaf services and the old portfolio repository are outside this project's deployment scope.
 
 ## Quality checks
 
@@ -49,7 +64,7 @@ The preview is available at `http://127.0.0.1:4173`.
 Edit [`data/profile.js`](data/profile.js) to revise the public profile:
 
 - `site` controls the site identity and canonical origin.
-- `profile` controls the hero, about copy, location, objective, and authorized telephone, email, and LinkedIn links.
+- `profile` controls the hero, about copy, location, objective, photo, email, and social links. No telephone is published.
 - `experience` controls the five Work entries.
 - `education` controls Academic Background.
 - `credentials` controls certifications and learning paths.
@@ -59,28 +74,15 @@ The UI reads these records directly; do not duplicate resume content in page com
 
 ## Adding a blog post
 
-Posts live in the `posts` array in [`data/posts.js`](data/posts.js). Add one object with this shape:
+Read [the editorial guide](docs/editorial-content.md) for the YAML/Markdown format, publication states, dates and image references. The checked-in example preserves the original article URL and adds Markdown demonstrations. Drafts and future articles are excluded from the site, **but remain readable in this public repository**.
 
-```js
-{
-  slug: "lowercase-hyphenated-slug",
-  title: "A descriptive article title",
-  summary: "A concise preview and metadata description.",
-  author: site.legalName,
-  publishedAt: "2026-09-24",
-  readingTime: "5 min read",
-  tags: ["Application Security"],
-  introduction: "Opening paragraph.",
-  sections: [
-    {
-      heading: "Section heading",
-      paragraphs: ["Section paragraph."],
-    },
-  ],
-}
+`pnpm build` captures one publication instant, validates content, generates a shared snapshot for every route, and exports only referenced eligible media. To reproduce a specific publication cutoff:
+
+```bash
+BLOG_PUBLICATION_TIME=2026-09-27T18:00:00Z pnpm build
 ```
 
-The newest ISO `publishedAt` value is selected automatically for Latest Writing and receives featured treatment on `/blog`. Every post is included by `generateStaticParams`, so no route component needs to be created. Verify a new record with:
+The newest eligible article is featured automatically. An empty collection is supported. Verify edits with:
 
 ```bash
 pnpm test

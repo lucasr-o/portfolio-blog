@@ -4,7 +4,7 @@ import path from "node:path";
 const root = process.cwd();
 const clientBoundaries = [];
 
-for (const directory of ["app", "components"]) {
+for (const directory of ["app", "components", "packages/blog-ui"]) {
   const entries = fs.readdirSync(path.join(root, directory), { recursive: true, withFileTypes: true });
   for (const entry of entries) {
     if (!entry.isFile() || !/\.[jt]sx?$/.test(entry.name)) continue;
@@ -17,7 +17,7 @@ for (const directory of ["app", "components"]) {
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 const runtimeDependencies = Object.keys(packageJson.dependencies ?? {});
 const forbiddenRuntimeDependencies = runtimeDependencies.filter((dependency) =>
-  /animate|motion|gsap|jquery/i.test(dependency),
+  /animate|motion|gsap|jquery|keystatic|keystar/i.test(dependency),
 );
 
 const chunksDirectory = path.join(root, "out", "_next", "static", "chunks");
@@ -43,3 +43,4 @@ if (JSON.stringify(clientBoundaries.sort()) !== JSON.stringify(expectedClientBou
 if (forbiddenRuntimeDependencies.length > 0) {
   throw new Error(`Unexpected animation/runtime dependencies: ${forbiddenRuntimeDependencies.join(", ")}`);
 }
+if (chunkBytes > 700_000) throw new Error(`Public JavaScript exceeds the 700 kB budget: ${chunkBytes}`);

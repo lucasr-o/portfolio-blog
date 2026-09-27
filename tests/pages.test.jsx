@@ -3,11 +3,12 @@ import { describe, expect, it } from "vitest";
 import HomePage from "@/app/page";
 import BlogPage from "@/app/blog/page";
 import PostPage from "@/app/blog/[slug]/page";
-import { latestPost } from "@/data/posts";
+import { getPublicContent } from "@/lib/public-content";
+const { posts: [latestPost] } = await getPublicContent();
 
 describe("public routes", () => {
-  it("renders the resume-driven home page with one primary heading", () => {
-    const { container } = render(<HomePage />);
+  it("renders the resume-driven home page with one primary heading", async () => {
+    const { container } = render(await HomePage());
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(screen.getByText("Lucas Reis de Oliveira da Silva", { exact: false })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "From findings to decisions." })).toBeInTheDocument();
@@ -23,11 +24,11 @@ describe("public routes", () => {
     expect(container.querySelector("#work")).toHaveAttribute("tabindex", "-1");
   });
 
-  it("uses the same latest post on the home page and blog index", () => {
-    const home = render(<HomePage />);
+  it("uses the same latest post on the home page and blog index", async () => {
+    const home = render(await HomePage());
     expect(home.getAllByRole("link", { name: latestPost.title })[0]).toHaveAttribute("href", `/blog/${latestPost.slug}`);
     home.unmount();
-    render(<BlogPage />);
+    render(await BlogPage());
     expect(screen.getByRole("heading", { level: 1, name: "Application security notes." })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2, name: "Latest notes" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 3, name: latestPost.title })).toBeInTheDocument();
@@ -41,6 +42,8 @@ describe("public routes", () => {
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(latestPost.title);
     expect(screen.getByRole("link", { name: /Back to blog/ })).toHaveAttribute("href", "/blog");
     expect(screen.getByText(latestPost.author, { exact: false })).toBeInTheDocument();
-    expect(within(container.querySelector("article")).getAllByRole("heading", { level: 2 })).toHaveLength(latestPost.sections.length);
+    expect(within(container.querySelector("article")).getAllByRole("heading", { level: 2 })).toHaveLength(4);
+    expect(screen.getByRole("table")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /Green and yellow/ })).toHaveAttribute("src", expect.stringMatching(/^\/media\/posts\//));
   });
 });

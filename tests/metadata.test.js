@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { metadata as homeMetadata } from "@/app/page";
 import { metadata as blogMetadata } from "@/app/blog/page";
 import { generateMetadata as generatePostMetadata } from "@/app/blog/[slug]/page";
-import { latestPost } from "@/data/posts";
+import { getPublicContent } from "@/lib/public-content";
+const { posts: [latestPost] } = await getPublicContent();
 
 describe("route metadata", () => {
   it("is unique and canonical across public routes", async () => {

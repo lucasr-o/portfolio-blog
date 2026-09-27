@@ -104,6 +104,10 @@ Capturar um único `publicationTime` UTC no início do job. Um artigo é elegív
 
 Home, `/blog/`, rotas de artigo, metadados, dados estruturados, sitemap e manifesto de mídias usam exatamente o mesmo conjunto. Ordenar por `publishedAt` decrescente, com slug como desempate determinístico. Tratar coleção vazia sem falha: índice com mensagem curta e Latest Writing omitido.
 
+Compatibilidade confirmada durante implementação em 2026-09-27: Next 16.3.6 rejeita uma lista vazia em `generateStaticParams()` com `output: export`. Após alinhamento com Lucas, a geração usará o parâmetro técnico `__empty__` somente quando não houver artigos elegíveis. Ele não é um slug editorial válido, não contém conteúdo e resolve obrigatoriamente para `notFound()`. O Next ainda emite payloads intermediários dessa rota; o script de build remove somente `out/blog/__empty__/` antes da auditoria e entrega. O export final deve conter zero arquivos dessa rota; uma auditoria bloqueia qualquer vazamento desse parâmetro em caminhos públicos. Não adicionar post fictício, entrada no sitemap ou fallback público 200 para resolver essa limitação.
+
+As imagens com hash usam um GET estático que entrega os mesmos bytes no desenvolvimento e no export, verificando o hash contra o manifesto. A mesma limitação do Next se aplica quando não há imagens: gerar somente um parâmetro técnico que responde 404 e remover `out/media/posts/__empty__` antes da auditoria, sem publicar um asset fictício.
+
 Quando a data de um scheduled chega, o build passa a incluí-lo; não é necessário um commit automático trocando status. Despublicar significa voltar a draft e executar novo deploy: remover também os objetos antigos de artigo/payload do prefixo público e invalidar o cache. Isso não apaga o histórico público no GitHub.
 
 ### 6. AWS manual e site estático por rota

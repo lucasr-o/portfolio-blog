@@ -13,7 +13,7 @@ const scrollRevealBootstrap = `
 `;
 
 export const metadata = {
-  metadataBase: new URL("https://lucas-reis.dev"),
+  metadataBase: new URL("https://lucas-reis.com"),
   title: {
     default: "Lucas Reis — Application Security Engineer",
     template: "%s | Lucas Reis",

@@ -1,0 +1,21 @@
+{
+  "name": "@portfolio/blog-content",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    "./format": "./format.js",
+    "./model": "./model.js",
+    "./reader": "./reader.js",
+    "./media": "./media.js",
+    "./publication": "./publication.js"
+  },
+  "dependencies": {
+    "yaml": "2.9.1",
+    "sharp": "0.35.5",
+    "unified": "11.0.5",
+    "remark-parse": "11.0.0",
+    "remark-gfm": "4.0.1",
+    "unist-util-visit": "5.1.0"
+  }
+}

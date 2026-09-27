@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { credentials, education, experience, profile, terminalSteps } from "@/data/profile";
-import { latestPost, posts, sortedPosts } from "@/data/posts";
-import { validatePostsContent, validateProfileContent } from "@/lib/content-validation";
+import { getPublicContent } from "@/lib/public-content";
+import { selectPublishedPosts } from "@portfolio/blog-content/model";
+import { posts as legacyPosts } from "./fixtures/legacy-post";
+import { validateProfileContent } from "@/lib/content-validation";
 
 describe("portfolio content", () => {
   it("contains the complete normalized resume seed", () => {
@@ -35,16 +37,24 @@ describe("portfolio content", () => {
 });
 
 describe("blog content", () => {
-  it("keeps the placeholder record internally consistent", () => {
-    expect(validatePostsContent(posts)).toEqual([]);
-    expect(latestPost).toBe(sortedPosts[0]);
+  it("validates the documented example, preserving the original slug, author and prose", async () => {
+    const { posts, media } = await getPublicContent();
+    const latestPost = posts[0];
+    const original = legacyPosts[0];
     expect(posts.some((post) => post.slug === "security-reviews-that-move-at-product-speed")).toBe(true);
-    expect(latestPost.publishedAt).toBe([...posts].map((post) => post.publishedAt).sort().at(-1));
+    expect(latestPost).toMatchObject({ slug: original.slug, title: original.title, summary: original.summary, author: original.author, isPlaceholder: true });
+    expect(latestPost.body).toContain(original.introduction.replace("lucas-reis.dev", "lucas-reis.com"));
+    for (const section of original.sections) {
+      expect(latestPost.body).toContain(`## ${section.heading}`);
+      for (const paragraph of section.paragraphs) expect(latestPost.body).toContain(paragraph);
+    }
+    expect(Object.keys(media)).toHaveLength(1);
   });
 
   it("selects a newly added later article without duplicated home data", async () => {
-    const collection = [...posts, { ...posts[0], slug: "newer", publishedAt: "2099-01-01" }];
-    const latest = [...collection].sort((left, right) => new Date(right.publishedAt) - new Date(left.publishedAt))[0];
+    const { posts } = await getPublicContent();
+    const collection = [...posts, { ...posts[0], slug: "newer", publishedAt: "2026-09-28T00:00:00Z", updatedAt: null }];
+    const latest = selectPublishedPosts(collection, "2026-09-28T00:00:00Z")[0];
     expect(latest.slug).toBe("newer");
   });
 });

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatPostDate } from "@/data/posts";
+import { formatPostDate } from "@portfolio/blog-content/format";
 import styles from "./PostPreview.module.css";
 
 export default function PostPreview({ post, featured = false, variant = "card", headingLevel = 2 }) {

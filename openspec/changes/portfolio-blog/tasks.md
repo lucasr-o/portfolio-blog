@@ -5,29 +5,29 @@ A implementação está em andamento; evidências estão em `implementation-log.
 ## 1. Preparar o workspace e o novo repositório
 
 - [x] 1.1 Registrar baseline do frontend atual e dos comandos documentados, executando lint, testes, build e E2E; separar falhas preexistentes antes de modificar a aplicação.
-- [ ] 1.2 Verificar a disponibilidade de `lucasr-o/portfolio-blog`, revisar segredos/arquivos locais e preparar o primeiro commit preservando o trabalho existente; verificar a lista de arquivos destinados ao repositório público antes do push e não alterar o repositório antigo.
-- [ ] 1.3 Adicionar `apps/cms` e pacotes compartilhados ao workspace, mantendo o aplicativo público na raiz; verificar instalação pelo lockfile e builds separados sem rotas CMS no export público.
-- [ ] 1.4 Documentar os comandos locais de site e painel e a divisão do workspace; validar que os comandos documentados iniciam cada aplicação nas portas locais previstas sem conflito.
+- [x] 1.2 Verificar a disponibilidade de `lucasr-o/portfolio-blog`, revisar segredos/arquivos locais e preparar o primeiro commit preservando o trabalho existente; verificar a lista de arquivos destinados ao repositório público antes do push e não alterar o repositório antigo.
+- [x] 1.3 Adicionar `apps/cms` e pacotes compartilhados ao workspace, mantendo o aplicativo público na raiz; verificar instalação pelo lockfile e builds separados sem rotas CMS no export público.
+- [x] 1.4 Documentar os comandos locais de site e painel e a divisão do workspace; validar que os comandos documentados iniciam cada aplicação nas portas locais previstas sem conflito.
 
 ## 2. Contrato editorial e conteúdo
 
-- [ ] 2.1 Implementar modelo e leitura dos registros YAML com Markdown fonte, estados, datas e campos de mídia; testar round-trip do texto, slug inválido/duplicado, rascunho incompleto e erro de publicação com mensagem por campo.
-- [ ] 2.2 Implementar a seleção publicável com um cutoff UTC injetável; testar draft, published/futuro, scheduled antes/no instante/depois, fuso São Paulo, empate de datas e coleção vazia usando o seletor real.
-- [ ] 2.3 Converter o placeholder atual preservando slug, autor e conteúdo, e incluir amostras de Markdown; verificar equivalência dos dados anteriores e que o marcador placeholder não é imposto a todos os posts.
-- [ ] 2.4 Implementar validação e manifesto de mídia com hashes e dimensões, incluindo limite de 5 MiB, alt text e caminhos permitidos; testar imagem inválida, traversal e exclusão de mídia pertencente somente a drafts do artefato público.
-- [ ] 2.5 Documentar o formato YAML/corpo Markdown, fuso, campos obrigatórios e semântica de salvar/publicar; validar os exemplos pelo mesmo validador de conteúdo usado no build.
+- [x] 2.1 Implementar modelo e leitura dos registros YAML com Markdown fonte, estados, datas e campos de mídia; testar round-trip do texto, slug inválido/duplicado, rascunho incompleto e erro de publicação com mensagem por campo.
+- [x] 2.2 Implementar a seleção publicável com um cutoff UTC injetável; testar draft, published/futuro, scheduled antes/no instante/depois, fuso São Paulo, empate de datas e coleção vazia usando o seletor real.
+- [x] 2.3 Converter o placeholder atual preservando slug, autor e conteúdo, e incluir amostras de Markdown; verificar equivalência dos dados anteriores e que o marcador placeholder não é imposto a todos os posts.
+- [x] 2.4 Implementar validação e manifesto de mídia com hashes e dimensões, incluindo limite de 5 MiB, alt text e caminhos permitidos; testar imagem inválida, traversal e exclusão de mídia pertencente somente a drafts do artefato público.
+- [x] 2.5 Documentar o formato YAML/corpo Markdown, fuso, campos obrigatórios e semântica de salvar/publicar; validar os exemplos pelo mesmo validador de conteúdo usado no build.
 
 ## 3. Integrar conteúdo ao site sem regressões
 
-- [ ] 3.1 Implementar renderer compartilhado de Markdown e estilos de código, tabelas e imagens; testar semântica, links inseguros, scripts/HTML hostil, texto alternativo e legibilidade em 320 px sem scroll horizontal da página.
-- [ ] 3.2 Substituir `data/posts.js` nos consumidores por uma coleção publicável única para home, índice, artigo, parâmetros estáticos e sitemap; testar destaque mais recente, vazio e ausência de rotas/payloads de drafts e agendados futuros no export.
-- [ ] 3.3 Atualizar origem canônica, metadados, JSON-LD e documentação pública para `lucas-reis.com`; verificar HTML inicial, sitemap e testes SEO sem referências canônicas `.dev` e sem depender de JavaScript do visitante.
-- [ ] 3.4 Preservar topo, contato, perfil, terminal macOS, reveal ao scroll e ausência de reveal nos artigos; executar testes E2E existentes, incluindo retorno do logo ao topo e ausência de flash sharp-to-blur antes da hidratação.
-- [ ] 3.5 Adaptar auditoria de bundle aos limites site/CMS e conferir o `out/` inteiro; falhar se incluir dependências do painel, segredos, registros brutos ou corpo de posts não publicáveis, mantendo as verificações de acessibilidade e Lighthouse exigidas.
+- [x] 3.1 Implementar renderer compartilhado de Markdown e estilos de código, tabelas e imagens; testar semântica, links inseguros, scripts/HTML hostil, texto alternativo e legibilidade em 320 px sem scroll horizontal da página.
+- [x] 3.2 Substituir `data/posts.js` nos consumidores por uma coleção publicável única para home, índice, artigo, parâmetros estáticos e sitemap; testar destaque mais recente, vazio e ausência de rotas/payloads de drafts e agendados futuros no export.
+- [x] 3.3 Atualizar origem canônica, metadados, JSON-LD e documentação pública para `lucas-reis.com`; verificar HTML inicial, sitemap e testes SEO sem referências canônicas `.dev` e sem depender de JavaScript do visitante.
+- [x] 3.4 Preservar topo, contato, perfil, terminal macOS, reveal ao scroll e ausência de reveal nos artigos; executar testes E2E existentes, incluindo retorno do logo ao topo e ausência de flash sharp-to-blur antes da hidratação.
+- [x] 3.5 Adaptar auditoria de bundle aos limites site/CMS e conferir o `out/` inteiro; falhar se incluir dependências do painel, segredos, registros brutos ou corpo de posts não publicáveis, mantendo as verificações de acessibilidade e Lighthouse exigidas.
 
 ## 4. Implementar painel e preview
 
-- [ ] 4.1 Integrar Keystatic em `apps/cms` com apenas a coleção de blog e campo multiline para Markdown fonte; verificar no navegador digitar, colar, salvar e reabrir sintaxe sem conversão em blocos visuais.
+- [x] 4.1 Integrar Keystatic em `apps/cms` com apenas a coleção de blog e campo multiline para Markdown fonte; verificar no navegador digitar, colar, salvar e reabrir sintaxe sem conversão em blocos visuais.
 - [ ] 4.2 Configurar GitHub storage e GitHub App limitado ao novo repositório, com segredos fora do Git; verificar login, gravação real na `main`, expiração de sessão e falha de save sem confirmação falsa.
 - [ ] 4.3 Adicionar upload/lista de imagens e referências Markdown copiáveis; verificar arquivo salvo no Git, erro de limite/formato e preview de imagem ainda não publicada.
 - [ ] 4.4 Implementar índice e rota protegida de preview após salvar, lendo a revisão GitHub atual e usando apresentação compartilhada; verificar que um novo draft aparece sem rebuild do CMS e que slug/path/repositório arbitrários são rejeitados.

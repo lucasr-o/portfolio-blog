@@ -1,4 +1,5 @@
-import { site } from "./profile";
+// Baseline migration fixture. Never import this file into either application.
+import { site } from "@/data/profile";
 
 export const posts = [
   {

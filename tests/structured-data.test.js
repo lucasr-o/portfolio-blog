@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { latestPost } from "@/data/posts";
+import { getPublicContent } from "@/lib/public-content";
+const { posts: [latestPost] } = await getPublicContent();
 import { profile, site } from "@/data/profile";
 import { createBlogPostingSchema, createPersonSchema } from "@/lib/structured-data";
 

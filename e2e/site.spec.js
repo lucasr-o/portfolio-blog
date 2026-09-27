@@ -58,7 +58,7 @@ for (const viewport of [
     }
 
     await page.goto(postPath);
-    const paragraphWidth = await page.locator("article section p").first().evaluate((element) => element.getBoundingClientRect().width);
+    const paragraphWidth = await page.getByText("A review should begin with the product decision", { exact: false }).evaluate((element) => element.getBoundingClientRect().width);
     expect(paragraphWidth).toBeLessThanOrEqual(720);
   });
 }

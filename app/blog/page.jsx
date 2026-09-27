@@ -1,7 +1,7 @@
 import PostPreview from "@/components/PostPreview";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
-import { sortedPosts } from "@/data/posts";
+import { getPublicContent } from "@/lib/public-content";
 import styles from "./blog.module.css";
 
 export const metadata = {
@@ -16,7 +16,8 @@ export const metadata = {
   },
 };
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  const { posts: sortedPosts } = await getPublicContent();
   const articleCount = `${sortedPosts.length} ${sortedPosts.length === 1 ? "article" : "articles"}`;
 
   return (
@@ -35,13 +36,13 @@ export default function BlogPage() {
             <h2 id="articles-title">Latest notes</h2>
             <p>{articleCount}</p>
           </div>
-          <ol className={styles.list}>
+          {sortedPosts.length === 0 ? <p>No articles yet. New notes will appear here.</p> : <ol className={styles.list}>
             {sortedPosts.map((post, index) => (
               <li className="reveal-on-scroll" key={post.slug}>
                 <PostPreview post={post} featured={index === 0} variant="minimal" headingLevel={3} />
               </li>
             ))}
-          </ol>
+          </ol>}
         </section>
       </main>
       <SiteFooter />

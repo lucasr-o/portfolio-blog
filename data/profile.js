@@ -1,7 +1,7 @@
 export const site = {
   name: "Lucas Reis",
   legalName: "Lucas Reis de Oliveira da Silva",
-  url: "https://lucas-reis.dev",
+  url: "https://lucas-reis.com",
   title: "Application Security Engineer",
   description:
     "Application Security Engineer focused on penetration testing, threat modeling, secure product development, and practical collaboration with engineering teams.",
