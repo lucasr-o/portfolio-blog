@@ -1,0 +1,26 @@
+.figure { margin: 0; }
+.window { overflow: hidden; min-height: 30rem; border: 1px solid #353832; border-radius: 0.85rem; background: var(--color-terminal); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 2rem 6rem rgba(20, 22, 18, 0.16); color: var(--color-terminal-text); }
+.chrome { min-height: 3rem; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding-inline: var(--space-4); border-bottom: 1px solid #30332e; background: linear-gradient(#2c2e2a, #232520); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset; }
+.trafficLights { display: flex; align-items: center; justify-self: start; gap: 0.5rem; }
+.trafficLight { width: 0.75rem; height: 0.75rem; border: 1px solid rgba(0, 0, 0, 0.22); border-radius: 50%; box-shadow: 0 1px 0 rgba(255, 255, 255, 0.18) inset; }
+.close { background: #ff5f57; }
+.minimize { background: #febc2e; }
+.maximize { background: #28c840; }
+.windowTitle { margin: 0; color: #c6c9c1; font-family: var(--font-sans); font-size: 0.72rem; font-weight: 620; letter-spacing: -0.01em; text-align: center; }
+.chromeSpacer { justify-self: end; width: 4.25rem; }
+.body { padding: clamp(1.2rem, 4vw, 2.75rem); font-family: var(--font-mono); font-size: clamp(0.73rem, 2vw, 0.95rem); line-height: 1.75; overflow-wrap: anywhere; }
+.animatedTranscript { display: none; }
+.figure[data-enhanced="true"] .staticTranscript { display: none; }
+.figure[data-enhanced="true"] .animatedTranscript { display: block; }
+.step { margin-bottom: var(--space-5); }
+.command, .output { margin: 0; white-space: pre-wrap; }
+.command { color: var(--color-terminal-text); }
+.prompt { white-space: nowrap; font-weight: 760; }
+.promptUser { color: #69aef5; }
+.promptPath { color: #8bd49c; }
+.promptSymbol { color: var(--color-terminal-text); }
+.output { padding-left: 1.5rem; color: var(--color-terminal-muted); }
+.cursor { display: inline-block; width: 0.55em; height: 1em; margin-left: 0.12em; vertical-align: -0.14em; background: #69aef5; animation: blink 1s steps(1, end) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+@media (max-width: 36rem) { .window { min-height: 33rem; } .chrome { padding-inline: 0.85rem; } .trafficLights { gap: 0.38rem; } .trafficLight { width: 0.68rem; height: 0.68rem; } .windowTitle { font-size: 0.66rem; } .chromeSpacer { width: 3.56rem; } .body { padding-inline: 1rem; } .promptUser { display: none; } .output { padding-left: 1rem; } }
+@media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }

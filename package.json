@@ -1,0 +1,39 @@
+{
+  "name": "lucas-reis",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.25.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "preview": "serve out -l 4173",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:a11y": "playwright test e2e/accessibility.spec.js",
+    "test:all": "pnpm lint && pnpm test && pnpm build && pnpm audit:bundle && pnpm test:e2e",
+    "audit:bundle": "node scripts/audit-bundle.mjs",
+    "lighthouse": "node scripts/run-lighthouse.mjs"
+  },
+  "dependencies": {
+    "lucide-react": "^1.48.0",
+    "next": "16.3.6",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.63.0",
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.1",
+    "@vitejs/plugin-react": "6.1.1",
+    "eslint": "9.39.1",
+    "eslint-config-next": "16.3.6",
+    "jsdom": "28.1.0",
+    "lighthouse": "13.5.0",
+    "serve": "14.2.6",
+    "vitest": "5.0.1"
+  }
+}

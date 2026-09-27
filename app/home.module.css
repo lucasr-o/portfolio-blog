@@ -1,0 +1,67 @@
+.hero { min-height: min(48rem, calc(100vh - 5.5rem)); display: grid; place-items: center; padding-block: var(--space-8); text-align: center; }
+.heroInner { max-width: 66rem; }
+.identity { margin-bottom: var(--space-5); color: var(--color-text-muted); font-size: 0.84rem; font-weight: 650; }
+.hero h1 { max-width: 18ch; margin-inline: auto; margin-bottom: var(--space-5); }
+.lead { max-width: 54ch; margin: 0 auto var(--space-6); color: var(--color-text-muted); font-size: clamp(1.02rem, 2vw, 1.25rem); }
+.actions, .contactLinks { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); }
+.buttonPrimary, .buttonSecondary { display: inline-flex; align-items: center; justify-content: center; min-height: 3rem; padding-inline: 1.25rem; border: 1px solid var(--color-text); border-radius: 999px; font-size: 0.86rem; font-weight: 720; text-decoration: none; }
+.buttonPrimary { background: var(--color-text); color: var(--color-surface-raised); }
+.buttonPrimary:hover { background: var(--color-tertiary); border-color: var(--color-tertiary); color: white; }
+.buttonSecondary:hover { border-color: var(--color-tertiary); }
+.terminalWrap { padding-bottom: var(--space-9); }
+.section { padding-block: var(--space-9); border-top: 1px solid var(--color-border); }
+.section:focus { outline: none; }
+.section:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 4px; }
+.sectionHeader { display: grid; grid-template-columns: minmax(8rem, 0.45fr) minmax(0, 1fr); gap: var(--space-6); margin-bottom: var(--space-7); }
+.sectionHeader h2, .sectionHeader p { margin: 0; }
+.sectionHeader p { max-width: var(--measure); color: var(--color-text-muted); }
+.experienceList, .simpleList, .credentialList { margin: 0; padding: 0; list-style: none; }
+.experienceItem { display: grid; grid-template-columns: minmax(11rem, 0.5fr) minmax(0, 1fr); gap: var(--space-6); padding-block: var(--space-6); border-top: 1px solid var(--color-border); }
+.organizationLogoFrame, .institutionLogoFrame { display: grid; overflow: hidden; place-items: center; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface-raised); }
+.organizationLogoFrame { width: 10rem; min-height: 4.75rem; margin-bottom: var(--space-4); padding: var(--space-3); }
+.organizationLogo, .institutionLogo { width: 100%; height: 100%; object-fit: contain; }
+.experienceMeta p, .experienceBody p { margin-bottom: var(--space-2); }
+.experienceMeta p { color: var(--color-text-muted); font-size: 0.82rem; }
+.experienceBody h3 { margin-bottom: var(--space-3); }
+.experienceBody ul { max-width: var(--measure); margin: var(--space-4) 0 0; padding-left: 1.1rem; color: var(--color-text-muted); }
+.experienceBody li + li { margin-top: var(--space-2); }
+.latest { padding-block: var(--space-9); }
+.aboutGrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.62fr); align-items: start; gap: var(--space-8); }
+.aboutNarrative { display: grid; gap: var(--space-6); }
+.aboutCopy { max-width: var(--measure); font-size: clamp(1.2rem, 2.3vw, 1.7rem); line-height: 1.45; }
+.objective { padding-left: var(--space-5); border-left: 3px solid var(--color-tertiary); color: var(--color-text-muted); }
+.portrait { margin: 0; }
+.portraitMedia { position: relative; overflow: hidden; aspect-ratio: 1; border-radius: var(--radius-md); background: var(--color-surface-raised); }
+.portraitImage { object-fit: cover; object-position: center; }
+.portraitPlaceholder { position: relative; display: grid; overflow: hidden; min-height: 25rem; place-items: end start; padding: var(--space-5); background: linear-gradient(145deg, var(--color-tertiary), #032b58 68%, var(--color-terminal)); color: white; }
+.portraitPlaceholder::before { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 3rem 3rem; content: ""; mask-image: linear-gradient(to bottom, transparent, black); }
+.portraitPlaceholder span { position: relative; font-size: clamp(4rem, 10vw, 8rem); font-weight: 780; letter-spacing: -0.09em; line-height: 0.8; }
+.portrait figcaption { display: flex; justify-content: space-between; gap: var(--space-4); padding-top: var(--space-3); font-size: 0.78rem; }
+.portrait figcaption span { color: var(--color-text-muted); text-align: right; }
+.simpleList li, .credentialList li { display: grid; gap: var(--space-2); padding-block: var(--space-5); border-top: 1px solid var(--color-border); }
+.simpleList li { grid-template-columns: minmax(0, 1fr) auto; }
+.educationIdentity { display: flex; align-items: center; gap: var(--space-5); }
+.institutionLogoFrame { flex: 0 0 7rem; width: 7rem; height: 4rem; padding: var(--space-2); }
+.simpleList strong, .credentialList strong { display: block; font-size: 1.15rem; }
+.simpleList p, .credentialList p, .simpleList span, .credentialList span { margin: 0; color: var(--color-text-muted); }
+.credentialList li { grid-template-columns: minmax(10rem, 0.42fr) minmax(0, 1fr) minmax(5.5rem, max-content); }
+.credentialList li > span { text-align: right; }
+.contact { text-align: center; }
+.contact h2 { max-width: 16ch; margin-inline: auto; }
+.contactLocation { color: var(--color-text-muted); }
+.contactLinks { margin-top: var(--space-6); }
+.contactLinks a { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-text); font-weight: 680; text-decoration: none; }
+@media (max-width: 46rem) {
+  .hero { min-height: auto; padding-block: var(--space-7) var(--space-8); }
+  .section, .latest { padding-block: var(--space-8); }
+  .sectionHeader, .experienceItem, .aboutGrid, .simpleList li, .credentialList li { grid-template-columns: 1fr; }
+  .credentialList li > span { text-align: left; }
+  .sectionHeader, .aboutGrid { gap: var(--space-5); }
+  .experienceItem { gap: var(--space-3); }
+  .portraitPlaceholder { min-height: 21rem; }
+}
+@media (max-width: 24rem) {
+  .educationIdentity { align-items: flex-start; flex-direction: column; }
+  .actions, .contactLinks { align-items: stretch; flex-direction: column; }
+  .buttonPrimary, .buttonSecondary { width: 100%; }
+}

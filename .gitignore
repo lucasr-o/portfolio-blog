@@ -1,0 +1,23 @@
+node_modules/
+.next/
+out/
+coverage/
+playwright-report/
+test-results/
+.lighthouse/
+.DS_Store
+*.log
+
+# Machine-local configuration, credentials, and agent installations.
+.env
+.env.*
+!.env.example
+!.env.*.example
+.agents/
+.codex/
+secrets/
+*.pem
+*.key
+.htpasswd
+.cache/
+*.tsbuildinfo

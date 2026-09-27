@@ -1,0 +1,113 @@
+.root {
+  position: relative;
+  isolation: isolate;
+  display: inline-grid;
+  width: 7rem;
+  min-height: 2.5rem;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid var(--color-text);
+  border-radius: 999px;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  text-decoration: none;
+  touch-action: manipulation;
+  transition:
+    border-color var(--motion-medium),
+    box-shadow var(--motion-medium);
+}
+
+.restingText {
+  position: relative;
+  z-index: 2;
+  transform: translateX(0.2rem);
+  transition:
+    opacity var(--motion-medium),
+    transform var(--motion-medium);
+}
+
+.hoverContent {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  color: white;
+  opacity: 0;
+  transform: translateX(2rem);
+  transition:
+    opacity var(--motion-medium),
+    transform var(--motion-medium);
+}
+
+.accent {
+  position: absolute;
+  z-index: 1;
+  top: calc(50% - 0.25rem);
+  left: 1rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--color-tertiary);
+  transition:
+    top var(--motion-medium),
+    left var(--motion-medium),
+    width var(--motion-medium),
+    height var(--motion-medium),
+    border-radius var(--motion-medium);
+}
+
+.icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.root:hover,
+.root:focus-visible {
+  border-color: var(--color-tertiary);
+  color: var(--color-text);
+  box-shadow: 0 0.3rem 1rem rgb(7 89 183 / 16%);
+}
+
+.root:hover .restingText,
+.root:focus-visible .restingText {
+  opacity: 0;
+  transform: translateX(3rem);
+}
+
+.root:hover .hoverContent,
+.root:focus-visible .hoverContent {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.root:hover .accent,
+.root:focus-visible .accent {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+
+@media (max-width: 24rem) {
+  .root {
+    width: 6.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root,
+  .restingText,
+  .hoverContent,
+  .accent {
+    transition: none;
+  }
+}
