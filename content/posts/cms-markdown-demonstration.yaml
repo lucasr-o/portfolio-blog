@@ -8,22 +8,36 @@ cover: {}
 images:
   - src: /media/cms-markdown-demonstration/images/0/src.png
     alt: UFABC logo used as a Markdown upload demonstration
-body: |
+body: >
   ## Browser-authored Markdown
+
 
   This **draft** demonstrates editing and saving from Keystatic.
 
+
   [Visit the public site](https://lucas-reis.com)
 
+
   | Check | Result |
+
   | --- | --- |
+
   | Raw Markdown | Preserved |
+
   | Publication | Draft only |
 
+
   ```javascript
+
   const message = "Saved from the browser";
     console.log(message);
   ```
 
+
   Two spaces keep this line break.  
+
   This is the next line.
+
+
+  ![UFABC logo used as a Markdown upload
+  demonstration](/media/cms-markdown-demonstration/images/0/src.png)
