@@ -5,7 +5,9 @@ status: draft
 tags: []
 isPlaceholder: true
 cover: {}
-images: []
+images:
+  - src: /media/cms-markdown-demonstration/images/0/src.png
+    alt: UFABC logo used as a Markdown upload demonstration
 body: |
   ## Browser-authored Markdown
 
