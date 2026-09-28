@@ -27,7 +27,8 @@ jobs:
           if (!encoded) throw new Error('OIDC response lacks a payload');
           const claims = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'));
           for (const field of ['iss', 'aud', 'sub']) {
-            if (typeof claims[field] !== 'string' || !/^[A-Za-z0-9:/._-]+$/.test(claims[field])) {
+            if (typeof claims[field] !== 'string' ||
+                !/^[\x20-\x7e]{1,512}$/.test(claims[field])) {
               throw new Error(`Invalid ${field} claim`);
             }
             console.log(`${field}=${claims[field]}`);
