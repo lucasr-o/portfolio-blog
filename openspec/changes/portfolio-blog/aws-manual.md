@@ -20,13 +20,13 @@ Ter acesso à conta AWS, à zona Cloudflare `lucas-reis.com` e ao GitHub `lucasr
 | `CERTIFICATE_ARN` | ARN do certificado ACM em `us-east-1` |
 | `DEPLOY_ROLE_ARN` | ARN da role criada na etapa 7 |
 | `GITHUB_REPOSITORY` | `lucasr-o/portfolio-blog`, já criado; branch `main` |
-| `GITHUB_OIDC_SUB` | Claim exato do workflow aprovado da `main` |
+| `GITHUB_OIDC_SUB` | `repo:lucasr-o@75533514/portfolio-blog@1391300735:ref:refs/heads/main` (medido na `main` em 28/09/2026) |
 | `CMS_HOSTNAME` | Subdomínio hexadecimal aleatório de `lucas-reis.com` |
 | `DNS_ANTERIOR` | Tipo, valor e estado de proxy do registro atual do apex |
 
 Não publicar senha HTTP, token do Tunnel, client secret GitHub, cookies ou tokens de sessão. IDs e ARNs não substituem autenticação, mas devem ser preenchidos conscientemente nos exemplos.
 
-Já disponíveis no repositório: função em `infra/cloudfront/viewer-request.js`; validação em `.github/workflows/checks.yml`; publicação/agendamento em `release.yml`; rollback em `rollback.yml`; retenção em `retention.yml`; scripts `prepare-release.mjs`, `publish-release.mjs`, `rollback-release.mjs` e `prune-releases.mjs`. O editor GitHub e preview foram verificados localmente. A imagem ARM64, o Compose dedicado, o Tunnel, o domínio final e os recursos AWS ainda precisam ser concluídos. Não improvisar `sync --delete` na raiz do bucket.
+Já disponíveis no repositório: função em `infra/cloudfront/viewer-request.js`; validação em `.github/workflows/checks.yml`; publicação/agendamento em `release.yml`; rollback em `rollback.yml`; retenção em `retention.yml`; scripts `prepare-release.mjs`, `publish-release.mjs`, `rollback-release.mjs` e `prune-releases.mjs`. O editor GitHub e preview foram verificados localmente; a imagem ARM64 foi publicada e validada no GHCR e o Compose dedicado está pronto. O Tunnel, o domínio final e os recursos AWS **ainda não foram ativados**. Não improvisar `sync --delete` na raiz do bucket.
 
 ## 1. Conferir cobrança antes de criar a distribuição
 
@@ -187,7 +187,7 @@ Fazer esta etapa após criar o novo repositório e a `main`. Os nomes abaixo sã
 
 ### 7.2 Identificar o subject correto
 
-O workflow manual **Inspect main OIDC claims** (`.github/workflows/oidc-claims.yml`) só executa na `main` e mostra `iss`, `aud` e `sub`, nunca o token completo. Em **Actions → Inspect main OIDC claims → Run workflow**, escolha `main`. Copie o `sub` exato do job para `GITHUB_OIDC_SUB`; confirme que `iss` é `https://token.actions.githubusercontent.com`, `aud` é `sts.amazonaws.com` e que `sub` representa a `main` deste repositório. Não use um `sub` de outro workflow, branch ou repositório.
+O workflow manual **Inspect main OIDC claims** (`.github/workflows/oidc-claims.yml`) só executa na `main` e mostra `iss`, `aud` e `sub`, nunca o token completo. A [execução autorizada #2](https://github.com/lucasr-o/portfolio-blog/actions/runs/36370199307) passou e retornou `iss=https://token.actions.githubusercontent.com`, `aud=sts.amazonaws.com` e o `sub` exato na tabela acima. Use esse `sub` na trust policy e confirme novamente a identidade se alterar as configurações OIDC do repositório. Não use um `sub` de outro workflow, branch ou repositório. A primeira execução falhou apenas por uma validação local de caracteres excessivamente restrita, já corrigida; não enviou token à AWS.
 
 Repositórios recentes podem usar IDs imutáveis de owner/repo no subject. Não assumir que o formato antigo `repo:owner/name:ref:refs/heads/main` será o emitido. Se futuramente houver um GitHub Environment, o subject pode mudar; esta proposta não depende de Environment. [OIDC GitHub/AWS](https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws).
 
@@ -276,7 +276,7 @@ Essa política não limita quais objetos dentro dos prefixos podem ser apagados 
 
 ## 8. Configurar o repositório e primeiro deploy
 
-1. Criar o repositório público com o nome disponível. Antes do primeiro push, revisar conteúdo existente, arquivos ignorados, tokens, anexos pessoais e artefatos de build. Não presumir que tudo que está untracked deve entrar no commit.
+1. O repositório público `lucasr-o/portfolio-blog` e a `main` já existem. Os arquivos ignorados, tokens e artefatos foram revisados antes dos pushes; continue verificando futuros commits antes de publicá-los. Não criar outro repositório nem reutilizar o antigo.
 2. Em **Repository → Settings → Secrets and variables → Actions → Variables**, cadastrar os nomes que serão usados nos workflows:
    - `AWS_REGION`: `us-east-1`.
    - `AWS_DEPLOY_ROLE_ARN`: role da etapa 7.
@@ -305,7 +305,7 @@ Esta etapa acompanha o deploy público, mas não cria recursos AWS adicionais.
 3. Na implementação, preparar `/home/rp4/portfolio-blog-cms` com a configuração dedicada, imagens fixadas, arquivos de segredo e permissões locais restritas. Não copiar ou alterar o compose Overleaf.
 4. A rota publicada do Tunnel usará `CMS_HOSTNAME` e serviço interno `http://cms-proxy:8080`, alinhado ao nome/porta da configuração que será entregue. Não apontar para `localhost:3000`, que pertence ao serviço antigo.
 5. O proxy solicita usuário/senha HTTP antes de atender qualquer path. Lucas escolhe uma senha própria, diferente da senha de acesso ao Pi. Guardar hash da senha na configuração do proxy; não colocar credenciais na URL.
-6. Criar GitHub App do Keystatic a partir do fluxo local documentado, instalar apenas no novo repositório e configurar o callback HTTPS `https://CMS_HOSTNAME/api/keystatic/github/oauth/callback`. O cliente deve usar o hostname real, não a string literal `CMS_HOSTNAME`.
+6. O GitHub App `portfolio-blog-keystatic-lucasr-o` já foi criado e instalado apenas no novo repositório. Adicione a ele o callback HTTPS `https://CMS_HOSTNAME/api/keystatic/github/oauth/callback`; o cliente deve usar o hostname real, não a string literal `CMS_HOSTNAME`. Confirme o `redirect_uri` efetivamente pedido pelo Keystatic antes de salvar, sem wildcard.
 7. Provisionar no serviço CMS `KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_CLIENT_SECRET`, `KEYSTATIC_SECRET` e o slug público do app. Segredos não entram na imagem nem no build público. [Setup GitHub Keystatic](https://keystatic.com/docs/github-mode).
 8. Subir somente o projeto dedicado. Conferir saúde, limites de memória e estado dos containers Overleaf antes/depois. Não executar comandos globais de restart, down ou prune.
 9. Testar janela anônima: painel, API e preview devem exigir HTTP Auth. Depois, testar login GitHub, salvar/reabrir draft, upload e preview sem rebuild do CMS.
