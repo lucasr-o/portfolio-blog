@@ -1,5 +1,6 @@
 import { collection, config, fields } from "@keystatic/core";
 import { DEFAULT_AUTHOR, SLUG_PATTERN, normalizeInstant } from "@portfolio/blog-content/model";
+import { editorialImageField } from "./lib/image-field.js";
 
 const local = process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_CMS_STORAGE !== "github";
 
@@ -16,10 +17,7 @@ function instantField(label) {
 }
 
 const imageFields = () => fields.object({
-  src: fields.image({
-    label: "Image file", directory: "content/media", publicPath: "/media/",
-    description: "PNG, JPEG or WebP; still image, at most 5 MiB. Publication validates format and size.",
-  }),
+  src: editorialImageField(),
   alt: fields.text({ label: "Alternative text", description: "Describe the image. Required for publication." }),
 });
 
@@ -30,6 +28,7 @@ export default config({
     posts: collection({
       label: "Blog posts", path: "content/posts/*", slugField: "title", format: "yaml",
       columns: ["title", "status", "publishedAt"],
+      previewUrl: local ? undefined : "/preview/{slug}",
       schema: {
         title: fields.slug({
           name: { label: "Title", description: "Required for publication; drafts may be incomplete." },

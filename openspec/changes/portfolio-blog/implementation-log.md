@@ -53,10 +53,22 @@ The isolated CMS Chromium test passes: creates an incomplete draft, enters sourc
 
 Date fields use native text inputs with an explicit timezone; serialization normalizes non-empty timestamps to UTC. Keystatic's native datetime field was not used because this installed version serializes timezone-less values. Empty optional dates are omitted by the native text serializer and accepted by the shared validator.
 
-GitHub mode is fixed to `lucasr-o/portfolio-blog` outside local development. Actual GitHub login/save/expiration handling, upload rules and saved-revision preview remain pending tasks; local authoring is not evidence that those integrations are complete.
+At this stage, GitHub mode was fixed to `lucasr-o/portfolio-blog` outside local development; the later checks are recorded below.
 
-No AWS, DNS, Pi, Tunnel or Overleaf provisioning has taken place. Lucas signed into GitHub in the browser; no password or token was requested in chat. After explicit approval, the native Keystatic setup created `portfolio-blog-keystatic-lucasr-o` and installed it with **Only select repositories → lucasr-o/portfolio-blog** (one repository). Permissions: contents read/write, metadata read and pull requests read. The callback completed and the CMS dashboard shows Lucas on `main`. Credentials were generated in ignored `apps/cms/.env`, restricted to filesystem mode 600; values are not recorded here. Real save and session-failure checks remain pending.
+No AWS, DNS, Pi, Tunnel or Overleaf provisioning has taken place. Lucas signed into GitHub in the browser; no password or token was requested in chat. After explicit approval, the native Keystatic setup created `portfolio-blog-keystatic-lucasr-o` and installed it with **Only select repositories → lucasr-o/portfolio-blog** (one repository). Permissions: contents read/write, metadata read and pull requests read. The callback completed and the CMS dashboard shows Lucas on `main`. Credentials were generated in ignored `apps/cms/.env`, restricted to filesystem mode 600; values are not recorded here. Subsequent real save and session-failure checks are recorded below.
 
 ## Development media consistency
 
 The hashed Markdown image initially worked in the production export but returned 404 in development. A static GET route now serves the verified manifest bytes in both modes. The local server returns HTTP 200 with `image/png`. The empty/mixed publication integration suite passed again, including removal of the empty-media technical path. The normal public artifact was restored. Lint and all 67 unit tests across 13 files passed after this correction.
+
+## GitHub editor, preview and proxy preparation (tasks 4.2–4.4, 4.6; 4.5 partial)
+
+- Browser login through the Keystatic GitHub App created the draft `cms-markdown-demonstration` on `main`. It saved raw Markdown as commit `52bbaba`, an image as `6501d97`, then an image reference in Markdown as `45215a9`. The browser preview immediately tracked the latest GitHub revision and loaded the saved UFABC image before any CMS rebuild. The record remains a draft and was absent from the public export.
+- A revoked GitHub session produced a native save failure and retained the unsaved indicator; the remote record did not change. Login through the same App restored editing. The temporary test edit was reset in the editor afterward.
+- The authoring guide covers source Markdown, images, draft visibility in the public repository, publication, saved preview and session recovery. Its demonstration was followed in the browser.
+- Local CMS regression checks: 76 unit tests across 15 files, four CMS browser tests, standalone production build with private/no-store/noindex behavior. The public export built with one eligible placeholder, one excluded demo draft and one published image; all 24 site browser tests passed again.
+- A dedicated Nginx proxy configuration and isolated Docker test protect page, API, OAuth callback, assets and preview paths with Basic Auth. The test verified challenges without credentials, cookie/query forwarding, fixed HTTPS upstream host, removal of Basic credentials before the CMS, private/no-store/noindex headers and no token-bearing access logs. It used disposable containers on a dedicated local network and removed them. The real HTTPS Tunnel login/save cycle remains outstanding; task 4.5 is intentionally unchecked.
+
+## CloudFront routing (task 5.1)
+
+`infra/cloudfront/viewer-request.js` rewrites page paths to their actual `index.html` export keys while retaining exported asset and Next payload paths, query strings and headers. Three tests compare it with the full current `out/` inventory and cover `/`, `/blog` with and without slash, the article path, absent article mapping to an absent key, traversal and malformed paths. AWS function association and actual edge HTTP status checks remain under tasks 7.2/7.4.

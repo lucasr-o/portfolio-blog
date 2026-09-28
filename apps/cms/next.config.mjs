@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 const workspaceRoot = fileURLToPath(new URL("../../", import.meta.url));
 
 const nextConfig = {
+  distDir: process.env.CMS_TEST_OUTPUT === "1" ? ".next-test" : ".next",
   output: "standalone",
   outputFileTracingRoot: workspaceRoot,
   turbopack: { root: workspaceRoot },

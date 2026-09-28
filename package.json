@@ -16,6 +16,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:cms": "playwright test --config playwright.cms.config.js",
+    "test:cms:production": "node scripts/test-cms-production.mjs",
+    "test:cms:proxy": "node scripts/test-cms-proxy.mjs",
     "test:a11y": "playwright test e2e/accessibility.spec.js",
     "test:all": "pnpm lint && pnpm test && pnpm build && pnpm audit:bundle && pnpm test:e2e",
     "audit:bundle": "node scripts/audit-bundle.mjs",

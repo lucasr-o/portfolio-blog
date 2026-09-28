@@ -2,7 +2,7 @@
 
 Static portfolio and blog for Lucas Reis, built with Next.js, React, and JavaScript.
 
-The public application exports static HTML and assets, with small client components for the terminal and scroll reveals. The separate Node-based CMS lives in `apps/cms`; it is never exported to S3. Deployment and GitHub authoring are being implemented in the OpenSpec change `portfolio-blog` and are not live yet.
+The public application exports static HTML and assets, with small client components for the terminal and scroll reveals. The separate Node-based CMS lives in `apps/cms`; it is never exported to S3. GitHub authoring, uploads and saved-revision previews work locally. Production deployment is still being implemented in the OpenSpec change `portfolio-blog` and is not live yet.
 
 ## Requirements
 
@@ -74,7 +74,7 @@ The UI reads these records directly; do not duplicate resume content in page com
 
 ## Adding a blog post
 
-Read [the editorial guide](docs/editorial-content.md) for the YAML/Markdown format, publication states, dates and image references. The checked-in example preserves the original article URL and adds Markdown demonstrations. Drafts and future articles are excluded from the site, **but remain readable in this public repository**.
+Read [the browser editor guide](docs/blog-editor.md) for writing, uploads, saved previews and session recovery, and [the editorial format guide](docs/editorial-content.md) for YAML/Markdown details. The checked-in example preserves the original article URL and adds Markdown demonstrations. Drafts and future articles are excluded from the site, **but remain readable in this public repository**.
 
 `pnpm build` captures one publication instant, validates content, generates a shared snapshot for every route, and exports only referenced eligible media. To reproduce a specific publication cutoff:
 

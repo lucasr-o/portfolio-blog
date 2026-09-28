@@ -1,0 +1,20 @@
+.shell {
+  --color-surface: #fbfaf7; --color-text: #11110f; --color-text-muted: #5e5e58; --color-border: #c9c8c0; --color-tertiary: #0759b7;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --space-1: .25rem; --space-2: .5rem; --space-3: .75rem; --space-4: 1rem; --space-5: 1.5rem; --space-6: 2rem; --space-7: 3rem; --space-8: 4.5rem; --space-9: 7rem; --measure: 68ch;
+  min-height: 100vh; background: var(--color-surface); color: var(--color-text); font: 1rem/1.6 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; overflow-wrap: anywhere;
+}
+.shell *, .shell *::before, .shell *::after { box-sizing: border-box; }
+.shell h1, .shell h2, .shell h3 { margin-top: 0; line-height: 1.08; letter-spacing: -.035em; }
+.shell p { margin-top: 0; }
+.shell a { color: var(--color-tertiary); text-underline-offset: .2em; }
+.shell :focus-visible { outline: 3px solid var(--color-tertiary); outline-offset: 4px; }
+.navigation { display: flex; flex-wrap: wrap; gap: 1.5rem; max-width: 60rem; margin: auto; padding: 1.5rem 1rem; }
+.panel { width: min(calc(100% - 2rem), 48rem); margin: 1rem auto 0; padding: 1.5rem; border: 1px solid var(--color-border); border-radius: .4rem; background: white; }
+.panel h1 { font-size: 2rem; }
+.panel h2 { font-size: 1.3rem; }
+.panel h3 { font-size: 1.05rem; }
+.panel code { font-size: .85em; }
+.panel li + li { margin-top: .5rem; }
+.reference { display: block; margin-top: 1rem; }
+.reference textarea { display: block; width: 100%; padding: .6rem; font-family: var(--font-mono); font-size: .85rem; resize: vertical; }

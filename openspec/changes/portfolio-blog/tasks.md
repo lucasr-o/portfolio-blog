@@ -28,15 +28,15 @@ A implementação está em andamento; evidências estão em `implementation-log.
 ## 4. Implementar painel e preview
 
 - [x] 4.1 Integrar Keystatic em `apps/cms` com apenas a coleção de blog e campo multiline para Markdown fonte; verificar no navegador digitar, colar, salvar e reabrir sintaxe sem conversão em blocos visuais.
-- [ ] 4.2 Configurar GitHub storage e GitHub App limitado ao novo repositório, com segredos fora do Git; verificar login, gravação real na `main`, expiração de sessão e falha de save sem confirmação falsa.
-- [ ] 4.3 Adicionar upload/lista de imagens e referências Markdown copiáveis; verificar arquivo salvo no Git, erro de limite/formato e preview de imagem ainda não publicada.
-- [ ] 4.4 Implementar índice e rota protegida de preview após salvar, lendo a revisão GitHub atual e usando apresentação compartilhada; verificar que um novo draft aparece sem rebuild do CMS e que slug/path/repositório arbitrários são rejeitados.
+- [x] 4.2 Configurar GitHub storage e GitHub App limitado ao novo repositório, com segredos fora do Git; verificar login, gravação real na `main`, expiração de sessão e falha de save sem confirmação falsa.
+- [x] 4.3 Adicionar upload/lista de imagens e referências Markdown copiáveis; verificar arquivo salvo no Git, erro de limite/formato e preview de imagem ainda não publicada.
+- [x] 4.4 Implementar índice e rota protegida de preview após salvar, lendo a revisão GitHub atual e usando apresentação compartilhada; verificar que um novo draft aparece sem rebuild do CMS e que slug/path/repositório arbitrários são rejeitados.
 - [ ] 4.5 Integrar HTTP Basic Auth ao proxy, proteger todo o hostname e definir no-store/noindex para respostas administrativas; testar desafios sem credenciais em página/API/assets/preview e o ciclo login GitHub → callback → save atrás do proxy HTTPS.
-- [ ] 4.6 Documentar acesso, Markdown, imagens, rascunhos públicos, preview após salvar e recuperação de sessão; validar o roteiro no navegador com um artigo demonstrativo sem publicá-lo acidentalmente.
+- [x] 4.6 Documentar acesso, Markdown, imagens, rascunhos públicos, preview após salvar e recuperação de sessão; validar o roteiro no navegador com um artigo demonstrativo sem publicá-lo acidentalmente.
 
 ## 5. Entrega estática e automação pública
 
-- [ ] 5.1 Implementar a CloudFront Function planejada com fixtures do export real; testar `/`, rotas com/sem barra, assets, queries e payloads Next, erro 404 e resistência a traversal/URI malformada.
+- [x] 5.1 Implementar a CloudFront Function planejada com fixtures do export real; testar `/`, rotas com/sem barra, assets, queries e payloads Next, erro 404 e resistência a traversal/URI malformada.
 - [ ] 5.2 Implementar geração de manifesto, snapshot de release e upload ordenado com metadados corretos; testar planejamento de chaves, inclusão de assets antes de documentos e ausência de operações fora dos prefixos do projeto.
 - [ ] 5.3 Implementar retirada de objetos mutáveis por manifesto, invalidação e smoke tests, incluindo restore em falha; simular erro após cada fase e verificar recuperação de snapshot anterior sem apagar bundles retidos.
 - [ ] 5.4 Criar workflows de PR/main com dependências fixadas, checks antes de mutações, OIDC, concorrência e rejeição de candidato obsoleto por commit/cutoff; testar jobs do mesmo commit com datas diferentes e ausência de credenciais de deploy em PR/fork.
