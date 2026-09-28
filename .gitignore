@@ -20,5 +20,7 @@ secrets/
 *.pem
 *.key
 .htpasswd
+ops/cms/generated/
+ops/cms/runtime/
 .cache/
 *.tsbuildinfo

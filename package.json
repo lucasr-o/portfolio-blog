@@ -18,6 +18,8 @@
     "test:cms": "playwright test --config playwright.cms.config.js",
     "test:cms:production": "node scripts/test-cms-production.mjs",
     "test:cms:proxy": "node scripts/test-cms-proxy.mjs",
+    "test:cms:compose": "node scripts/test-cms-compose.mjs",
+    "test:cms:update": "node tests/cms-update.node.mjs",
     "test:a11y": "playwright test e2e/accessibility.spec.js",
     "test:all": "pnpm lint && pnpm test && pnpm build && pnpm audit:bundle && pnpm test:e2e",
     "audit:bundle": "node scripts/audit-bundle.mjs",

@@ -1,0 +1,87 @@
+name: Build CMS ARM64 image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/cms/**'
+      - 'packages/blog-content/**'
+      - 'packages/blog-ui/**'
+      - 'ops/cms/Dockerfile'
+      - '.dockerignore'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/cms-image.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    uses: ./.github/workflows/checks.yml
+    permissions:
+      contents: read
+
+  image:
+    needs: verify
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      packages: write
+    concurrency:
+      group: portfolio-blog-cms-image
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Reject a superseded source revision
+        run: |
+          head="$(git ls-remote https://github.com/lucasr-o/portfolio-blog.git refs/heads/main | cut -f1)"
+          test "$head" = "$GITHUB_SHA"
+      - id: build
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: ops/cms/Dockerfile
+          platforms: linux/arm64
+          push: true
+          provenance: true
+          sbom: true
+          tags: |
+            ghcr.io/lucasr-o/portfolio-blog-cms:main
+            ghcr.io/lucasr-o/portfolio-blog-cms:sha-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/lucasr-o/portfolio-blog
+            org.opencontainers.image.revision=${{ github.sha }}
+      - name: Verify architecture, secret exclusion and health by digest
+        env:
+          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          set -euo pipefail
+          image="ghcr.io/lucasr-o/portfolio-blog-cms@${IMAGE_DIGEST}"
+          docker buildx imagetools inspect --raw "$image" | node -e 'const fs=require("node:fs");const m=JSON.parse(fs.readFileSync(0,"utf8"));if(!m.manifests?.some(x=>x.platform?.os==="linux"&&x.platform?.architecture==="arm64"))process.exit(1)'
+          docker run --rm --platform linux/arm64 --network none --entrypoint sh "$image" -c 'test ! -e /app/apps/cms/.env && test -f /app/apps/cms/server.js'
+          docker run -d --name portfolio-blog-cms-image-ci --platform linux/arm64 --read-only --tmpfs /tmp:rw,noexec,nosuid,size=32m --tmpfs /app/apps/cms/.next/cache:rw,noexec,nosuid,size=32m --cap-drop ALL --security-opt no-new-privileges:true --memory 768m --publish 127.0.0.1::3000 "$image"
+          trap 'docker rm --force portfolio-blog-cms-image-ci >/dev/null 2>&1 || true' EXIT
+          port="$(docker port portfolio-blog-cms-image-ci 3000/tcp | cut -d: -f2)"
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error --max-time 3 "http://127.0.0.1:${port}/api/health"; then
+              echo "CMS image digest ${IMAGE_DIGEST} is linux/arm64 and healthy"
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs portfolio-blog-cms-image-ci
+          exit 1

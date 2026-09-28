@@ -1,0 +1,12 @@
+[Unit]
+Description=Check for an approved portfolio blog CMS image every 15 minutes
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=15min
+RandomizedDelaySec=1min
+Persistent=true
+Unit=portfolio-blog-cms-update.service
+
+[Install]
+WantedBy=timers.target

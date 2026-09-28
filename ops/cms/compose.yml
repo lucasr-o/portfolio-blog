@@ -1,0 +1,95 @@
+name: portfolio-blog-cms
+
+services:
+  cms:
+    image: ${CMS_IMAGE:?Set an approved ghcr.io/lucasr-o/portfolio-blog-cms@sha256 digest}
+    env_file:
+      - ./secrets/cms.env
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_CMS_STORAGE: github
+      HOSTNAME: 0.0.0.0
+      PORT: "3000"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32m
+      - /app/apps/cms/.next/cache:rw,noexec,nosuid,size=32m
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 768m
+    pids_limit: 128
+    restart: unless-stopped
+    expose: ["3000"]
+    networks: [editor]
+    logging:
+      driver: json-file
+      options: { max-size: "5m", max-file: "2" }
+
+  proxy:
+    image: nginx@sha256:0985e772fb9f729e6fa0980da05fca5d9c468e870eed43071545afa9d2e27d94
+    user: "101:101"
+    entrypoint: [nginx]
+    command: ["-g", "daemon off;"]
+    volumes:
+      - type: bind
+        source: ./generated/nginx.conf
+        target: /etc/nginx/nginx.conf
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: ./secrets/cms.htpasswd
+        target: /run/secrets/cms.htpasswd
+        read_only: true
+        bind: { create_host_path: false }
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 64m
+    pids_limit: 64
+    restart: unless-stopped
+    expose: ["8080"]
+    depends_on:
+      cms: { condition: service_healthy }
+    healthcheck:
+      test: [CMD, nginx, -t]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      editor:
+        aliases: [cms-proxy]
+    logging:
+      driver: json-file
+      options: { max-size: "5m", max-file: "2" }
+
+  tunnel:
+    image: cloudflare/cloudflared@sha256:072c067d25ccbe61d46e18f0d0723255f2bb5304f7317caa95b27031520ff92c
+    command: [tunnel, --no-autoupdate, run, --token-file, /run/secrets/tunnel-token]
+    volumes:
+      - type: bind
+        source: ./secrets/tunnel-token
+        target: /run/secrets/tunnel-token
+        read_only: true
+        bind: { create_host_path: false }
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    pids_limit: 64
+    restart: unless-stopped
+    depends_on:
+      proxy: { condition: service_healthy }
+    networks: [editor]
+    logging:
+      driver: json-file
+      options: { max-size: "5m", max-file: "2" }
+
+networks:
+  editor: {}

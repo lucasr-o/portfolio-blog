@@ -1,0 +1,68 @@
+name: Site and CMS checks
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_call:
+    inputs:
+      publication_cutoff:
+        type: string
+        required: false
+      release_artifact:
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24.19.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Set the candidate publication instant
+        env:
+          CUTOFF: ${{ inputs.publication_cutoff }}
+        run: |
+          if [ -n "$CUTOFF" ]; then
+            printf 'BLOG_PUBLICATION_TIME=%s\n' "$CUTOFF" >> "$GITHUB_ENV"
+          fi
+      - run: pnpm lint
+      - run: pnpm test:publication
+      - run: pnpm build
+      - run: pnpm test
+      - run: pnpm test:cms:update
+      - run: pnpm test:cms:compose
+      - run: pnpm audit:bundle
+      - run: pnpm exec playwright install --with-deps chrome
+      - run: CI=1 pnpm test:e2e
+      - run: CI=1 pnpm test:cms
+      - run: pnpm test:cms:production
+      - run: pnpm lighthouse
+      - name: Prepare immutable release manifest
+        if: inputs.release_artifact
+        run: node scripts/prepare-release.mjs
+      - name: Save verified release artifact
+        if: inputs.release_artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: verified-site-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            out/
+            .cache/publication.json
+            .cache/release-manifest.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7

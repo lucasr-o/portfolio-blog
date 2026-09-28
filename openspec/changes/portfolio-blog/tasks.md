@@ -37,19 +37,19 @@ A implementação está em andamento; evidências estão em `implementation-log.
 ## 5. Entrega estática e automação pública
 
 - [x] 5.1 Implementar a CloudFront Function planejada com fixtures do export real; testar `/`, rotas com/sem barra, assets, queries e payloads Next, erro 404 e resistência a traversal/URI malformada.
-- [ ] 5.2 Implementar geração de manifesto, snapshot de release e upload ordenado com metadados corretos; testar planejamento de chaves, inclusão de assets antes de documentos e ausência de operações fora dos prefixos do projeto.
-- [ ] 5.3 Implementar retirada de objetos mutáveis por manifesto, invalidação e smoke tests, incluindo restore em falha; simular erro após cada fase e verificar recuperação de snapshot anterior sem apagar bundles retidos.
-- [ ] 5.4 Criar workflows de PR/main com dependências fixadas, checks antes de mutações, OIDC, concorrência e rejeição de candidato obsoleto por commit/cutoff; testar jobs do mesmo commit com datas diferentes e ausência de credenciais de deploy em PR/fork.
-- [ ] 5.5 Criar agendamento, preflight de comparação com o estado publicado e execução manual; testar relógio controlado, check sem mudança sem build/upload/invalidation, falha de leitura de estado e scheduled vencido usando o fluxo normal.
-- [ ] 5.6 Implementar rollback manual separado e retenção por manifestos; verificar que release ativa/últimas cinco/recentes sobrevivem à limpeza, que restauração usa o artefato original e que o roteiro permite pausar automações sem desabilitar o rollback.
-- [ ] 5.7 Atualizar o roteiro AWS e documentação de publicação com nomes reais dos workflows/scripts, permissões efetivamente usadas e diagnóstico de cron inativo; conferir cada referência e executar os procedimentos de simulação local.
+- [x] 5.2 Implementar geração de manifesto, snapshot de release e upload ordenado com metadados corretos; testar planejamento de chaves, inclusão de assets antes de documentos e ausência de operações fora dos prefixos do projeto.
+- [x] 5.3 Implementar retirada de objetos mutáveis por manifesto, invalidação e smoke tests, incluindo restore em falha; simular erro após cada fase e verificar recuperação de snapshot anterior sem apagar bundles retidos.
+- [x] 5.4 Criar workflows de PR/main com dependências fixadas, checks antes de mutações, OIDC, concorrência e rejeição de candidato obsoleto por commit/cutoff; testar jobs do mesmo commit com datas diferentes e ausência de credenciais de deploy em PR/fork.
+- [x] 5.5 Criar agendamento, preflight de comparação com o estado publicado e execução manual; testar relógio controlado, check sem mudança sem build/upload/invalidation, falha de leitura de estado e scheduled vencido usando o fluxo normal.
+- [x] 5.6 Implementar rollback manual separado e retenção por manifestos; verificar que release ativa/últimas cinco/recentes sobrevivem à limpeza, que restauração usa o artefato original e que o roteiro permite pausar automações sem desabilitar o rollback.
+- [x] 5.7 Atualizar o roteiro AWS e documentação de publicação com nomes reais dos workflows/scripts, permissões efetivamente usadas e diagnóstico de cron inativo; conferir cada referência e executar os procedimentos de simulação local.
 
 ## 6. Empacotar e operar o CMS no Raspberry Pi
 
 - [ ] 6.1 Criar imagem ARM64 de produção e workflow GHCR somente para código CMS/compartilhado, sem embutir segredos; verificar digest, arquitetura, build reproduzível e saúde da imagem.
-- [ ] 6.2 Criar configuração Compose isolada para CMS, proxy e Tunnel, sem portas host nem docker.sock; validar a configuração, limites de memória, rede própria, logs limitados e referência exclusiva a recursos `portfolio-blog-cms`.
-- [ ] 6.3 Implementar atualizador dedicado que aplica somente imagens aprovadas do repositório fixo por digest e restaura o digest anterior em falha; testar atualização saudável, imagem quebrada, erro de rede e nenhuma operação em outros projetos.
-- [ ] 6.4 Documentar instalação, segredos, atualização, health check e recuperação do painel; verificar que o procedimento não inclui comandos Docker globais, reutilização do tunnel Overleaf ou substituição do Node host.
+- [x] 6.2 Criar configuração Compose isolada para CMS, proxy e Tunnel, sem portas host nem docker.sock; validar a configuração, limites de memória, rede própria, logs limitados e referência exclusiva a recursos `portfolio-blog-cms`.
+- [x] 6.3 Implementar atualizador dedicado que aplica somente imagens aprovadas do repositório fixo por digest e restaura o digest anterior em falha; testar atualização saudável, imagem quebrada, erro de rede e nenhuma operação em outros projetos.
+- [x] 6.4 Documentar instalação, segredos, atualização, health check e recuperação do painel; verificar que o procedimento não inclui comandos Docker globais, reutilização do tunnel Overleaf ou substituição do Node host.
 
 ## 7. Provisionar AWS e conectar GitHub
 

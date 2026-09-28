@@ -1,6 +1,6 @@
 # portfolio-blog — roteiro manual de produção
 
-Documento de planejamento revisado em 27/09/2026. **Nenhum recurso foi criado por este guia.** Executar somente na fase de implementação autorizada. Nomes de telas podem mudar; quando houver divergência, conferir o valor efetivo, não aceitar opções pagas por semelhança de nome.
+Roteiro revisado em 28/09/2026. **A AWS ainda não foi provisionada.** A implementação local e os workflows descritos abaixo não comprovam um deploy real. Nomes de telas podem mudar; quando houver divergência, conferir o valor efetivo, não aceitar opções pagas por semelhança de nome.
 
 O site será estático no S3/CloudFront. O painel ficará no Raspberry Pi. OAC é a autorização entre CloudFront e S3, não outro servidor. A AWS não hospedará o Keystatic.
 
@@ -17,21 +17,14 @@ Ter acesso à conta AWS, à zona Cloudflare `lucas-reis.com` e ao GitHub `lucasr
 | `DISTRIBUTION_DOMAIN` | Nome `d....cloudfront.net`, sem `https://` |
 | `CERTIFICATE_ARN` | ARN do certificado ACM em `us-east-1` |
 | `DEPLOY_ROLE_ARN` | ARN da role criada na etapa 7 |
-| `GITHUB_REPOSITORY` | `lucasr-o/portfolio-blog`, após verificar disponibilidade |
+| `GITHUB_REPOSITORY` | `lucasr-o/portfolio-blog`, já criado; branch `main` |
 | `GITHUB_OIDC_SUB` | Claim exato do workflow aprovado da `main` |
 | `CMS_HOSTNAME` | Subdomínio hexadecimal aleatório de `lucas-reis.com` |
 | `DNS_ANTERIOR` | Tipo, valor e estado de proxy do registro atual do apex |
 
 Não publicar senha HTTP, token do Tunnel, client secret GitHub, cookies ou tokens de sessão. IDs e ARNs não substituem autenticação, mas devem ser preenchidos conscientemente nos exemplos.
 
-Pré-requisitos que a implementação ainda entregará:
-
-- Fonte da CloudFront Function em `infra/cloudfront/viewer-request.js` e testes de rotas.
-- Workflows de validação, deploy, rollback, agenda e imagem CMS.
-- Scripts de publicação por manifesto e recuperação de release.
-- Aplicativo CMS, imagem ARM64 e configuração operacional isolada.
-
-As etapas que dependem desses arquivos não podem ser concluídas usando apenas esta proposta. Não improvisar `sync --delete` na raiz do bucket para substituí-los.
+Já disponíveis no repositório: função em `infra/cloudfront/viewer-request.js`; validação em `.github/workflows/checks.yml`; publicação/agendamento em `release.yml`; rollback em `rollback.yml`; retenção em `retention.yml`; scripts `prepare-release.mjs`, `publish-release.mjs`, `rollback-release.mjs` e `prune-releases.mjs`. O editor GitHub e preview foram verificados localmente. A imagem ARM64, o Compose dedicado, o Tunnel, o domínio final e os recursos AWS ainda precisam ser concluídos. Não improvisar `sync --delete` na raiz do bucket.
 
 ## 1. Conferir cobrança antes de criar a distribuição
 
@@ -230,10 +223,10 @@ Em **IAM → Policies → Create policy → JSON**, criar `portfolio-blog-deploy
       ]
     },
     {
-      "Sid": "RemoveOnlyRecordedSiteAndReleaseObjects",
+      "Sid": "RemoveOnlyRecordedSiteReleaseAndFailedInitialState",
       "Effect": "Allow",
       "Action": "s3:DeleteObject",
-      "Resource": ["arn:aws:s3:::BUCKET/site/*", "arn:aws:s3:::BUCKET/releases/*"]
+      "Resource": ["arn:aws:s3:::BUCKET/site/*", "arn:aws:s3:::BUCKET/releases/*", "arn:aws:s3:::BUCKET/state/current-release.json"]
     },
     {
       "Sid": "RefreshOnlyThisDistribution",
@@ -245,7 +238,7 @@ Em **IAM → Policies → Create policy → JSON**, criar `portfolio-blog-deploy
 }
 ```
 
-Essa política não limita quais objetos dentro dos prefixos podem ser apagados por uma credencial comprometida. A remoção por manifesto é uma proteção do script; IAM limita o alcance ao projeto. O workflow não terá permissão para alterar bucket policy, IAM, DNS, distribuição ou função de rotas. Se o script final precisar outra ação, justificá-la e atualizar guia/testes antes de ampliar a role.
+Essa política não limita quais objetos dentro dos prefixos podem ser apagados por uma credencial comprometida. A remoção por manifesto é uma proteção do script; IAM limita o alcance ao projeto. A exceção de exclusão de `state/current-release.json` permite retirar o estado ambíguo de uma primeira publicação que falhou. O workflow não terá permissão para alterar bucket policy, IAM, DNS, distribuição ou função de rotas.
 
 ### 7.4 Role e trust policy
 
@@ -287,16 +280,19 @@ Essa política não limita quais objetos dentro dos prefixos podem ser apagados 
    - `AWS_DEPLOY_ROLE_ARN`: role da etapa 7.
    - `S3_BUCKET`: nome do bucket.
    - `CLOUDFRONT_DISTRIBUTION_ID`: ID da distribuição.
-   - `PUBLIC_SITE_URL`: `https://lucas-reis.com`.
    - `CLOUDFRONT_DOMAIN`: domínio AWS para o teste técnico anterior ao corte.
 3. Os identificadores acima não são chaves de acesso. Não cadastrar `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` para este fluxo.
 4. Manter permissões padrão de Actions restritas. O workflow declara `contents: read`; somente os jobs pertinentes recebem `id-token: write` ou `packages: write`.
 5. Habilitar notificações de falhas de Actions para Lucas. Conferir que o workflow está na `main` e permite execução manual.
-6. Executar a pipeline de primeiro deploy. Ela deve validar, criar snapshot, enviar assets, atualizar documentos, invalidar e testar antes de registrar sucesso.
-7. Anotar o commit, release-id e horário. Em S3, conferir `site/index.html`, `site/blog/index.html`, artigo placeholder, `site/404.html` e assets; conferir snapshot e estado em seus prefixos privados.
+6. Conferir que **Publish site** (`.github/workflows/release.yml`) está na `main` e executar **Run workflow**. Antes de cadastrar todas as cinco variáveis, pushes ainda executam os checks, mas a publicação permanece desabilitada. O job `verify` valida o mesmo cutoff, gera `out/` e o manifesto; só o job `deploy` recebe OIDC e grava na AWS. Um erro de leitura do estado impede o deploy; não equivale a coleção vazia.
+7. Anotar o commit, release-id (`<sha>-<run-id>-<attempt>`) e horário. Em S3, conferir `site/index.html`, `site/blog/index.html`, artigo placeholder, `site/404.html` e assets; conferir `releases/<id>/files/`, `manifest.json`, `success.json` e `state/current-release.json` nos prefixos privados.
 8. Abrir o domínio técnico CloudFront para teste de origem. Não é um ambiente ou hostname de staging: é a mesma distribuição de produção antes da troca do DNS.
 
 **Verificação:** artefato publicado sem usar o Pi; nenhum arquivo `.env`, corpo de draft, coleção YAML, rota CMS ou segredo no export. O teste de conteúdo deve verificar o artefato inteiro, incluindo payloads estáticos, não apenas o HTML visível.
+
+### Simulação local sem credenciais AWS
+
+Execute `pnpm test:publication`, `pnpm build`, `pnpm test`, `pnpm audit:bundle` e `pnpm test:e2e`. Depois, com `GITHUB_SHA` igual ao SHA completo do checkout, `GITHUB_RUN_ID=1` e `GITHUB_RUN_ATTEMPT=1`, execute `node scripts/prepare-release.mjs`. O arquivo ignorado `.cache/release-manifest.json` deve listar apenas chaves `site/`, com assets versionados primeiro. Os testes `tests/release-*.test.js` simulam saves, retirada, invalidação, smoke, falha, recuperação e retenção usando armazenamento em memória. `publish-release.mjs` e `rollback-release.mjs` precisam de AWS real e não fazem parte desta simulação.
 
 ## 9. Preparar o CMS sem tocar Overleaf
 
@@ -346,19 +342,19 @@ Depois do aceite, avaliar a desativação somente do serviço legado do portfól
 
 ## 11. Publicação diária, agenda e rollback
 
-**Frontend:** editar, testar localmente e enviar para `main`; acompanhar o workflow até sucesso. Um push não deve ser considerado publicado enquanto os checks e o smoke test não terminarem.
+**Frontend:** editar, testar localmente e enviar para `main`; acompanhar **Publish site** até sucesso. Um push não deve ser considerado publicado enquanto os checks e o smoke test não terminarem. O upload guarda um snapshot privado, envia assets antes de documentos, retira apenas arquivos mutáveis anteriores registrados no manifesto, invalida `/*`, espera a invalidação e testa home, blog, asset, artigo e 404. Uma falha após a primeira mutação pública tenta restaurar os bytes do snapshot ativo e mantém o job falho.
 
 **Blog:** entrar no subdomínio, passar HTTP Auth, fazer login GitHub, escrever Markdown e salvar como draft. Abrir a prévia, corrigir e escolher `published` com data atual/passada ou `scheduled` com data futura. Conferir o fuso mostrado pelo painel. Salvar publica no Git; a visibilidade no site depende do estado, data e sucesso do deploy.
 
-**Agenda:** conferir se o workflow está ativo antes de depender de um agendamento. A verificação prevista é a cada 15 minutos, mais fila e build; não há minuto exato garantido. Após longa inatividade, reativar em **Actions → workflow → Enable workflow**, quando essa opção aparecer, e usar **Run workflow** na `main`. [Limitações de schedule](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule).
+**Agenda:** conferir se **Publish site** está ativo antes de depender de um agendamento. O cron verifica nos minutos 7, 22, 37 e 52 de cada hora. Se commit e posts elegíveis são os mesmos do estado ativo, o job termina sem build, upload nem invalidação. Não há minuto exato garantido. Após longa inatividade, reativar em **Actions → Publish site → Enable workflow**, quando essa opção aparecer, e usar **Run workflow** na `main`. [Limitações de schedule](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule).
 
-**Rollback de conteúdo:** antes de uma reversão operacional manual, pausar os workflows automáticos de deploy e agenda em **Actions → workflow → menu → Disable workflow**, mantendo disponível o workflow separado de rollback. Em **Actions → workflow de rollback → Run workflow**, selecionar a release retida, confirmar que pertence ao projeto e acompanhar restauração, invalidação e smoke test. Corrigir/reverter a `main` antes de reativar os workflows automáticos, para não republicar o problema. O workflow e seus campos serão entregues na implementação. Não reconstruir um commit antigo com a data atual para simular o mesmo snapshot.
+**Rollback de conteúdo:** antes de uma reversão operacional manual, pausar **Publish site** em **Actions → Publish site → menu → Disable workflow**. **Roll back public site** (`rollback.yml`) continua separado e disponível. Executá-lo na `main`, fornecendo exatamente o release-id de uma versão bem-sucedida retida. Ele lê os bytes originais do snapshot, restaura arquivos, invalida e testa; não executa build. Corrigir/reverter a `main` antes de reativar **Publish site**, para não republicar o problema. Não reconstruir um commit antigo com a data atual para simular o mesmo snapshot.
 
 **Rollback do corte:** se houver falha estrutural, restaurar somente o registro web anterior do apex, incluindo o estado de proxy, e confirmar que o serviço legado ainda funciona. Considerar a propagação de DNS/cache. Não alterar os registros de email para reverter o site.
 
 **Rollback do CMS:** aplicar o digest anterior pelo mecanismo dedicado e conferir login/preview. Posts persistem no Git; segredos locais precisam de cópia de recuperação guardada fora do repositório público.
 
-**Retenção:** preservar release ativa, últimas cinco releases bem-sucedidas e snapshots recentes conforme o design. Limpeza é específica por manifesto/identificador; não usar expiração automática de todo `releases/` que possa apagar o rollback de um site sem alterações há meses.
+**Retenção:** **Retain recoverable releases** (`retention.yml`) faz uma verificação semanal e pode ser executado manualmente primeiro em dry run. Preserva a release ativa, as últimas cinco bem-sucedidas e todas as snapshots com menos de 30 dias. Remove apenas objetos listados e validados nos manifestos de versões antigas e bundles sem referência em qualquer snapshot retido. Snapshots incompletos/ambíguos são pulados. Não usar expiração automática de todo `releases/` que possa apagar o rollback de um site sem alterações há meses.
 
 ## 12. Diagnóstico rápido
 
