@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { DIGEST_IMAGE, updateCms } from "../ops/cms/update-plan.mjs";
+import { DIGEST_IMAGE, imageRevisionStillCurrent, updateCms } from "../ops/cms/update-plan.mjs";
 
 const oldImage = `ghcr.io/lucasr-o/portfolio-blog-cms@sha256:${"a".repeat(64)}`;
 const newImage = `ghcr.io/lucasr-o/portfolio-blog-cms@sha256:${"b".repeat(64)}`;
@@ -13,6 +13,7 @@ function fixture(overrides = {}) {
     currentImage: oldImage,
     candidateImage: newImage,
     readMainHead: async () => { calls.push("head"); return head; },
+    compareRevisions: async () => { calls.push("compare"); return { status: "diverged" }; },
     pull: async (image) => { calls.push(`pull:${image}`); },
     inspect: async (image) => {
       calls.push(`inspect:${image}`);
@@ -54,6 +55,36 @@ test("approved arm64 main revision updates and passes health", async () => {
   const { calls, options } = fixture();
   assert.deepEqual(await updateCms(options), { status: "updated", image: newImage, revision: head });
   assert.deepEqual(calls, ["head", `pull:${newImage}`, `inspect:${newImage}`, "head", `apply:${newImage}`, "health"]);
+});
+
+test("a newer frontend-only main accepts the last CMS image, but a CMS change rejects it", async () => {
+  const oldRevision = "d".repeat(40);
+  const comparison = { status: "ahead", ahead_by: 1, behind_by: 0,
+    base_commit: { sha: oldRevision }, files: [{ filename: "README.md" },
+      { filename: "app/page.jsx" }] };
+  assert.equal(imageRevisionStillCurrent({ candidateRevision: oldRevision, mainHead: head, comparison }), true);
+  for (const filename of ["apps/cms/app/page.js", "packages/blog-content/src/index.js",
+    "ops/cms/Dockerfile", "package.json", ".github/workflows/cms-image.yml"]) {
+    assert.equal(imageRevisionStillCurrent({ candidateRevision: oldRevision, mainHead: head,
+      comparison: { ...comparison, files: [{ filename }] } }), false, filename);
+  }
+  assert.equal(imageRevisionStillCurrent({ candidateRevision: oldRevision, mainHead: head,
+    comparison: { ...comparison, files: [{ filename: "README.md", previous_filename: "apps/cms/old.md" }] } }), false);
+  assert.equal(imageRevisionStillCurrent({ candidateRevision: oldRevision, mainHead: head,
+    comparison: { ...comparison, files: Array.from({ length: 300 }, (_, i) => ({ filename: `docs/${i}.md` })) } }), false);
+  assert.equal(imageRevisionStillCurrent({ candidateRevision: oldRevision, mainHead: head,
+    comparison: { ...comparison, status: "diverged" } }), false);
+
+  const { calls, options } = fixture({
+    inspect: async () => ({ architecture: "arm64", source: "https://github.com/lucasr-o/portfolio-blog",
+      revision: oldRevision }),
+    compareRevisions: async (base, latest) => {
+      calls.push(`compare:${base}:${latest}`);
+      return comparison;
+    },
+  });
+  assert.equal((await updateCms(options)).status, "updated");
+  assert.equal(calls.includes(`compare:${oldRevision}:${head}`), true);
 });
 
 test("network failure or unapproved labels never replaces the running CMS", async () => {

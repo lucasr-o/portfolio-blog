@@ -2,7 +2,7 @@
 
 Static portfolio and blog for Lucas Reis, built with Next.js, React, and JavaScript.
 
-The public application exports static HTML and assets, with small client components for the terminal and scroll reveals. The separate Node-based CMS lives in `apps/cms`; it is never exported to S3. GitHub authoring, uploads and saved-revision previews work locally. Production deployment is still being implemented in the OpenSpec change `portfolio-blog` and is not live yet.
+The public application exports static HTML and assets, with small client components for the terminal and scroll reveals. The separate Node-based CMS lives in `apps/cms`; it is never exported to S3. GitHub authoring, uploads and saved-revision previews work locally. Release automation and the isolated CMS container are implemented, but AWS and the Raspberry Pi have not been connected yet; the site is not live from this repository.
 
 ## Requirements
 
@@ -43,6 +43,8 @@ pnpm test:e2e
 pnpm test:a11y
 pnpm audit:bundle
 pnpm lighthouse
+pnpm test:cms:update
+pnpm test:cms:compose
 ```
 
 Run the complete release suite with:
@@ -90,6 +92,12 @@ pnpm build
 ```
 
 Confirm the resulting article exists at `out/blog/<slug>/index.html` before deploying.
+
+## Production delivery (not activated yet)
+
+The intended public path is CloudFront with OAC to `site/` in a private S3 bucket. Once the five repository variables and AWS OIDC role in [the AWS setup guide](openspec/changes/portfolio-blog/aws-manual.md) are configured, a push to `main` runs the checks and publishes a verified static snapshot. Scheduled checks every 15 minutes publish due posts if the public collection changes. The [CMS operations guide](docs/cms-operations.md) covers the separate Keystatic ARM64 image, dedicated Compose project and Cloudflare Tunnel on the Pi. Neither workflow modifies the Overleaf project.
+
+Before AWS variables exist, pushes still run validation but deliberately do not deploy. The public site is independent of CMS uptime after a successful publish. A failed release restores the previous snapshot; the separate manual rollback workflow remains available even when the publish workflow is paused.
 
 ## Static routes
 

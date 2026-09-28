@@ -46,7 +46,7 @@ A implementação está em andamento; evidências estão em `implementation-log.
 
 ## 6. Empacotar e operar o CMS no Raspberry Pi
 
-- [ ] 6.1 Criar imagem ARM64 de produção e workflow GHCR somente para código CMS/compartilhado, sem embutir segredos; verificar digest, arquitetura, build reproduzível e saúde da imagem.
+- [x] 6.1 Criar imagem ARM64 de produção e workflow GHCR somente para código CMS/compartilhado, sem embutir segredos; verificar digest, arquitetura, build reproduzível e saúde da imagem.
 - [x] 6.2 Criar configuração Compose isolada para CMS, proxy e Tunnel, sem portas host nem docker.sock; validar a configuração, limites de memória, rede própria, logs limitados e referência exclusiva a recursos `portfolio-blog-cms`.
 - [x] 6.3 Implementar atualizador dedicado que aplica somente imagens aprovadas do repositório fixo por digest e restaura o digest anterior em falha; testar atualização saudável, imagem quebrada, erro de rede e nenhuma operação em outros projetos.
 - [x] 6.4 Documentar instalação, segredos, atualização, health check e recuperação do painel; verificar que o procedimento não inclui comandos Docker globais, reutilização do tunnel Overleaf ou substituição do Node host.

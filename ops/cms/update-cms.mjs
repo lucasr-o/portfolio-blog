@@ -66,6 +66,18 @@ async function mainHead() {
   return commit.sha;
 }
 
+async function compareRevisions(base, head) {
+  if (!/^[a-f0-9]{40}$/.test(base) || !/^[a-f0-9]{40}$/.test(head)) {
+    throw new Error("Invalid CMS image comparison revision");
+  }
+  const response = await fetch(`https://api.github.com/repos/lucasr-o/portfolio-blog/compare/${base}...${head}`, {
+    headers: { Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2026-03-10" },
+    signal: AbortSignal.timeout(15_000),
+  });
+  if (!response.ok) throw new Error(`Could not compare CMS image revision (${response.status})`);
+  return response.json();
+}
+
 async function validateDedicatedCompose() {
   const config = JSON.parse(await command("docker", [...composeArgs, "config", "--format", "json"]));
   if (config.name !== "portfolio-blog-cms" ||
@@ -112,6 +124,7 @@ try {
 
 const result = await updateCms({ currentImage, candidateImage, failedImage,
   readMainHead: mainHead,
+  compareRevisions,
   pull: async (image) => { await command("docker", ["pull", image]); },
   inspect: async (image) => {
     const info = JSON.parse(await command("docker", ["image", "inspect", image,

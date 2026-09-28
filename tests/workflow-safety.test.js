@@ -6,6 +6,7 @@ const workflows = join(process.cwd(), ".github/workflows");
 const checks = await readFile(join(workflows, "checks.yml"), "utf8");
 const release = await readFile(join(workflows, "release.yml"), "utf8");
 const cmsImage = await readFile(join(workflows, "cms-image.yml"), "utf8");
+const oidcClaims = await readFile(join(workflows, "oidc-claims.yml"), "utf8");
 
 describe("GitHub Actions security boundary", () => {
   it("runs pull request checks with read-only repository permission and no AWS identity", () => {
@@ -41,5 +42,14 @@ describe("GitHub Actions security boundary", () => {
     expect(cmsImage).toMatch(/org\.opencontainers\.image\.revision=/);
     expect(cmsImage).toMatch(/test ! -e \/app\/apps\/cms\/\.env/);
     expect(cmsImage).not.toMatch(/AWS_DEPLOY_ROLE_ARN|id-token: write/);
+  });
+
+  it("exposes only allowlisted OIDC claim names from a manual main run", () => {
+    expect(oidcClaims).toMatch(/workflow_dispatch:/);
+    expect(oidcClaims).not.toMatch(/push:|pull_request:/);
+    expect(oidcClaims).toMatch(/if: github\.ref == 'refs\/heads\/main'/);
+    expect(oidcClaims).toMatch(/id-token: write/);
+    expect(oidcClaims).toMatch(/\['iss', 'aud', 'sub'\]/);
+    expect(oidcClaims).not.toMatch(/console\.log\([^)]*value|console\.log\([^)]*token/);
   });
 });

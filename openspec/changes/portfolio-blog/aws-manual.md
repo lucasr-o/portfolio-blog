@@ -2,6 +2,8 @@
 
 Roteiro revisado em 28/09/2026. **A AWS ainda não foi provisionada.** A implementação local e os workflows descritos abaixo não comprovam um deploy real. Nomes de telas podem mudar; quando houver divergência, conferir o valor efetivo, não aceitar opções pagas por semelhança de nome.
 
+**Decisão de Lucas:** executar a AWS manualmente e selecionar o plano gratuito, se a conta for elegível. Este guia não autoriza escolher um plano pago. A elegibilidade, os créditos e o custo efetivo precisam ser conferidos no console antes de criar recursos; se o Free não estiver disponível, parar e revisar o desenho antes de avançar.
+
 O site será estático no S3/CloudFront. O painel ficará no Raspberry Pi. OAC é a autorização entre CloudFront e S3, não outro servidor. A AWS não hospedará o Keystatic.
 
 ## 0. Preparação e valores a preencher
@@ -185,7 +187,7 @@ Fazer esta etapa após criar o novo repositório e a `main`. Os nomes abaixo sã
 
 ### 7.2 Identificar o subject correto
 
-Na implementação, um diagnóstico restrito na `main` mostrará somente `iss`, `aud` e `sub` do token OIDC, nunca o token completo. Copiar o valor exato de `sub` para `GITHUB_OIDC_SUB` e verificar que termina no contexto da `main`.
+O workflow manual **Inspect main OIDC claims** (`.github/workflows/oidc-claims.yml`) só executa na `main` e mostra `iss`, `aud` e `sub`, nunca o token completo. Em **Actions → Inspect main OIDC claims → Run workflow**, escolha `main`. Copie o `sub` exato do job para `GITHUB_OIDC_SUB`; confirme que `iss` é `https://token.actions.githubusercontent.com`, `aud` é `sts.amazonaws.com` e que `sub` representa a `main` deste repositório. Não use um `sub` de outro workflow, branch ou repositório.
 
 Repositórios recentes podem usar IDs imutáveis de owner/repo no subject. Não assumir que o formato antigo `repo:owner/name:ref:refs/heads/main` será o emitido. Se futuramente houver um GitHub Environment, o subject pode mudar; esta proposta não depende de Environment. [OIDC GitHub/AWS](https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws).
 

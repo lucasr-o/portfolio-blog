@@ -1,0 +1,35 @@
+name: Inspect main OIDC claims
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  main-claims:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      id-token: write
+    steps:
+      - name: Print only identity claims, never the token
+        run: |
+          node - <<'NODE'
+          const url = new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
+          url.searchParams.set('audience', 'sts.amazonaws.com');
+          const response = await fetch(url, {
+            headers: { Authorization: `Bearer ${process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN}` },
+          });
+          if (!response.ok) throw new Error(`OIDC claim request failed (${response.status})`);
+          const { value } = await response.json();
+          const encoded = value?.split('.')[1];
+          if (!encoded) throw new Error('OIDC response lacks a payload');
+          const claims = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'));
+          for (const field of ['iss', 'aud', 'sub']) {
+            if (typeof claims[field] !== 'string' || !/^[A-Za-z0-9:/._-]+$/.test(claims[field])) {
+              throw new Error(`Invalid ${field} claim`);
+            }
+            console.log(`${field}=${claims[field]}`);
+          }
+          NODE
