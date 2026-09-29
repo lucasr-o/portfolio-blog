@@ -1,13 +1,13 @@
 # Operar o CMS no Raspberry Pi
 
-Este roteiro ainda **não foi executado no Pi**. O CMS precisa de um hostname HTTPS definitivo para concluir o teste OAuth. Use somente `/home/rp4/portfolio-blog-cms` e o projeto Docker Compose `portfolio-blog-cms`; não pare, recrie, conecte ou altere os containers, redes e Tunnel do Overleaf. O site público não depende da disponibilidade do Pi depois de publicado.
+Este roteiro ainda **não foi executado no Pi**. Lucas informou o Tunnel dedicado `LUCAS-REIS-PORTFOLIO-BLOG-CMS` e o hostname `4fa8522f3d6b.lucas-reis.com`; a rota `http://cms-proxy:8080` foi configurada no painel, mas o conector não foi instalado. O token original compartilhado em chat foi revogado por Lucas; um token novo, nunca enviado por chat, será necessário para iniciar o conector. Use somente `/home/rp4/portfolio-blog-cms` e o projeto Docker Compose `portfolio-blog-cms`; não pare, recrie, conecte ou altere os containers, redes e Tunnel do Overleaf. O site público não depende da disponibilidade do Pi depois de publicado.
 
 ## Pré-requisitos e registro antes de mudar algo
 
 1. No Pi, confira `docker ps --format 'table {{.Names}}\t{{.Status}}'`, `free -h`, `df -h`, `docker compose version` e `node --version`. Guarde o resultado sem senhas. O updater usa Node do host **somente para executar o script**; a aplicação usa Node dentro da imagem. Se o host não tiver Node 18+ e houver impacto em outro projeto ao instalá-lo, pare e planeje uma alternativa isolada. Não substitua o Node do host sem avaliação.
 2. Confirme acesso à zona `lucas-reis.com` no Cloudflare e ao [GitHub App](https://github.com/settings/apps/portfolio-blog-keystatic-lucasr-o), instalado apenas em `lucasr-o/portfolio-blog`.
 3. Aguarde o workflow **Build CMS ARM64 image** passar em `main`. Verifique no GHCR que o pacote está público, tem manifesto `linux/arm64` e anote o digest de uma imagem aprovada. Não use a tag mutável `:main` no Compose.
-4. Gere um hostname aleatório hexadecimal de pelo menos 16 caracteres, por exemplo com `openssl rand -hex 12`. O exemplo `0123456789abcdef` dos arquivos não é uma escolha real. Registre o nome em um local privado; não inclua o token do Tunnel ou senhas nesse registro.
+4. Use o hostname escolhido `4fa8522f3d6b.lucas-reis.com`, sem tratá-lo como mecanismo de autenticação. O exemplo `0123456789abcdef` dos arquivos não é uma escolha real. Não inclua o token do Tunnel ou senhas no registro operacional.
 
 ## Preparar somente o diretório novo
 
@@ -23,7 +23,7 @@ Instale `apache2-utils` se `htpasswd` não estiver disponível. Execute `htpassw
 
 ## Criar Tunnel dedicado, sem tocar no existente
 
-No painel Cloudflare, crie um **novo** Tunnel gerenciado remotamente, com nome como `portfolio-blog-cms`. Em Routes / Published applications, associe **somente** `<hex>.lucas-reis.com` ao serviço `http://cms-proxy:8080`. Esse nome resolve dentro da rede Compose privada; não exponha porta no Pi nem associe o Tunnel do Overleaf. Guarde o token **do Tunnel novo** em `ops/cms/secrets/tunnel-token`, sem linha de comando, Git ou saída de logs. O cloudflared usa UID 65532; deixe o arquivo montado legível para esse UID (por exemplo `0644`, dentro de `secrets/` com acesso host `0700`). O token dá acesso ao Tunnel: trate-o como segredo e revogue-o se vazar.
+No painel Cloudflare, confirme o Tunnel dedicado `LUCAS-REIS-PORTFOLIO-BLOG-CMS` e a rota publicada **somente** de `4fa8522f3d6b.lucas-reis.com` para `http://cms-proxy:8080`. Esse nome resolve dentro da rede Compose privada; não exponha porta no Pi nem associe o Tunnel do Overleaf. **O token originalmente compartilhado foi revogado; gere/obtenha um token novo antes de iniciar o conector.** Guarde-o somente em `ops/cms/secrets/tunnel-token`, sem linha de comando, Git ou saída de logs; não execute `sudo cloudflared service install`, pois o Compose já tem o serviço `tunnel`. O cloudflared usa UID 65532; deixe o arquivo montado legível para esse UID (por exemplo `0644`, dentro de `secrets/` com acesso host `0700`). [Tokens do Tunnel](https://developers.cloudflare.com/tunnel/reference/tunnel-tokens/).
 
 No GitHub App, adicione a URL de callback HTTPS de produção que o Keystatic solicita durante **Log in with GitHub**. Mantenha o callback local usado no desenvolvimento. Confirme que o hostname e o protocolo no `redirect_uri` exibido são exatamente os aprovados; não habilite callback genérico ou wildcard. O painel final só deve ser acessado pelo hostname do Tunnel.
 

@@ -7,6 +7,8 @@ const checks = await readFile(join(workflows, "checks.yml"), "utf8");
 const release = await readFile(join(workflows, "release.yml"), "utf8");
 const cmsImage = await readFile(join(workflows, "cms-image.yml"), "utf8");
 const oidcClaims = await readFile(join(workflows, "oidc-claims.yml"), "utf8");
+const rollback = await readFile(join(workflows, "rollback.yml"), "utf8");
+const retention = await readFile(join(workflows, "retention.yml"), "utf8");
 
 describe("GitHub Actions security boundary", () => {
   it("runs pull request checks with read-only repository permission and no AWS identity", () => {
@@ -20,7 +22,7 @@ describe("GitHub Actions security boundary", () => {
   it("serializes production mutations after checks and pins external actions", () => {
     expect(release).toMatch(/needs: \[preflight, verify\]/);
     expect(release).toMatch(/group: portfolio-blog-production\n\s+cancel-in-progress: false/);
-    expect(release).toMatch(/if: needs\.preflight\.outputs\.deploy == 'true'/);
+    expect(release).toMatch(/if: github\.ref == 'refs\/heads\/main' && needs\.preflight\.outputs\.deploy == 'true'/);
     expect(release).toMatch(/7,22,37,52 \* \* \* \*/);
     expect(release).toMatch(/workflow_dispatch:/);
     for (const source of [checks, release, cmsImage]) {
@@ -51,5 +53,14 @@ describe("GitHub Actions security boundary", () => {
     expect(oidcClaims).toMatch(/id-token: write/);
     expect(oidcClaims).toMatch(/\['iss', 'aud', 'sub'\]/);
     expect(oidcClaims).not.toMatch(/console\.log\([^)]*value|console\.log\([^)]*token/);
+  });
+
+  it("binds every AWS job and the diagnostic to the protected prod environment", () => {
+    expect(release).toMatch(/preflight:\n\s+if: github\.ref == 'refs\/heads\/main'\n\s+runs-on: ubuntu-24\.04\n\s+environment: prod/);
+    expect(release).toMatch(/deploy:\n\s+needs: \[preflight, verify\]\n\s+if: github\.ref == 'refs\/heads\/main' && needs\.preflight\.outputs\.deploy == 'true'\n\s+runs-on: ubuntu-24\.04\n\s+environment: prod/);
+    expect(rollback).toMatch(/rollback:\n\s+if: github\.ref == 'refs\/heads\/main'\n\s+runs-on: ubuntu-24\.04\n\s+environment: prod/);
+    expect(retention).toMatch(/prune:\n\s+if: github\.ref == 'refs\/heads\/main'\n\s+runs-on: ubuntu-24\.04\n\s+environment: prod/);
+    expect(oidcClaims).toMatch(/main-claims:\n\s+if: github\.ref == 'refs\/heads\/main'\n\s+runs-on: ubuntu-24\.04\n\s+environment: prod/);
+    expect(retention).toMatch(/Require production configuration/);
   });
 });

@@ -15,6 +15,7 @@ jobs:
   rollback:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
+    environment: prod
     timeout-minutes: 30
     permissions:
       contents: read
@@ -23,6 +24,19 @@ jobs:
       group: portfolio-blog-production
       cancel-in-progress: false
     steps:
+      - name: Require production configuration
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          AWS_DEPLOY_ROLE_ARN: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          S3_BUCKET: ${{ vars.S3_BUCKET }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+          CLOUDFRONT_DOMAIN: ${{ vars.CLOUDFRONT_DOMAIN }}
+        run: |
+          test -n "$AWS_REGION"
+          test -n "$AWS_DEPLOY_ROLE_ARN"
+          test -n "$S3_BUCKET"
+          test -n "$CLOUDFRONT_DISTRIBUTION_ID"
+          test -n "$CLOUDFRONT_DOMAIN"
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false

@@ -1,6 +1,6 @@
 # portfolio-blog — roteiro manual de produção
 
-Roteiro revisado em 28/09/2026. **A AWS ainda não foi provisionada.** A implementação local e os workflows descritos abaixo não comprovam um deploy real. Nomes de telas podem mudar; quando houver divergência, conferir o valor efetivo, não aceitar opções pagas por semelhança de nome.
+Roteiro revisado em 29/09/2026. **A publicação na AWS ainda não foi comprovada.** Os identificadores abaixo foram conferidos nas variáveis GitHub, mas isso não valida as configurações dos recursos AWS. Nomes de telas podem mudar; quando houver divergência, conferir o valor efetivo, não aceitar opções pagas por semelhança de nome.
 
 **Decisão de Lucas:** executar a AWS manualmente e selecionar o plano gratuito, se a conta for elegível. Este guia não autoriza escolher um plano pago. A elegibilidade, os créditos e o custo efetivo precisam ser conferidos no console antes de criar recursos; se o Free não estiver disponível, parar e revisar o desenho antes de avançar.
 
@@ -12,17 +12,17 @@ Ter acesso à conta AWS, à zona Cloudflare `lucas-reis.com` e ao GitHub `lucasr
 
 | Nome usado no guia | Preencher durante implementação |
 | --- | --- |
-| `ACCOUNT_ID` | ID de 12 dígitos da conta AWS |
-| `BUCKET` | Nome único proposto: `portfolio-blog-prod-<account-id>-<sufixo>` |
-| `AWS_REGION` | `us-east-1`, padrão proposto para o bucket |
-| `DISTRIBUTION_ID` | ID retornado ao criar CloudFront |
-| `DISTRIBUTION_DOMAIN` | Nome `d....cloudfront.net`, sem `https://` |
+| `ACCOUNT_ID` | `808644003685` (informado por Lucas no ARN IAM) |
+| `BUCKET` | `portfolio-blog-prod-808644003685-us-east-1-an` (conferido nas variables de `prod`) |
+| `AWS_REGION` | `us-east-1` (conferido nas variables de `prod`) |
+| `DISTRIBUTION_ID` | `E2Z75V144GV4KT` (conferido nas variables de `prod`) |
+| `DISTRIBUTION_DOMAIN` | `d1a1hv6uftt83f.cloudfront.net` (conferido nas variables de `prod`) |
 | `CERTIFICATE_ARN` | ARN do certificado ACM em `us-east-1` |
-| `DEPLOY_ROLE_ARN` | ARN da role criada na etapa 7 |
+| `DEPLOY_ROLE_ARN` | `arn:aws:iam::808644003685:role/portfolio-blog-github-deploy` (conferido nas variables de `prod`; trust policy ainda precisa ser revalidada) |
 | `GITHUB_REPOSITORY` | `lucasr-o/portfolio-blog`, já criado; branch `main` |
-| `GITHUB_OIDC_SUB` | `repo:lucasr-o@75533514/portfolio-blog@1391300735:ref:refs/heads/main` (medido na `main` em 28/09/2026) |
-| `CMS_HOSTNAME` | Subdomínio hexadecimal aleatório de `lucas-reis.com` |
-| `DNS_ANTERIOR` | Tipo, valor e estado de proxy do registro atual do apex |
+| `GITHUB_OIDC_SUB` | `repo:lucasr-o@75533514/portfolio-blog@1391300735:environment:prod` (medido na execução autorizada #3 em 29/09/2026) |
+| `CMS_HOSTNAME` | `4fa8522f3d6b.lucas-reis.com` (informado por Lucas; ainda não validado no serviço final) |
+| `DNS_ANTERIOR` | Tipo, valor e estado de proxy do registro atual do apex; Lucas removeu o Tunnel do portfólio antigo, então o retorno a esse serviço não está garantido |
 
 Não publicar senha HTTP, token do Tunnel, client secret GitHub, cookies ou tokens de sessão. IDs e ARNs não substituem autenticação, mas devem ser preenchidos conscientemente nos exemplos.
 
@@ -187,9 +187,9 @@ Fazer esta etapa após criar o novo repositório e a `main`. Os nomes abaixo sã
 
 ### 7.2 Identificar o subject correto
 
-O workflow manual **Inspect main OIDC claims** (`.github/workflows/oidc-claims.yml`) só executa na `main` e mostra `iss`, `aud` e `sub`, nunca o token completo. A [execução autorizada #2](https://github.com/lucasr-o/portfolio-blog/actions/runs/36370199307) passou e retornou `iss=https://token.actions.githubusercontent.com`, `aud=sts.amazonaws.com` e o `sub` exato na tabela acima. Use esse `sub` na trust policy e confirme novamente a identidade se alterar as configurações OIDC do repositório. Não use um `sub` de outro workflow, branch ou repositório. A primeira execução falhou apenas por uma validação local de caracteres excessivamente restrita, já corrigida; não enviou token à AWS.
+O workflow manual **Inspect main OIDC claims** (`.github/workflows/oidc-claims.yml`) só executa na `main` e mostra `iss`, `aud` e `sub`, nunca o token completo. A [execução autorizada #3](https://github.com/lucasr-o/portfolio-blog/actions/runs/36519829869/job/109250040898) com `environment: prod` passou e mediu `iss=https://token.actions.githubusercontent.com`, `aud=sts.amazonaws.com` e `sub=repo:lucasr-o@75533514/portfolio-blog@1391300735:environment:prod`. A medição anterior sem environment retornou `:ref:refs/heads/main` e **não serve mais** para esta role. Use na trust policy apenas o novo `sub` exato, nunca o valor antigo ou um wildcard.
 
-Repositórios recentes podem usar IDs imutáveis de owner/repo no subject. Não assumir que o formato antigo `repo:owner/name:ref:refs/heads/main` será o emitido. Se futuramente houver um GitHub Environment, o subject pode mudar; esta proposta não depende de Environment. [OIDC GitHub/AWS](https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws).
+O subject medido usa IDs imutáveis de owner/repo e environment, sem a branch. **Repository → Settings → Environments → prod → Deployment branches and tags** já foi restrito a `main` (regra exata, verificada no GitHub em 29/09/2026); mantenha também as condições de branch dos jobs AWS. Não habilite aprovadores obrigatórios se o `git push` deve publicar automaticamente. [Referência OIDC GitHub](https://docs.github.com/en/actions/reference/security/oidc).
 
 ### 7.3 Política de permissão do deploy
 
@@ -256,13 +256,13 @@ Essa política não limita quais objetos dentro dos prefixos podem ser apagados 
     {
       "Effect": "Allow",
       "Principal": {
-        "Federated": "arn:aws:iam::ACCOUNT_ID:oidc-provider/token.actions.githubusercontent.com"
+        "Federated": "arn:aws:iam::808644003685:oidc-provider/token.actions.githubusercontent.com"
       },
       "Action": "sts:AssumeRoleWithWebIdentity",
       "Condition": {
         "StringEquals": {
           "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
-          "token.actions.githubusercontent.com:sub": "GITHUB_OIDC_SUB"
+          "token.actions.githubusercontent.com:sub": "repo:lucasr-o@75533514/portfolio-blog@1391300735:environment:prod"
         }
       }
     }
@@ -277,7 +277,7 @@ Essa política não limita quais objetos dentro dos prefixos podem ser apagados 
 ## 8. Configurar o repositório e primeiro deploy
 
 1. O repositório público `lucasr-o/portfolio-blog` e a `main` já existem. Os arquivos ignorados, tokens e artefatos foram revisados antes dos pushes; continue verificando futuros commits antes de publicá-los. Não criar outro repositório nem reutilizar o antigo.
-2. Em **Repository → Settings → Secrets and variables → Actions → Variables**, cadastrar os nomes que serão usados nos workflows:
+2. Lucas criou o environment GitHub **`prod`** para as variáveis de produção. Em **Repository → Settings → Environments → prod → Environment variables**, os cinco nomes abaixo foram conferidos em 29/09/2026. Os jobs AWS de `release.yml`, `rollback.yml`, `retention.yml` e do diagnóstico OIDC declaram `environment: prod`. Esse environment já permite somente a branch `main`:
    - `AWS_REGION`: `us-east-1`.
    - `AWS_DEPLOY_ROLE_ARN`: role da etapa 7.
    - `S3_BUCKET`: nome do bucket.
@@ -286,7 +286,7 @@ Essa política não limita quais objetos dentro dos prefixos podem ser apagados 
 3. Os identificadores acima não são chaves de acesso. Não cadastrar `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` para este fluxo.
 4. Manter permissões padrão de Actions restritas. O workflow declara `contents: read`; somente os jobs pertinentes recebem `id-token: write` ou `packages: write`.
 5. Habilitar notificações de falhas de Actions para Lucas. Conferir que o workflow está na `main` e permite execução manual.
-6. Conferir que **Publish site** (`.github/workflows/release.yml`) está na `main` e executar **Run workflow**. Antes de cadastrar todas as cinco variáveis, pushes ainda executam os checks, mas a publicação permanece desabilitada. O job `verify` valida o mesmo cutoff, gera `out/` e o manifesto; só o job `deploy` recebe OIDC e grava na AWS. Um erro de leitura do estado impede o deploy; não equivale a coleção vazia.
+6. O diagnóstico OIDC com `prod` já passou. Atualizar a trust policy da role com o `sub` exato da tabela, confirmar a política de permissão e só depois publicar o `release.yml` conectado ou executar **Run workflow**. O job `verify` valida o mesmo cutoff, gera `out/` e o manifesto; só o job `deploy` grava na AWS. Um erro de leitura do estado impede o deploy; não equivale a coleção vazia.
 7. Anotar o commit, release-id (`<sha>-<run-id>-<attempt>`) e horário. Em S3, conferir `site/index.html`, `site/blog/index.html`, artigo placeholder, `site/404.html` e assets; conferir `releases/<id>/files/`, `manifest.json`, `success.json` e `state/current-release.json` nos prefixos privados.
 8. Abrir o domínio técnico CloudFront para teste de origem. Não é um ambiente ou hostname de staging: é a mesma distribuição de produção antes da troca do DNS.
 
@@ -300,8 +300,8 @@ Execute `pnpm test:publication`, `pnpm build`, `pnpm test`, `pnpm audit:bundle` 
 
 Esta etapa acompanha o deploy público, mas não cria recursos AWS adicionais.
 
-1. Gerar um hostname com 16 a 24 caracteres hexadecimais aleatórios e registrar `CMS_HOSTNAME`. O nome difícil de adivinhar não substitui a senha.
-2. No Cloudflare, abrir a área de **Networking/Tunnels** (ou **Networks → Tunnels**, conforme a interface), criar um Tunnel **novo** `portfolio-blog-cms` e selecionar conector Docker. Guardar seu token somente no host administrativo. [Criação de Tunnel](https://developers.cloudflare.com/tunnel/get-started/).
+1. Lucas escolheu `CMS_HOSTNAME=4fa8522f3d6b.lucas-reis.com`. O nome difícil de adivinhar não substitui a senha.
+2. No Cloudflare, confirmar o Tunnel dedicado `LUCAS-REIS-PORTFOLIO-BLOG-CMS` e selecionar conector Docker. O token original foi compartilhado em chat; rotacioná-lo antes de iniciar o conector e guardar o novo somente no host administrativo. Não executar `cloudflared service install` no Pi: a configuração Compose já inclui o conector. [Rotação de token](https://developers.cloudflare.com/tunnel/reference/tunnel-tokens/).
 3. Na implementação, preparar `/home/rp4/portfolio-blog-cms` com a configuração dedicada, imagens fixadas, arquivos de segredo e permissões locais restritas. Não copiar ou alterar o compose Overleaf.
 4. A rota publicada do Tunnel usará `CMS_HOSTNAME` e serviço interno `http://cms-proxy:8080`, alinhado ao nome/porta da configuração que será entregue. Não apontar para `localhost:3000`, que pertence ao serviço antigo.
 5. O proxy solicita usuário/senha HTTP antes de atender qualquer path. Lucas escolhe uma senha própria, diferente da senha de acesso ao Pi. Guardar hash da senha na configuração do proxy; não colocar credenciais na URL.
@@ -322,7 +322,7 @@ Só prosseguir quando distribuição, certificado, primeiro deploy e painel tive
 3. Substituir somente o registro web do apex por **CNAME**, nome `@`, destino `DISTRIBUTION_DOMAIN`, **DNS only**. Resolver eventuais registros A/AAAA conflitantes apenas do apex; preservar MX, TXT e registros de outros serviços.
 4. Não adicionar `https://` nem `/` ao destino. Cloudflare faz flattening do CNAME do apex. [CNAME no apex](https://developers.cloudflare.com/dns/cname-flattening/set-up-cname-flattening/).
 5. Manter o subdomínio CMS como rota do Tunnel. Não passar o site público pelo proxy Cloudflare neste desenho: queremos visitante → CloudFront.
-6. Aguardar a resolução efetiva e executar a lista abaixo. Não desligar o serviço legado antes do aceite.
+6. Aguardar a resolução efetiva e executar a lista abaixo. Lucas já removeu o Tunnel do portfólio antigo; não presumir que o site anterior seja uma rota de recuperação disponível.
 
 | Teste | Resultado obrigatório |
 | --- | --- |
@@ -352,7 +352,7 @@ Depois do aceite, avaliar a desativação somente do serviço legado do portfól
 
 **Rollback de conteúdo:** antes de uma reversão operacional manual, pausar **Publish site** em **Actions → Publish site → menu → Disable workflow**. **Roll back public site** (`rollback.yml`) continua separado e disponível. Executá-lo na `main`, fornecendo exatamente o release-id de uma versão bem-sucedida retida. Ele lê os bytes originais do snapshot, restaura arquivos, invalida e testa; não executa build. Corrigir/reverter a `main` antes de reativar **Publish site**, para não republicar o problema. Não reconstruir um commit antigo com a data atual para simular o mesmo snapshot.
 
-**Rollback do corte:** se houver falha estrutural, restaurar somente o registro web anterior do apex, incluindo o estado de proxy, e confirmar que o serviço legado ainda funciona. Considerar a propagação de DNS/cache. Não alterar os registros de email para reverter o site.
+**Rollback do corte:** se houver falha estrutural, restaurar somente o registro web anterior do apex, incluindo o estado de proxy, **apenas se o destino anterior tiver sido revalidado e estiver funcional**. Como o Tunnel antigo foi excluído, essa condição ainda não foi satisfeita; o rollback primário antes do corte deve ser a release anterior via CloudFront/S3. Considerar a propagação de DNS/cache. Não alterar os registros de email para reverter o site.
 
 **Rollback do CMS:** aplicar o digest anterior pelo mecanismo dedicado e conferir login/preview. Posts persistem no Git; segredos locais precisam de cópia de recuperação guardada fora do repositório público.
 

@@ -16,8 +16,9 @@ permissions:
 
 jobs:
   prune:
-    if: github.ref == 'refs/heads/main' && vars.AWS_REGION != '' && vars.AWS_DEPLOY_ROLE_ARN != '' && vars.S3_BUCKET != ''
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
+    environment: prod
     timeout-minutes: 20
     permissions:
       contents: read
@@ -26,6 +27,15 @@ jobs:
       group: portfolio-blog-production
       cancel-in-progress: false
     steps:
+      - name: Require production configuration
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          AWS_DEPLOY_ROLE_ARN: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          S3_BUCKET: ${{ vars.S3_BUCKET }}
+        run: |
+          test -n "$AWS_REGION"
+          test -n "$AWS_DEPLOY_ROLE_ARN"
+          test -n "$S3_BUCKET"
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
