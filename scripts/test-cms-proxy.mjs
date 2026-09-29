@@ -27,13 +27,13 @@ function command(program, args, options = {}) {
 
 async function configFile(name, value) {
   const path = join(directory, name);
-  await writeFile(path, value, { mode: 0o444 });
+  await writeFile(path, value, { mode: name === "cms.htpasswd" ? 0o600 : 0o444 });
   return path;
 }
 
 function start(name, config, options = []) {
   command("docker", ["run", "-d", "--name", name, "--network", project,
-    "--user", "101:101", "--cap-drop", "ALL", "--security-opt", "no-new-privileges:true",
+    "--user", "1000:1000", "--cap-drop", "ALL", "--security-opt", "no-new-privileges:true",
     "--read-only", "--tmpfs", "/tmp:rw,noexec,nosuid,size=16m", "--memory", "64m", "--pids-limit", "64",
     "--mount", `type=bind,src=${config},dst=/etc/nginx/nginx.conf,readonly`,
     ...options, "--entrypoint", "nginx", PROXY_IMAGE, "-g", "daemon off;"]);

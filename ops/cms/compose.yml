@@ -28,7 +28,8 @@ services:
 
   proxy:
     image: nginx@sha256:0985e772fb9f729e6fa0980da05fca5d9c468e870eed43071545afa9d2e27d94
-    user: "101:101"
+    # Match the dedicated Pi checkout owner so the mounted auth file stays 0600.
+    user: "1000:1000"
     entrypoint: [nginx]
     command: ["-g", "daemon off;"]
     volumes:
@@ -68,6 +69,8 @@ services:
 
   tunnel:
     image: cloudflare/cloudflared@sha256:072c067d25ccbe61d46e18f0d0723255f2bb5304f7317caa95b27031520ff92c
+    # Read the owner-only Tunnel token without making it world-readable.
+    user: "1000:1000"
     command: [tunnel, --no-autoupdate, run, --token-file, /run/secrets/tunnel-token]
     volumes:
       - type: bind

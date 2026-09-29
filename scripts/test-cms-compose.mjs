@@ -36,6 +36,8 @@ try {
     assert.equal(JSON.stringify(service).includes("docker.sock"), false);
     assert.ok(service.logging?.options?.["max-size"]);
   }
+  assert.equal(config.services.proxy.user, "1000:1000");
+  assert.equal(config.services.tunnel.user, "1000:1000");
   assert.equal(config.services.cms.image,
     `ghcr.io/lucasr-o/portfolio-blog-cms@sha256:${"a".repeat(64)}`);
   assert.deepEqual(config.services.tunnel.command.slice(-2), ["--token-file", "/run/secrets/tunnel-token"]);
