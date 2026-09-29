@@ -9,6 +9,7 @@ jobs:
   main-claims:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
+    environment: prod
     timeout-minutes: 5
     permissions:
       id-token: write
