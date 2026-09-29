@@ -40,6 +40,7 @@ try {
   assert.equal(config.services.tunnel.user, "1000:1000");
   assert.equal(config.services.cms.image,
     `ghcr.io/lucasr-o/portfolio-blog-cms@sha256:${"a".repeat(64)}`);
+  assert.equal(config.services.cms.environment.CMS_HOSTNAME, "4fa8522f3d6b.lucas-reis.com");
   assert.deepEqual(config.services.tunnel.command.slice(-2), ["--token-file", "/run/secrets/tunnel-token"]);
   assert.equal(config.services.tunnel.volumes.every((volume) => volume.read_only), true);
   assert.equal(config.services.proxy.volumes.every((volume) => volume.read_only), true);

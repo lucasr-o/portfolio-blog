@@ -10,6 +10,7 @@ services:
       NEXT_PUBLIC_CMS_STORAGE: github
       HOSTNAME: 0.0.0.0
       PORT: "3000"
+      CMS_HOSTNAME: ${CMS_HOSTNAME:?Set the dedicated hexadecimal CMS hostname}
     read_only: true
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=32m

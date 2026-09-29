@@ -1,6 +1,7 @@
 import path from "node:path";
 import { makeRouteHandler } from "@keystatic/next/route-handler";
 import config from "../../../../keystatic.config";
+import { withPublicCmsOrigin } from "../../../../lib/public-origin";
 
 // Instantiate at request time: production secrets must never be needed at build time.
 function handlers() {
@@ -12,5 +13,5 @@ function handlers() {
   });
 }
 
-export function GET(request) { return handlers().GET(request); }
-export function POST(request) { return handlers().POST(request); }
+export function GET(request) { return handlers().GET(withPublicCmsOrigin(request)); }
+export function POST(request) { return handlers().POST(withPublicCmsOrigin(request)); }
