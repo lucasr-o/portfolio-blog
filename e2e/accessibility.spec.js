@@ -5,6 +5,7 @@ const routes = [
   "/",
   "/blog/",
   "/blog/security-reviews-that-move-at-product-speed/",
+  "/no-such-page/",
 ];
 
 for (const route of routes) {

@@ -44,6 +44,26 @@ test("brand returns from the blog to the beginning of the home page", async ({ p
   await expect(page.getByRole("heading", { name: "Security that moves with the product." })).toBeInViewport();
 });
 
+test("offers a readable recovery path for an unknown page", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "dark" });
+  const response = await page.goto("/no-such-page/");
+
+  expect(response.status()).toBe(404);
+  await expect(page.getByRole("heading", { level: 1, name: "We couldn’t find that page." })).toBeVisible();
+  await expect(page.locator("main h1")).toHaveCSS("color", "rgb(17, 17, 15)");
+  await expect(page.getByRole("link", { name: "Back to home" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Browse the blog" })).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+
+  await page.setViewportSize({ width: 320, height: 760 });
+  await expectNoHorizontalOverflow(page);
+  await page.locator("footer").scrollIntoViewIfNeeded();
+  await expect(page.locator("footer")).toBeVisible();
+
+  await page.getByRole("link", { name: "Back to home" }).click();
+  await expect(page).toHaveURL(/\/$/);
+});
+
 for (const viewport of [
   { label: "320px", width: 320, height: 760 },
   { label: "200% reflow equivalent", width: 640, height: 900 },
