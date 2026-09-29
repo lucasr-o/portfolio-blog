@@ -11,7 +11,7 @@ import { PROXY_IMAGE, renderProxyConfig } from "../ops/cms/proxy.mjs";
 // Only disposable, uniquely named local resources; never contact the Pi.
 const project = `portfolio-blog-proxy-test-${randomBytes(6).toString("hex")}`;
 const directory = await mkdtemp(join(tmpdir(), `${project}-`));
-const hostname = "0123456789abcdef.lucas-reis.com";
+const hostname = "4fa8522f3d6b.lucas-reis.com";
 const password = randomBytes(32).toString("hex");
 const containers = [];
 let networkCreated = false;
@@ -43,6 +43,7 @@ function start(name, config, options = []) {
 try {
   // Hostname is validated before any generated configuration is used.
   await assert.rejects(() => renderProxyConfig("example.com; include /etc/passwd;"));
+  await assert.rejects(() => renderProxyConfig("4fa8522f3d6.lucas-reis.com"));
   const proxy = await configFile("nginx.conf", await renderProxyConfig(hostname));
   const hash = command("htpasswd", ["-niB", "editor"], { input: `${password}\n` });
   const credentials = await configFile("cms.htpasswd", `${hash}\n`);

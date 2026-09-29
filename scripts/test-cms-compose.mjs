@@ -11,12 +11,12 @@ try {
   await mkdir(join(testRoot, "generated"));
   await copyFile(new URL("../ops/cms/compose.yml", import.meta.url), join(testRoot, "compose.yml"));
   await writeFile(join(testRoot, ".env"),
-    `CMS_IMAGE=ghcr.io/lucasr-o/portfolio-blog-cms@sha256:${"a".repeat(64)}\nCMS_HOSTNAME=0123456789abcdef.lucas-reis.com\n`);
+    `CMS_IMAGE=ghcr.io/lucasr-o/portfolio-blog-cms@sha256:${"a".repeat(64)}\nCMS_HOSTNAME=4fa8522f3d6b.lucas-reis.com\n`);
   await writeFile(join(testRoot, "secrets/cms.env"),
     "KEYSTATIC_GITHUB_CLIENT_ID=test-public-id\nKEYSTATIC_GITHUB_CLIENT_SECRET=test-only\nKEYSTATIC_SECRET=test-only\n");
   await writeFile(join(testRoot, "secrets/cms.htpasswd"), "editor:test-only\n");
   await writeFile(join(testRoot, "secrets/tunnel-token"), "test-only\n");
-  await writeFile(join(testRoot, "generated/nginx.conf"), await renderProxyConfig("0123456789abcdef.lucas-reis.com"));
+  await writeFile(join(testRoot, "generated/nginx.conf"), await renderProxyConfig("4fa8522f3d6b.lucas-reis.com"));
   const result = spawnSync("docker", ["compose", "--project-directory", testRoot,
     "-f", join(testRoot, "compose.yml"), "config", "--format", "json"], {
     cwd: testRoot, encoding: "utf8", timeout: 30_000,
