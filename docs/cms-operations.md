@@ -1,6 +1,6 @@
 # Operar o CMS no Raspberry Pi
 
-Este roteiro ainda **não foi executado no Pi**. Lucas informou o Tunnel dedicado `LUCAS-REIS-PORTFOLIO-BLOG-CMS` e o hostname `4fa8522f3d6b.lucas-reis.com`; a rota `http://cms-proxy:8080` foi configurada no painel, mas o conector não foi instalado. O token original compartilhado em chat foi revogado por Lucas; um token novo, nunca enviado por chat, será necessário para iniciar o conector. Use somente `/home/rp4/portfolio-blog-cms` e o projeto Docker Compose `portfolio-blog-cms`; não pare, recrie, conecte ou altere os containers, redes e Tunnel do Overleaf. O site público não depende da disponibilidade do Pi depois de publicado.
+Este roteiro foi executado parcialmente no Pi em 2026-09-29: o checkout dedicado, os três containers e o Tunnel estão ativos, e o hostname externo exige HTTP Basic Auth. O callback de produção no GitHub App e o fluxo completo de edição ainda precisam ser validados. Lucas configurou o Tunnel dedicado `LUCAS-REIS-PORTFOLIO-BLOG-CMS`, o hostname `4fa8522f3d6b.lucas-reis.com` e a rota `http://cms-proxy:8080`. O token original compartilhado em chat foi revogado; o substituto permanece somente no arquivo privado do Pi. Use somente `/home/rp4/portfolio-blog-cms` e o projeto Docker Compose `portfolio-blog-cms`; não pare, recrie, conecte ou altere os containers, redes e Tunnel do Overleaf. O site público não depende da disponibilidade do Pi depois de publicado.
 
 ## Pré-requisitos e registro antes de mudar algo
 
@@ -25,7 +25,7 @@ O Pi não tem `htpasswd`; evite instalar pacote no host só para isso. Na estaç
 
 No painel Cloudflare, confirme o Tunnel dedicado `LUCAS-REIS-PORTFOLIO-BLOG-CMS` e a rota publicada **somente** de `4fa8522f3d6b.lucas-reis.com` para `http://cms-proxy:8080`. Esse nome resolve dentro da rede Compose privada; não exponha porta no Pi nem associe o Tunnel do Overleaf. **O token originalmente compartilhado foi revogado; gere/obtenha um token novo antes de iniciar o conector.** Guarde-o somente em `ops/cms/secrets/tunnel-token`, modo `0600`, sem linha de comando, Git ou saída de logs; não execute `sudo cloudflared service install`, pois o Compose já tem o serviço `tunnel`. O container roda como UID/GID `1000:1000` do dono do arquivo, mantendo o token inacessível aos demais usuários do host. [Tokens do Tunnel](https://developers.cloudflare.com/tunnel/reference/tunnel-tokens/).
 
-No GitHub App, adicione a URL de callback HTTPS de produção que o Keystatic solicita durante **Log in with GitHub**. Mantenha o callback local usado no desenvolvimento. Confirme que o hostname e o protocolo no `redirect_uri` exibido são exatamente os aprovados; não habilite callback genérico ou wildcard. O painel final só deve ser acessado pelo hostname do Tunnel.
+No GitHub App, adicione `https://4fa8522f3d6b.lucas-reis.com/api/keystatic/github/oauth/callback` como URL de callback HTTPS de produção. Mantenha o callback local usado no desenvolvimento. Confirme que o hostname e o protocolo no `redirect_uri` exibido durante **Log in with GitHub** são exatamente os aprovados; não habilite callback genérico ou wildcard. O painel final só deve ser acessado pelo hostname do Tunnel.
 
 ## Subir e validar
 

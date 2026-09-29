@@ -60,7 +60,7 @@ A implementação está em andamento; evidências estão em `implementation-log.
 
 ## 8. Ativar o painel e fazer o corte controlado
 
-- [ ] 8.1 Revalidar memória/disco e registrar estado dos serviços existentes no Pi; criar somente diretório/rede/serviços dedicados, Tunnel novo, hostname hexadecimal e credenciais do CMS, verificando que o Overleaf mantém configuração e saúde.
+- [x] 8.1 Revalidar memória/disco e registrar estado dos serviços existentes no Pi; criar somente diretório/rede/serviços dedicados, Tunnel novo, hostname hexadecimal e credenciais do CMS, verificando que o Overleaf mantém configuração e saúde.
 - [ ] 8.2 Validar no hostname final o fluxo HTTP Auth → GitHub → Markdown → save → preview → publicação, incluindo upload e erro de autenticação; registrar commit e versão de painel, sem compartilhar tokens em evidências.
 - [ ] 8.3 Registrar DNS anterior e trocar somente o apex para CloudFront em DNS-only; verificar HTTPS, F5, navegação, assets, SEO, 404 e preservação de email/Overleaf conforme a matriz do guia.
 - [ ] 8.4 Ensaiar publicação agendada, despublicação e rollback de release, além da independência do site em relação ao CMS; verificar coleção/sitemap/cache coerentes e os resultados dos smoke tests após recuperação.
