@@ -71,4 +71,19 @@ describe("saved GitHub previews", () => {
     await expect(readPreviewImage(snapshot, "saved-draft", `${"0".repeat(64)}.png`)).rejects.toMatchObject({ status: 404 });
     await expect(readPreviewImage(snapshot, "saved-draft", "../secret")).rejects.toMatchObject({ status: 400 });
   });
+  it("previews partial Portuguese Markdown from the same saved revision without approving it", async () => {
+    const bytes = await readFile(new URL("../content/media/markdown-demo/ufabc.png", import.meta.url));
+    const image = { src: "/media/example.png", alt: "English alt" };
+    const post = validatePost({
+      title: "English article", summary: "English summary", body: "English body", status: "published",
+      publishedAt: "2026-09-18T12:00:00Z", images: [image],
+      pt: { publish: false, title: "Artigo em português", body: `![Emblema](${image.src})\n\n## Seção` },
+    }, "saved-draft");
+    const preview = await preparePreview({ revision, readPost: async () => post, readImage: async () => bytes }, "saved-draft");
+    expect(preview.revision).toBe(revision);
+    expect(preview.ptPost).toMatchObject({ title: "Artigo em português", locale: "pt-BR" });
+    expect(preview.ptIssues.map(({ path }) => path)).toContain("content/posts/saved-draft.yaml:pt.summary");
+    expect(preview.media[image.src].url).toContain(`/preview/media/${revision}/saved-draft/`);
+    expect(preview.issues).toEqual([]);
+  });
 });

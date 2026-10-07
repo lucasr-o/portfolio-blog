@@ -48,6 +48,7 @@ jobs:
       - run: pnpm audit:bundle
       - run: pnpm exec playwright install --with-deps chrome
       - run: CI=1 pnpm test:e2e
+      - run: CI=1 pnpm test:bilingual:e2e
       - run: CI=1 pnpm test:cms
       - run: pnpm test:cms:production
       - run: pnpm lighthouse

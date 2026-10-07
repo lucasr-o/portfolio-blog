@@ -8,6 +8,7 @@
     "./model": "./model.js",
     "./reader": "./reader.js",
     "./media": "./media.js",
+    "./locale": "./locale.js",
     "./publication": "./publication.js"
   },
   "dependencies": {

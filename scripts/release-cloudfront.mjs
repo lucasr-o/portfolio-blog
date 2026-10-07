@@ -50,6 +50,9 @@ export function createReleaseRuntime({ distributionId, domain, token }) {
       if (!asset) throw new Error("Release has no testable asset");
       const paths = ["/", "/blog/", `/${asset.path}`,
         ...manifest.posts.slice(0, 1).map((slug) => `/blog/${slug}/`)];
+      if (manifest.files.some((file) => file.path === "pt/blog/index.html")) {
+        paths.push("/pt/blog/", ...(manifest.portuguesePosts ?? []).slice(0, 1).map((slug) => `/pt/blog/${slug}/`));
+      }
       for (const uri of paths) {
         const response = await fetch(`https://${domain}${uri}`, {
           redirect: "manual", signal: AbortSignal.timeout(15_000),

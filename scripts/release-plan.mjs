@@ -73,7 +73,7 @@ async function listFiles(directory, prefix = "") {
 }
 
 export async function buildReleaseManifest({ exportDirectory, sourceRevision, publicationTime,
-  releaseId, posts }) {
+  releaseId, posts, portuguesePosts = [] }) {
   if (!SHA.test(sourceRevision ?? "")) throw new Error("Invalid source revision");
   validateReleaseId(releaseId);
   if (!Number.isFinite(Date.parse(publicationTime)) || new Date(publicationTime).toISOString() !== publicationTime) {
@@ -82,9 +82,15 @@ export async function buildReleaseManifest({ exportDirectory, sourceRevision, pu
   if (!Array.isArray(posts) || posts.some((slug) => !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug))) {
     throw new Error("Invalid published post list");
   }
+  if (!Array.isArray(portuguesePosts) || portuguesePosts.some((slug) => !posts.includes(slug))) {
+    throw new Error("Invalid Portuguese post list");
+  }
   const relativeFiles = await listFiles(exportDirectory);
   if (!relativeFiles.includes("index.html") || !relativeFiles.includes("404.html")) {
     throw new Error("Incomplete export: home or 404 missing");
+  }
+  for (const slug of portuguesePosts) {
+    if (!relativeFiles.includes(`pt/blog/${slug}/index.html`)) throw new Error(`Missing Portuguese article: ${slug}`);
   }
   const files = [];
   for (const relative of relativeFiles) {
@@ -98,7 +104,7 @@ export async function buildReleaseManifest({ exportDirectory, sourceRevision, pu
     left.path.localeCompare(right.path, "en"));
   return {
     schema: 1, releaseId, sourceRevision, publicationTime,
-    posts: [...posts].sort(), files,
+    posts: [...posts].sort(), portuguesePosts: [...portuguesePosts].sort(), files,
     mutableKeys: files.filter((file) => !file.immutable).map((file) => file.key).sort(),
   };
 }
@@ -110,6 +116,10 @@ export function assertReleaseManifest(manifest) {
     throw new Error("Invalid release manifest");
   }
   validateReleaseId(manifest.releaseId);
+  if (!Array.isArray(manifest.posts) || manifest.posts.some((slug) => !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) ||
+      (manifest.portuguesePosts !== undefined && (!Array.isArray(manifest.portuguesePosts) || manifest.portuguesePosts.some((slug) => !manifest.posts.includes(slug))))) {
+    throw new Error("Invalid release article lists");
+  }
   const keys = new Set();
   for (const file of manifest.files) {
     const metadata = classifySiteFile(file.path);

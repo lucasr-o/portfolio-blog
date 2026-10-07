@@ -25,8 +25,11 @@ if (result.status !== 0) process.exit(result.status ?? 1);
 if (publication.posts.length === 0) {
   await rm(path.join(root, "out/blog/__empty__"), { recursive: true, force: true });
 }
+if (publication.ptPosts.length === 0) {
+  await rm(path.join(root, "out/pt/blog/__empty__"), { recursive: true, force: true });
+}
 if (Object.keys(publication.media).length === 0) {
   await rm(path.join(root, "out/media/posts/__empty__"), { recursive: true, force: true });
 }
 await auditPublication({ root, contentRoot, publication });
-console.info(`Published snapshot: ${publication.posts.length} articles at ${publication.publicationTime}`);
+console.info(`Published snapshot: ${publication.posts.length} English articles, ${publication.ptPosts.length} Portuguese versions at ${publication.publicationTime}`);

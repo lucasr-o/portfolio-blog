@@ -22,6 +22,8 @@ describe("scheduled release preflight", () => {
       eligibleSlugs: ["ready"], current })).toBe(true);
     expect(shouldDeploy({ eventName: "schedule", sourceRevision: sha,
       eligibleSlugs: ["ready"], current: null })).toBe(true);
+    expect(shouldDeploy({ eventName: "schedule", sourceRevision: sha,
+      eligibleSlugs: ["ready"], eligiblePortugueseSlugs: ["ready"], current })).toBe(true);
   });
   it("does not treat invalid state or an unsupported event as no change", () => {
     expect(() => shouldDeploy({ eventName: "schedule", sourceRevision: sha,

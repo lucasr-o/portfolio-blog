@@ -2,6 +2,7 @@ import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
+import { blogCopy } from "@portfolio/blog-content/locale";
 import styles from "./article.module.css";
 
 export function safeLink(value) {
@@ -12,7 +13,8 @@ export function safeLink(value) {
   return "";
 }
 
-export default function Markdown({ body, media = {} }) {
+export default function Markdown({ body, media = {}, locale = "en" }) {
+  const copy = blogCopy(locale);
   return <div className={styles.body}>
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
@@ -22,7 +24,7 @@ export default function Markdown({ body, media = {} }) {
       components={{
         h1: ({ children }) => <h2>{children}</h2>,
         a: ({ href, children }) => href ? <a href={href}>{children}</a> : <span>{children}</span>,
-        table: ({ children }) => <div className={styles.tableScroll} role="region" aria-label="Article table" tabIndex={0}><table>{children}</table></div>,
+        table: ({ children }) => <div className={styles.tableScroll} role="region" aria-label={copy.articleTable} tabIndex={0}><table>{children}</table></div>,
         img: ({ src, alt }) => {
           const image = media[src];
           if (!image) return null;

@@ -1,5 +1,5 @@
 .article { width: min(calc(100% - 2rem), 48rem); margin-inline: auto; padding-block: var(--space-7) var(--space-9); overflow-wrap: anywhere; }
-.back { display: flex; margin-bottom: var(--space-7); font-weight: 700; }
+.back { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4); margin-bottom: var(--space-7); font-weight: 700; }
 .header { padding-bottom: var(--space-7); border-bottom: 1px solid var(--color-border); }
 .header h1 { margin-bottom: var(--space-5); font-size: clamp(2.5rem, 7vw, 5rem); }
 .summary { color: var(--color-text-muted); font-size: clamp(1.05rem, 2vw, 1.3rem); }

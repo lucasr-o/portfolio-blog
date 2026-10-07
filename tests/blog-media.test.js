@@ -2,6 +2,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createMediaManifest, inspectImage, referencedImages } from "@portfolio/blog-content/media";
 import { mediaRepositoryPath, validatePost, selectPublishedPosts, MAX_IMAGE_BYTES } from "@portfolio/blog-content/model";
+import { selectPortuguesePosts } from "@portfolio/blog-content/locale";
 import { readFile } from "node:fs/promises";
 
 const image = { src: "/media/example/photo.png", alt: "A university emblem" };
@@ -43,5 +44,26 @@ describe("editorial media", () => {
     expect(Object.keys(manifest)).toEqual([image.src]);
     expect(read).toHaveBeenCalledExactlyOnceWith("content/media/example/photo.png");
     expect(await createMediaManifest([article({ body: "No images." })], read)).toEqual({});
+  });
+  it("includes Portuguese-only images only when their translation is approved", async () => {
+    const portugueseImage = { src: "/media/example/pt.png", alt: "Imagem compartilhada" };
+    const base = {
+      body: "English text without an image.", images: [portugueseImage],
+      pt: { publish: false, title: "Título", summary: "Resumo", body: `![Imagem em português](${portugueseImage.src})` },
+    };
+    const reader = vi.fn(png);
+    const unpublished = selectPublishedPosts([article(base)], "2026-09-27T00:00:00Z");
+    expect(await createMediaManifest([...unpublished, ...selectPortuguesePosts(unpublished)], reader)).toEqual({});
+    const published = selectPublishedPosts([article({ ...base, pt: { ...base.pt, publish: true } })], "2026-09-27T00:00:00Z");
+    const manifest = await createMediaManifest([...published, ...selectPortuguesePosts(published)], reader);
+    expect(Object.keys(manifest)).toEqual([portugueseImage.src]);
+    expect(reader).toHaveBeenCalledExactlyOnceWith("content/media/example/pt.png");
+    expect(() => referencedImages(selectPortuguesePosts([article({ ...base, pt: { ...base.pt, publish: true, body: `![](${portugueseImage.src})` } })])[0])).toThrow(/pt.body.image/);
+  });
+  it("uses Portuguese cover alternative text in the translated article", () => {
+    const cover = { src: image.src, alt: "English cover description" };
+    const [pt] = selectPortuguesePosts([article({ body: "English text", cover, pt: { publish: true, title: "Título", summary: "Resumo", body: "Texto", coverAlt: "Descrição da capa" } })]);
+    expect(pt.cover.alt).toBe("Descrição da capa");
+    expect(referencedImages(pt)).toEqual([{ src: image.src, alt: "Descrição da capa" }]);
   });
 });

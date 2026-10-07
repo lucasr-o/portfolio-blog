@@ -18,3 +18,5 @@
 .panel li + li { margin-top: .5rem; }
 .reference { display: block; margin-top: 1rem; }
 .reference textarea { display: block; width: 100%; padding: .6rem; font-family: var(--font-mono); font-size: .85rem; resize: vertical; }
+.languages { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
+.languages a[aria-current="page"] { color: var(--color-text); font-weight: 700; text-decoration-thickness: 2px; }

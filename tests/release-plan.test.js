@@ -54,4 +54,17 @@ describe("release plan", () => {
         publicationTime: "2026-09-28T00:00:00.000Z", releaseId, posts: [] })).rejects.toThrow("Symlink");
     });
   });
+  it("tracks Portuguese routes without breaking older release manifests", async () => fixture(async (root) => {
+    await mkdir(join(root, "pt/blog/example"), { recursive: true });
+    await writeFile(join(root, "pt/blog/index.html"), "Portuguese index");
+    await writeFile(join(root, "pt/blog/example/index.html"), "Portuguese article");
+    const manifest = await buildReleaseManifest({ exportDirectory: root, sourceRevision: sha,
+      publicationTime: "2026-09-28T00:00:00.000Z", releaseId, posts: ["example"], portuguesePosts: ["example"] });
+    expect(manifest.portuguesePosts).toEqual(["example"]);
+    expect(assertReleaseManifest(manifest)).toBe(manifest);
+    expect(assertReleaseManifest({ ...manifest, portuguesePosts: undefined })).toBeTruthy();
+    expect(() => assertReleaseManifest({ ...manifest, portuguesePosts: ["missing"] })).toThrow(/article lists/);
+    await expect(buildReleaseManifest({ exportDirectory: root, sourceRevision: sha,
+      publicationTime: "2026-09-28T00:00:00.000Z", releaseId, posts: ["example"], portuguesePosts: ["missing"] })).rejects.toThrow(/Portuguese post list/);
+  }));
 });

@@ -24,6 +24,7 @@
     "test:all": "pnpm lint && pnpm test && pnpm build && pnpm audit:bundle && pnpm test:e2e",
     "audit:bundle": "node scripts/audit-bundle.mjs",
     "test:publication": "node scripts/test-publication-export.mjs",
+    "test:bilingual:e2e": "node scripts/test-bilingual-browser.mjs",
     "lighthouse": "node scripts/run-lighthouse.mjs"
   },
   "dependencies": {

@@ -1,8 +1,9 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import HomePage from "@/app/page";
-import BlogPage from "@/app/blog/page";
-import PostPage from "@/app/blog/[slug]/page";
+import HomePage from "@/app/(en)/page";
+import BlogPage from "@/app/(en)/blog/page";
+import PortugueseBlogPage from "@/app/(pt)/pt/blog/page";
+import PostPage from "@/app/(en)/blog/[slug]/page";
 import { getPublicContent } from "@/lib/public-content";
 const { posts: [latestPost] } = await getPublicContent();
 
@@ -33,6 +34,14 @@ describe("public routes", () => {
     expect(screen.getByRole("heading", { level: 2, name: "Latest notes" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 3, name: latestPost.title })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: latestPost.title })).toHaveAttribute("href", `/blog/${latestPost.slug}`);
+    expect(screen.getByRole("navigation", { name: "Blog language" }).getAttribute("aria-label")).toBe("Blog language");
+  });
+
+  it("renders the Portuguese index without English-only article cards", async () => {
+    render(await PortugueseBlogPage());
+    expect(screen.getByRole("heading", { level: 1, name: "Notas sobre segurança de aplicações." })).toBeInTheDocument();
+    expect(screen.getByText("Ainda não há artigos em português. Novas notas aparecerão aqui.")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: latestPost.title })).not.toBeInTheDocument();
   });
 
   it("renders the placeholder article metadata, structure, and return path", async () => {

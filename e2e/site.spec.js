@@ -44,6 +44,26 @@ test("brand returns from the blog to the beginning of the home page", async ({ p
   await expect(page.getByRole("heading", { name: "Security that moves with the product." })).toBeInViewport();
 });
 
+test("switches between the English index and an empty Portuguese index without a broken article link", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 760 });
+  await page.goto("/blog/");
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  const englishSwitch = page.getByRole("navigation", { name: "Blog language" });
+  await expect(englishSwitch.getByRole("link", { name: "EN" })).toHaveAttribute("aria-current", "page");
+  await englishSwitch.getByRole("link", { name: "PT" }).click();
+  await expect(page).toHaveURL(/\/pt\/blog\/$/);
+  await expect(page.locator("html")).toHaveAttribute("lang", "pt-BR");
+  await expect(page.getByRole("heading", { level: 1, name: "Notas sobre segurança de aplicações." })).toBeVisible();
+  await expect(page.getByText("Ainda não há artigos em português.", { exact: false })).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+  const portugueseSwitch = page.getByRole("navigation", { name: "Idioma do blog" });
+  await expect(portugueseSwitch.getByRole("link", { name: "PT" })).toHaveAttribute("aria-current", "page");
+  await portugueseSwitch.getByRole("link", { name: "EN" }).click();
+  await expect(page).toHaveURL(/\/blog\/$/);
+  await page.goto(postPath);
+  await expect(page.getByRole("navigation", { name: "Article language" })).toHaveCount(0);
+});
+
 test("offers a readable recovery path for an unknown page", async ({ page }) => {
   await page.emulateMedia({ colorScheme: "dark" });
   const response = await page.goto("/no-such-page/");

@@ -25,6 +25,8 @@
   font-size: clamp(1rem, 1.8vw, 1.18rem);
 }
 
+.header nav { margin-top: var(--space-5); }
+
 .archive {
   border-bottom: 1px solid var(--color-border);
 }

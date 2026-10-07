@@ -12,6 +12,11 @@ const expectedRoutes = [
     canonical: "https://lucas-reis.com/blog/",
   },
   {
+    path: "/pt/blog/",
+    title: "Blog em português | Lucas Reis",
+    canonical: "https://lucas-reis.com/pt/blog/",
+  },
+  {
     path: "/blog/security-reviews-that-move-at-product-speed/",
     title: "Security reviews that move at product speed | Lucas Reis",
     canonical: "https://lucas-reis.com/blog/security-reviews-that-move-at-product-speed/",
@@ -50,7 +55,7 @@ test("structured data matches visible person and article records", async ({ page
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(article.headline);
 });
 
-test("robots and sitemap expose the three canonical public routes", async ({ request }) => {
+test("robots and sitemap expose only eligible canonical public routes", async ({ request }) => {
   const robots = await request.get("/robots.txt");
   expect(robots.ok()).toBeTruthy();
   expect(await robots.text()).toContain("Sitemap: https://lucas-reis.com/sitemap.xml");
@@ -59,7 +64,20 @@ test("robots and sitemap expose the three canonical public routes", async ({ req
   expect(sitemap.ok()).toBeTruthy();
   const xml = await sitemap.text();
   for (const route of expectedRoutes) expect(xml).toContain(route.canonical);
-  expect((xml.match(/<url>/g) ?? [])).toHaveLength(3);
+  expect((xml.match(/<url>/g) ?? [])).toHaveLength(4);
+  expect(xml).not.toContain("/pt/blog/security-reviews-that-move-at-product-speed/");
+});
+
+test("indexes are reciprocal language alternates while English-only articles are not", async ({ page }) => {
+  for (const path of ["/blog/", "/pt/blog/"]) {
+    await page.goto(path);
+    await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute("href", "https://lucas-reis.com/blog/");
+    await expect(page.locator('link[rel="alternate"][hreflang="pt-BR"]')).toHaveAttribute("href", "https://lucas-reis.com/pt/blog/");
+  }
+  await page.goto("/blog/security-reviews-that-move-at-product-speed/");
+  await expect(page.locator('link[rel="alternate"][hreflang="pt-BR"]')).toHaveCount(0);
+  const article = await page.locator('script[type="application/ld+json"]').evaluate((element) => JSON.parse(element.textContent));
+  expect(article.inLanguage).toBe("en");
 });
 
 test("uses the Lucas Reis mark as the site icon", async ({ page, request }) => {

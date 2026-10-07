@@ -8,7 +8,7 @@ import SiteHeader from "@/components/SiteHeader";
 import { getPublicContent } from "@/lib/public-content";
 import { credentials, education, experience, profile, site, terminalSteps } from "@/data/profile";
 import { createPersonSchema } from "@/lib/structured-data";
-import styles from "./home.module.css";
+import styles from "@/app/home.module.css";
 
 export const metadata = {
   title: "Lucas Reis — Application Security Engineer",

@@ -8,6 +8,7 @@ const baseUrl = "http://127.0.0.1:4173";
 const routes = [
   ["home", "/"],
   ["blog", "/blog/"],
+  ["pt-blog", "/pt/blog/"],
   ["post", "/blog/security-reviews-that-move-at-product-speed/"],
 ];
 const outputDirectory = path.join(root, ".lighthouse");

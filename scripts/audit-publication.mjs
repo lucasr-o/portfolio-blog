@@ -6,7 +6,9 @@ export async function auditPublication({ root, contentRoot = root, publication }
   const output = path.join(root, "out");
   const allPosts = await readPosts(contentRoot);
   const allowed = new Set(publication.posts.map((post) => post.slug));
+  const allowedPortuguese = new Set(publication.ptPosts.map((post) => post.slug));
   const excluded = allPosts.filter((post) => !allowed.has(post.slug));
+  const excludedPortuguese = allPosts.filter((post) => !allowedPortuguese.has(post.slug));
   const allowedMedia = new Set(Object.values(publication.media).map((image) => image.url.slice(1)));
   const forbidden = ["@keystatic/", "KEYSTATIC_GITHUB_CLIENT_SECRET", "KEYSTATIC_SECRET", "CLOUDFLARE_TUNNEL_TOKEN", "keystatic-gh-access-token", "https://lucas-reis.dev"];
   for (const key of ["KEYSTATIC_SECRET", "KEYSTATIC_GITHUB_CLIENT_SECRET", "CLOUDFLARE_TUNNEL_TOKEN", "AWS_SECRET_ACCESS_KEY"]) {
@@ -23,6 +25,9 @@ export async function auditPublication({ root, contentRoot = root, publication }
     for (const post of excluded) {
       if (relative.startsWith(`blog/${post.slug}/`) || relative === `blog/${post.slug}.html`) throw new Error(`Excluded article route: ${relative}`);
     }
+    for (const post of excludedPortuguese) {
+      if (relative.startsWith(`pt/blog/${post.slug}/`) || relative === `pt/blog/${post.slug}.html`) throw new Error(`Excluded Portuguese article route: ${relative}`);
+    }
     if (!/\.(?:html|txt|js|json|xml|css)$/.test(relative)) continue;
     const text = await readFile(file, "utf8");
     for (const marker of forbidden) if (text.includes(marker)) throw new Error(`Forbidden CMS/secret/canonical marker in ${relative}`);
@@ -33,9 +38,16 @@ export async function auditPublication({ root, contentRoot = root, publication }
         if (text.includes(piece) || text.includes(JSON.stringify(piece).slice(1, -1))) throw new Error(`Excluded article body in ${relative}: ${post.slug}`);
       }
     }
+    for (const post of excludedPortuguese) {
+      const pieces = [post.pt?.title, post.pt?.summary, post.pt?.body, ...(post.pt?.body ?? "").split(/\n\s*\n/)].filter((piece) => typeof piece === "string" && piece.length >= 40);
+      for (const piece of pieces) {
+        if (text.includes(piece) || text.includes(JSON.stringify(piece).slice(1, -1))) throw new Error(`Excluded Portuguese article content in ${relative}: ${post.slug}`);
+      }
+    }
   }
   for (const media of allowedMedia) await stat(path.join(output, media));
   const sitemap = await readFile(path.join(output, "sitemap.xml"), "utf8");
   for (const post of excluded) if (sitemap.includes(`/blog/${post.slug}/`)) throw new Error(`Excluded article in sitemap: ${post.slug}`);
-  console.info(`Publication audit: ${allowed.size} eligible articles; ${excluded.length} excluded; ${allowedMedia.size} images.`);
+  for (const post of excludedPortuguese) if (sitemap.includes(`/pt/blog/${post.slug}/`)) throw new Error(`Excluded Portuguese article in sitemap: ${post.slug}`);
+  console.info(`Publication audit: ${allowed.size} English and ${allowedPortuguese.size} Portuguese articles; ${excluded.length} excluded parents; ${allowedMedia.size} images.`);
 }

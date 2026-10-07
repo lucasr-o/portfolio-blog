@@ -5,7 +5,7 @@ export const DEFAULT_AUTHOR = "Lucas Reis de Oliveira da Silva";
 export const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const statuses = new Set(["draft", "published", "scheduled"]);
-const knownFields = new Set(["slug", "title", "summary", "author", "status", "publishedAt", "updatedAt", "tags", "body", "cover", "images", "isPlaceholder"]);
+const knownFields = new Set(["slug", "title", "summary", "author", "status", "publishedAt", "updatedAt", "tags", "body", "cover", "images", "isPlaceholder", "pt"]);
 
 export class ContentError extends Error {
   constructor(issues) {
@@ -77,6 +77,24 @@ export function validatePost(raw, slug, source = `content/posts/${slug}.yaml`) {
   else post.images = (raw.images ?? []).map((value, index) => media(value, `images[${index}]`)).filter(Boolean);
   const refs = post.images.map((image) => image.src);
   if (new Set(refs).size !== refs.length) issue("images", "Image references must be unique.");
+  if (raw.pt !== undefined && raw.pt !== null) {
+    if (typeof raw.pt !== "object" || Array.isArray(raw.pt)) issue("pt", "Expected Portuguese translation fields.");
+    else {
+      const allowed = new Set(["publish", "title", "summary", "body", "tags", "coverAlt"]);
+      for (const field of Object.keys(raw.pt)) if (!allowed.has(field)) issue(`pt.${field}`, "Unknown translation field.");
+      const pt = { publish: raw.pt.publish ?? false };
+      if (typeof pt.publish !== "boolean") issue("pt.publish", "Expected true or false.");
+      for (const field of ["title", "summary", "body", "coverAlt"]) {
+        pt[field] = raw.pt[field] ?? "";
+        if (typeof pt[field] !== "string") issue(`pt.${field}`, "Expected text.");
+        else if (pt.publish && field !== "coverAlt" && !pt[field].trim()) issue(`pt.${field}`, "Required to publish the Portuguese version.");
+      }
+      pt.tags = raw.pt.tags ?? [];
+      if (!Array.isArray(pt.tags) || pt.tags.some((tag) => typeof tag !== "string" || !tag.trim() || tag.length > 60)) issue("pt.tags", "Expected a list of non-empty texts, each at most 60 characters.");
+      if (pt.publish && post.cover && !pt.coverAlt?.trim()) issue("pt.coverAlt", "Provide Portuguese alternative text for the shared cover.");
+      post.pt = pt;
+    }
+  }
   if (issues.length) throw new ContentError(issues);
   return { ...post, readingTime: readingTime(post.body) };
 }

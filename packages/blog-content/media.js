@@ -20,7 +20,7 @@ export function referencedImages(post) {
   });
   const declared = new Map([...(post.cover ? [post.cover] : []), ...post.images].map((image) => [image.src, image]));
   for (const reference of refs) {
-    const field = `${post.slug}:body.image`;
+    const field = `${post.slug}:${post.locale === "pt-BR" ? "pt.body" : "body"}.image`;
     try { mediaRepositoryPath(reference.src); } catch (error) { throw new ContentError([{ path: field, message: error.message }]); }
     if (!reference.alt?.trim()) throw new ContentError([{ path: field, message: `Add descriptive alt text for ${reference.src}.` }]);
     if (!declared.has(reference.src)) throw new ContentError([{ path: field, message: `Add ${reference.src} to the Images field before using it in Markdown.` }]);

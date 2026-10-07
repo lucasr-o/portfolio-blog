@@ -8,11 +8,16 @@ test("saves and reopens raw Markdown as an incomplete draft", async ({ page }) =
   await page.getByLabel("Title", { exact: true }).fill("Markdown round trip");
   const markdown = '# Source heading\n\nA [link](https://example.com).\n\n| A | B |\n| --- | --- |\n| 1 | 2 |\n\n```js\n  const greeting = "hello";\n```\n\nHard break.  \nNext line.\n';
   await page.getByLabel("Markdown", { exact: true }).fill(markdown);
+  const portuguese = "# Revisão de segurança\n\nTexto inicial.\n\n```sh\nnmap -sV example.com\n```\n";
+  await page.getByLabel("Portuguese title", { exact: true }).fill("Revisão de segurança");
+  await page.getByLabel("Portuguese Markdown", { exact: true }).fill(portuguese);
   await expect(page.getByLabel("Markdown", { exact: true })).toHaveValue(markdown);
   await page.getByRole("button", { name: "Create", exact: true }).click();
   await expect(page).toHaveURL(/\/item\/markdown-round-trip/, { timeout: 20_000 });
   await page.reload();
   await expect(page.getByLabel("Markdown", { exact: true })).toHaveValue(markdown);
+  await expect(page.getByLabel("Portuguese Markdown", { exact: true })).toHaveValue(portuguese);
+  await expect(page.getByLabel("Portuguese title", { exact: true })).toHaveValue("Revisão de segurança");
   await expect(page.getByLabel("Summary", { exact: true })).toHaveValue("");
   await expect(page.getByRole("button", { name: /Draft — not on the website/ })).toBeVisible();
   await expect(page.getByText(/Drafts are not confidential/)).toBeVisible();
@@ -66,6 +71,9 @@ test("does not expose preview content or images without a GitHub session", async
   expect(preview.headers()["cache-control"]).toContain("no-cache");
   expect(preview.headers()["x-robots-tag"]).toContain("noindex");
   expect(await preview.text()).toContain("Sign in to Keystatic with GitHub");
+  const portuguesePreview = await request.get("/preview/cms-markdown-demonstration?lang=pt");
+  expect(portuguesePreview.headers()["x-robots-tag"]).toContain("noindex");
+  expect(await portuguesePreview.text()).toContain("Sign in to Keystatic with GitHub");
   const image = await request.get(`/preview/media/${"a".repeat(40)}/cms-markdown-demonstration/${"b".repeat(64)}.png`);
   expect(image.status()).toBe(401);
   expect(image.headers()["cache-control"]).toBe("private, no-store");

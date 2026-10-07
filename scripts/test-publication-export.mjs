@@ -20,8 +20,10 @@ try {
   // Build a genuinely empty collection; the build-only not-found parameter must emit no files.
   runBuild({ BLOG_CONTENT_ROOT: fixture, BLOG_PUBLICATION_TIME: "2026-09-27T18:00:00Z" });
   assert.match(await readFile(path.join(root, "out/blog/index.html"), "utf8"), /No articles yet/);
+  assert.match(await readFile(path.join(root, "out/pt/blog/index.html"), "utf8"), /Ainda não há artigos em português/);
+  await assert.rejects(readFile(path.join(root, "out/pt/blog/__empty__/index.html"), "utf8"));
   assert.doesNotMatch(await readFile(path.join(root, "out/index.html"), "utf8"), /id="latest-title"/);
-  assert.equal(((await readFile(path.join(root, "out/sitemap.xml"), "utf8")).match(/<url>/g) ?? []).length, 2);
+  assert.equal(((await readFile(path.join(root, "out/sitemap.xml"), "utf8")).match(/<url>/g) ?? []).length, 3);
 
   await cp(path.join(root, "content"), path.join(fixture, "content"), { recursive: true });
   const marker = "DRAFT_EXPORT_CANARY__not_public__729acd679bf17__";
@@ -29,9 +31,52 @@ try {
     const record = validatePost({ title: slug, summary: "Not eligible", status, publishedAt, body: `${marker}${slug}` }, slug);
     await writeFile(path.join(postsPath, `${slug}.yaml`), serializePost(record));
   }
+  const translationMarker = "PORTUGUESE_DRAFT_CANARY__not_public__729acd679bf17__";
+  const untranslated = validatePost({
+    title: "English-only article", summary: "English summary", status: "published", publishedAt: "2026-09-18T12:00:00Z",
+    body: "An English-only article.", pt: { publish: false, title: "Título ainda não publicado", body: translationMarker },
+  }, "english-only");
+  await writeFile(path.join(postsPath, "english-only.yaml"), serializePost(untranslated));
   runBuild({ BLOG_CONTENT_ROOT: fixture, BLOG_PUBLICATION_TIME: "2026-09-27T18:00:00Z", KEYSTATIC_SECRET: "CMS_SECRET_CANARY__6f9e2ad701" });
+  await assert.rejects(readFile(path.join(root, "out/pt/blog/english-only/index.html"), "utf8"));
+  const withoutTranslation = await readFile(path.join(root, "out/pt/blog/index.html"), "utf8");
+  assert.doesNotMatch(withoutTranslation, /Título ainda não publicado/);
+
+  const bilingual = validatePost({
+    title: "English article", summary: "English summary", status: "published", publishedAt: "2026-09-19T12:00:00Z",
+    body: "An English article about application security.",
+    images: [{ src: "/media/markdown-demo/ufabc.png", alt: "UFABC mark" }],
+    pt: { publish: true, title: "Artigo em português", summary: "Resumo do artigo", body: "## Segurança de aplicações\n\n![Marca da UFABC](/media/markdown-demo/ufabc.png)" },
+  }, "bilingual-demo");
+  await writeFile(path.join(postsPath, "bilingual-demo.yaml"), serializePost(bilingual));
+  runBuild({ BLOG_CONTENT_ROOT: fixture, BLOG_PUBLICATION_TIME: "2026-09-27T18:00:00Z" });
+  const portugueseHtml = await readFile(path.join(root, "out/pt/blog/bilingual-demo/index.html"), "utf8");
+  assert.match(portugueseHtml, /<html lang="pt-BR"/);
+  assert.match(portugueseHtml, /Artigo em português/);
+  assert.match(portugueseHtml, /Marca da UFABC/);
+  assert.match(portugueseHtml, /hrefLang="en"/);
+  assert.match(portugueseHtml, /hrefLang="pt-BR"/);
+  const englishHtml = await readFile(path.join(root, "out/blog/bilingual-demo/index.html"), "utf8");
+  assert.match(englishHtml, /English article/);
+  assert.doesNotMatch(englishHtml, /Segurança de aplicações/);
+  const sitemap = await readFile(path.join(root, "out/sitemap.xml"), "utf8");
+  assert.match(sitemap, /\/pt\/blog\/bilingual-demo\//);
+  assert.doesNotMatch(sitemap, /\/pt\/blog\/english-only\//);
+
+  await writeFile(path.join(postsPath, "bilingual-demo.yaml"), serializePost({ ...bilingual, pt: { ...bilingual.pt, publish: false } }));
+  runBuild({ BLOG_CONTENT_ROOT: fixture, BLOG_PUBLICATION_TIME: "2026-09-27T18:00:00Z" });
+  await assert.rejects(readFile(path.join(root, "out/pt/blog/bilingual-demo/index.html"), "utf8"));
+  assert.match(await readFile(path.join(root, "out/blog/bilingual-demo/index.html"), "utf8"), /English article/);
+
+  const invalid = { ...bilingual, pt: { ...bilingual.pt, publish: true, summary: "" } };
+  await writeFile(path.join(postsPath, "bilingual-demo.yaml"), serializePost({ ...invalid, pt: { ...invalid.pt, publish: false } }));
+  const invalidRecord = (await readFile(path.join(postsPath, "bilingual-demo.yaml"), "utf8")).replace("publish: false", "publish: true");
+  await writeFile(path.join(postsPath, "bilingual-demo.yaml"), invalidRecord);
+  const rejected = spawnSync(process.execPath, ["scripts/build-site.mjs"], { cwd: root, encoding: "utf8", env: { ...process.env, BLOG_CONTENT_ROOT: fixture, BLOG_PUBLICATION_TIME: "2026-09-27T18:00:00Z" } });
+  assert.notEqual(rejected.status, 0);
+  assert.match(`${rejected.stdout}${rejected.stderr}`, /pt.summary/);
   // The production audit scans every HTML, RSC, JS and discovery artifact in this build.
-  console.info("Empty, draft and future article exports passed.");
+  console.info("Empty, draft, future, bilingual, withdrawal and invalid translation exports passed.");
 } finally {
   // Leave the normal export ready for browser tests; never mutate real editorial records.
   runBuild({ BLOG_CONTENT_ROOT: root, BLOG_PUBLICATION_TIME: process.env.BLOG_PUBLICATION_TIME ?? new Date().toISOString() });

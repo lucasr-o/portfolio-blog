@@ -5,13 +5,15 @@ import { loadPublication } from "@portfolio/blog-content/publication";
 import { assertCurrentState } from "./release-deploy.mjs";
 import { withAwsObjectStore } from "./release-upload.mjs";
 
-export function shouldDeploy({ eventName, sourceRevision, eligibleSlugs, current }) {
+export function shouldDeploy({ eventName, sourceRevision, eligibleSlugs, eligiblePortugueseSlugs = [], current }) {
   if (eventName === "push" || eventName === "workflow_dispatch") return true;
   if (eventName !== "schedule") throw new Error("Unsupported release trigger");
   assertCurrentState(current);
   if (!current || current.sourceRevision !== sourceRevision) return true;
   const previous = [...current.manifest.posts].sort();
-  return JSON.stringify([...eligibleSlugs].sort()) !== JSON.stringify(previous);
+  const previousPortuguese = [...(current.manifest.portuguesePosts ?? [])].sort();
+  return JSON.stringify([...eligibleSlugs].sort()) !== JSON.stringify(previous) ||
+    JSON.stringify([...eligiblePortugueseSlugs].sort()) !== JSON.stringify(previousPortuguese);
 }
 
 async function run() {
@@ -28,7 +30,8 @@ async function run() {
     return bytes ? assertCurrentState(JSON.parse(bytes.toString("utf8"))) : null;
   });
   const deploy = shouldDeploy({ eventName, sourceRevision,
-    eligibleSlugs: publication.posts.map((post) => post.slug), current });
+    eligibleSlugs: publication.posts.map((post) => post.slug),
+    eligiblePortugueseSlugs: publication.ptPosts.map((post) => post.slug), current });
   await appendFile(path.resolve(outputFile), `deploy=${deploy}\n`);
   console.info(`Preflight: ${deploy ? "release required" : "unchanged"}; ${publication.posts.length} eligible posts at ${cutoff}`);
 }
