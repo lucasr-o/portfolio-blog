@@ -9,7 +9,7 @@ test("keeps Portuguese previews and same-post language switching coherent", asyn
   await expect(page.getByRole("heading", { level: 3, name: "Artigo em português" })).toBeVisible();
   await expect(page.getByText("English-only article")).toHaveCount(0);
   await expect(page.getByText("Resumo do artigo")).toBeVisible();
-  await expect(page.getByText("1 min de leitura")).toBeVisible();
+  await expect(page.getByRole("article").filter({ has: page.getByRole("link", { name: "Artigo em português" }) }).getByText("1 min de leitura")).toBeVisible();
   await page.getByRole("link", { name: "Artigo em português" }).click();
   await expect(page).toHaveURL(/\/pt\/blog\/bilingual-demo\/$/);
   await expect(page.getByRole("heading", { level: 1, name: "Artigo em português" })).toBeVisible();
@@ -44,4 +44,33 @@ test("publishes distinct canonical, alternates and structured data for each arti
     const article = await page.locator('script[type="application/ld+json"]').evaluate((element) => JSON.parse(element.textContent));
     expect(article).toMatchObject({ headline: title, inLanguage: locale, mainEntityOfPage: `https://lucas-reis.com${path}` });
   }
+});
+
+test("navigates static archive pages and finds full-body terms beyond page one", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 760 });
+  await page.goto("/pt/blog/");
+  const pagination = page.getByRole("navigation", { name: "Páginas dos artigos" });
+  await expect(pagination.getByRole("link", { name: "Página 2" })).toBeVisible();
+  await pagination.getByRole("link", { name: "Página 2" }).focus();
+  await expect(pagination.getByRole("link", { name: "Página 2" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/pt\/blog\/page\/2\/$/);
+  await expect(page.getByRole("heading", { level: 3, name: "Arquivo exemplo 1" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Páginas dos artigos" }).getByRole("link", { name: "Página 2" })).toHaveAttribute("aria-current", "page");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://lucas-reis.com/pt/blog/page/2/");
+  await page.getByRole("navigation", { name: "Idioma do blog" }).getByRole("link", { name: "EN" }).click();
+  await expect(page).toHaveURL(/\/blog\/$/);
+  await page.getByRole("searchbox", { name: "Search posts" }).fill("hiddenarchiveword");
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Search results" }).getByRole("link", { name: "Archive fixture 1" })).toBeVisible();
+  await page.goto("/pt/blog/?q=palavraescondida");
+  await expect(page.getByRole("region", { name: "Resultados da pesquisa" }).getByRole("link", { name: "Arquivo exemplo 1" })).toBeVisible();
+  await page.goto("/pt/blog/?q=resumo&page=2");
+  await expect(page.getByRole("navigation", { name: "Páginas dos artigos" }).getByRole("link", { name: "Página 2" })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("region", { name: "Resultados da pesquisa" }).getByRole("link", { name: "Arquivo exemplo 1" })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("region", { name: "Resultados da pesquisa" }).getByRole("link", { name: "Arquivo exemplo 1" })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+  await page.setViewportSize({ width: 640, height: 900 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
 });

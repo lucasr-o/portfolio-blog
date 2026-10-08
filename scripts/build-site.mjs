@@ -4,6 +4,8 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { loadPublication } from "@portfolio/blog-content/publication";
 import { auditPublication } from "./audit-publication.mjs";
+import { writeSearchIndexes } from "./write-search-index.mjs";
+import { pageCount } from "@portfolio/blog-content/pagination";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const contentRoot = process.env.BLOG_CONTENT_ROOT ? path.resolve(process.env.BLOG_CONTENT_ROOT) : root;
@@ -31,5 +33,12 @@ if (publication.ptPosts.length === 0) {
 if (Object.keys(publication.media).length === 0) {
   await rm(path.join(root, "out/media/posts/__empty__"), { recursive: true, force: true });
 }
+if (pageCount(publication.posts.length) === 1) {
+  await rm(path.join(root, "out/blog/page/__empty__"), { recursive: true, force: true });
+}
+if (pageCount(publication.ptPosts.length) === 1) {
+  await rm(path.join(root, "out/pt/blog/page/__empty__"), { recursive: true, force: true });
+}
+await writeSearchIndexes(path.join(root, "out"), publication);
 await auditPublication({ root, contentRoot, publication });
 console.info(`Published snapshot: ${publication.posts.length} English articles, ${publication.ptPosts.length} Portuguese versions at ${publication.publicationTime}`);

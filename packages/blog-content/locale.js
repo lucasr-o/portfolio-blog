@@ -32,18 +32,18 @@ export function selectPortuguesePosts(publishedEnglishPosts) {
 
 const copies = {
   en: {
-    writing: "Writing", blogTitle: "Application security notes.",
-    blogIntroduction: "Practical observations about finding risk, explaining it clearly, and helping product teams ship safer systems.",
-    latestNotes: "Latest notes", articleSingular: "article", articlePlural: "articles",
+    writing: "Writing", blogTitle: "Posts.",
+    blogIntroduction: "Thoughts and field notes on security, technology, and whatever else is worth exploring.",
+    latestNotes: "Recent posts", articleSingular: "post", articlePlural: "posts",
     empty: "No articles yet. New notes will appear here.", latest: "Latest",
     readArticle: "Read article", topics: "Topics", placeholder: "Placeholder article",
     untitled: "Untitled draft", writtenBy: "Written by", back: "Back to blog",
     articleTable: "Article table", language: "Article language", indexLanguage: "Blog language",
   },
   "pt-BR": {
-    writing: "Publicações", blogTitle: "Notas sobre segurança de aplicações.",
-    blogIntroduction: "Observações práticas sobre identificar riscos, explicá-los com clareza e ajudar equipes a criar produtos mais seguros.",
-    latestNotes: "Notas recentes", articleSingular: "artigo", articlePlural: "artigos",
+    writing: "Publicações", blogTitle: "Artigos.",
+    blogIntroduction: "Ideias e notas sobre segurança, tecnologia e outros assuntos que valem a conversa.",
+    latestNotes: "Artigos recentes", articleSingular: "artigo", articlePlural: "artigos",
     empty: "Ainda não há artigos em português. Novas notas aparecerão aqui.", latest: "Mais recente",
     readArticle: "Ler artigo", topics: "Tópicos", placeholder: "Artigo de demonstração",
     untitled: "Rascunho sem título", writtenBy: "Escrito por", back: "Voltar ao blog",

@@ -53,13 +53,14 @@ test("switches between the English index and an empty Portuguese index without a
   await englishSwitch.getByRole("link", { name: "PT" }).click();
   await expect(page).toHaveURL(/\/pt\/blog\/$/);
   await expect(page.locator("html")).toHaveAttribute("lang", "pt-BR");
-  await expect(page.getByRole("heading", { level: 1, name: "Notas sobre segurança de aplicações." })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Artigos." })).toBeVisible();
   await expect(page.getByText("Ainda não há artigos em português.", { exact: false })).toBeVisible();
   await expectNoHorizontalOverflow(page);
   const portugueseSwitch = page.getByRole("navigation", { name: "Idioma do blog" });
   await expect(portugueseSwitch.getByRole("link", { name: "PT" })).toHaveAttribute("aria-current", "page");
   await portugueseSwitch.getByRole("link", { name: "EN" }).click();
   await expect(page).toHaveURL(/\/blog\/$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Posts." })).toBeVisible();
   await page.goto(postPath);
   await expect(page.getByRole("navigation", { name: "Article language" })).toHaveCount(0);
 });

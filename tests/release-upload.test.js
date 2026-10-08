@@ -9,6 +9,10 @@ async function fixture(callback) {
   const root = await mkdtemp(join(tmpdir(), "portfolio-blog-upload-test-"));
   try {
     await mkdir(join(root, "_next/static"), { recursive: true });
+    await mkdir(join(root, "blog-search"));
+    for (const locale of ["en", "pt-BR"]) {
+      await writeFile(join(root, `blog-search/${locale}.json`), JSON.stringify({ schema: 1, locale, posts: [], terms: {} }));
+    }
     await writeFile(join(root, "index.html"), "home");
     await writeFile(join(root, "404.html"), "missing");
     await writeFile(join(root, "_next/static/main-123.js"), "client");
@@ -28,15 +32,15 @@ describe("ordered release upload", () => {
       calls.push({ key, content: bytes.toString(), metadata });
     } };
     const result = await uploadRelease({ manifest, exportDirectory: root, store });
-    expect(result.uploaded).toBe(3);
+    expect(result.uploaded).toBe(5);
     const snapshotPrefix = `releases/${manifest.releaseId}/`;
-    expect(calls.slice(0, 3).every((call) => call.key.startsWith(snapshotPrefix + "files/"))).toBe(true);
-    expect(calls[3].key).toBe(snapshotPrefix + "manifest.json");
-    expect(calls[3].metadata.createOnly).toBe(true);
-    expect(JSON.parse(calls[3].content)).toEqual(manifest);
-    expect(calls.slice(4).map((call) => call.key)).toEqual(manifest.files.map((file) => file.key));
-    expect(calls[4].key).toContain("_next/static/");
-    expect(calls.slice(5).every((call) => call.metadata.cacheControl.includes("s-maxage=60"))).toBe(true);
+    expect(calls.slice(0, 5).every((call) => call.key.startsWith(snapshotPrefix + "files/"))).toBe(true);
+    expect(calls[5].key).toBe(snapshotPrefix + "manifest.json");
+    expect(calls[5].metadata.createOnly).toBe(true);
+    expect(JSON.parse(calls[5].content)).toEqual(manifest);
+    expect(calls.slice(6).map((call) => call.key)).toEqual(manifest.files.map((file) => file.key));
+    expect(calls[6].key).toContain("_next/static/");
+    expect(calls.slice(7).every((call) => call.metadata.cacheControl.includes("s-maxage=60"))).toBe(true);
     expect(calls.every((call) => /^(?:site|releases)\//.test(call.key))).toBe(true);
   }));
 

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtemp, mkdir, writeFile, readFile, cp } from "node:fs/promises";
+import { mkdtemp, mkdir, writeFile, readFile, cp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -22,8 +22,34 @@ try {
   assert.match(await readFile(path.join(root, "out/blog/index.html"), "utf8"), /No articles yet/);
   assert.match(await readFile(path.join(root, "out/pt/blog/index.html"), "utf8"), /Ainda não há artigos em português/);
   await assert.rejects(readFile(path.join(root, "out/pt/blog/__empty__/index.html"), "utf8"));
+  assert.equal(JSON.parse(await readFile(path.join(root, "out/blog-search/en.json"), "utf8")).posts.length, 0);
+  assert.equal(JSON.parse(await readFile(path.join(root, "out/blog-search/pt-BR.json"), "utf8")).posts.length, 0);
   assert.doesNotMatch(await readFile(path.join(root, "out/index.html"), "utf8"), /id="latest-title"/);
   assert.equal(((await readFile(path.join(root, "out/sitemap.xml"), "utf8")).match(/<url>/g) ?? []).length, 3);
+
+  for (let index = 1; index <= 7; index += 1) {
+    const slug = `fixture-post-${index}`;
+    const record = validatePost({ title: `Fixture ${index}`, summary: "Public fixture summary", status: "published",
+      publishedAt: `2026-09-${String(index).padStart(2, "0")}T12:00:00Z`, body: index === 1 ? "Unlisted bodyneedle term." : "Normal body text.",
+      pt: { publish: true, title: `Artigo ${index}`, summary: "Resumo público", body: "Texto de criptografia." } }, slug);
+    await writeFile(path.join(postsPath, `${slug}.yaml`), serializePost(record));
+  }
+  runBuild({ BLOG_CONTENT_ROOT: fixture, BLOG_PUBLICATION_TIME: "2026-09-27T18:00:00Z" });
+  const englishSecondPage = await readFile(path.join(root, "out/blog/page/2/index.html"), "utf8");
+  const portugueseSecondPage = await readFile(path.join(root, "out/pt/blog/page/2/index.html"), "utf8");
+  assert.match(englishSecondPage, /Fixture 1/);
+  assert.match(englishSecondPage, /https:\/\/lucas-reis.com\/blog\/page\/2\//);
+  assert.doesNotMatch(englishSecondPage, /<link[^>]+hreflang="pt-BR"/i);
+  assert.match(portugueseSecondPage, /Artigo 1/);
+  assert.match(portugueseSecondPage, /https:\/\/lucas-reis.com\/pt\/blog\/page\/2\//);
+  assert.doesNotMatch(portugueseSecondPage, /<link[^>]+hreflang="en"/i);
+  assert.match(await readFile(path.join(root, "out/sitemap.xml"), "utf8"), /\/blog\/page\/2\//);
+  assert.match(await readFile(path.join(root, "out/blog-search/en.json"), "utf8"), /bodyneedle/);
+  await rm(path.join(postsPath, "fixture-post-1.yaml"));
+  runBuild({ BLOG_CONTENT_ROOT: fixture, BLOG_PUBLICATION_TIME: "2026-09-27T18:00:00Z" });
+  await assert.rejects(readFile(path.join(root, "out/blog/page/2/index.html"), "utf8"));
+  await assert.rejects(readFile(path.join(root, "out/pt/blog/page/2/index.html"), "utf8"));
+  for (let index = 2; index <= 7; index += 1) await rm(path.join(postsPath, `fixture-post-${index}.yaml`));
 
   await cp(path.join(root, "content"), path.join(fixture, "content"), { recursive: true });
   const marker = "DRAFT_EXPORT_CANARY__not_public__729acd679bf17__";
@@ -38,6 +64,11 @@ try {
   }, "english-only");
   await writeFile(path.join(postsPath, "english-only.yaml"), serializePost(untranslated));
   runBuild({ BLOG_CONTENT_ROOT: fixture, BLOG_PUBLICATION_TIME: "2026-09-27T18:00:00Z", KEYSTATIC_SECRET: "CMS_SECRET_CANARY__6f9e2ad701" });
+  const enSearch = await readFile(path.join(root, "out/blog-search/en.json"), "utf8");
+  const ptSearch = await readFile(path.join(root, "out/blog-search/pt-BR.json"), "utf8");
+  assert.doesNotMatch(enSearch + ptSearch, /DRAFT_EXPORT_CANARY|PORTUGUESE_DRAFT_CANARY|private-draft|future-scheduled/);
+  assert.match(enSearch, /english-only/);
+  assert.doesNotMatch(ptSearch, /english-only/);
   await assert.rejects(readFile(path.join(root, "out/pt/blog/english-only/index.html"), "utf8"));
   const withoutTranslation = await readFile(path.join(root, "out/pt/blog/index.html"), "utf8");
   assert.doesNotMatch(withoutTranslation, /Título ainda não publicado/);

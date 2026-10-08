@@ -14,6 +14,10 @@ async function exportFixture(slug, runId) {
   const root = await mkdtemp(join(tmpdir(), "portfolio-blog-deploy-test-"));
   await mkdir(join(root, `blog/${slug}`), { recursive: true });
   await mkdir(join(root, "_next/static"), { recursive: true });
+  await mkdir(join(root, "blog-search"));
+  for (const locale of ["en", "pt-BR"]) {
+    await writeFile(join(root, `blog-search/${locale}.json`), JSON.stringify({ schema: 1, locale, posts: [], terms: {} }));
+  }
   await writeFile(join(root, "index.html"), `home-${slug}`);
   await writeFile(join(root, "404.html"), "missing");
   await writeFile(join(root, `blog/${slug}/index.html`), `post-${slug}`);

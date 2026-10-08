@@ -36,7 +36,7 @@ const report = {
 
 console.log(JSON.stringify(report, null, 2));
 
-const expectedClientBoundaries = ["components/ScrollRevealManager.jsx", "components/SecurityTerminal.jsx"];
+const expectedClientBoundaries = ["components/BlogSearch.jsx", "components/ScrollRevealManager.jsx", "components/SecurityTerminal.jsx"];
 if (JSON.stringify(clientBoundaries.sort()) !== JSON.stringify(expectedClientBoundaries)) {
   throw new Error(`Unexpected application client boundaries: ${clientBoundaries.join(", ")}`);
 }

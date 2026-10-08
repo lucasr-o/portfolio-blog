@@ -13,6 +13,10 @@ async function fixture(callback) {
   try {
     await writeFile(join(root, "index.html"), "home");
     await writeFile(join(root, "404.html"), "missing");
+    await mkdir(join(root, "blog-search"));
+    for (const locale of ["en", "pt-BR"]) {
+      await writeFile(join(root, `blog-search/${locale}.json`), JSON.stringify({ schema: 1, locale, posts: [], terms: {} }));
+    }
     await mkdir(join(root, "_next/static"), { recursive: true });
     await writeFile(join(root, "_next/static/bundle-123.js"), "console.log(1)");
     await mkdir(join(root, "blog/example"), { recursive: true });
@@ -31,7 +35,7 @@ describe("release plan", () => {
     expect(manifest.files[0].key).toBe("site/_next/static/bundle-123.js");
     expect(manifest.files[0].cacheControl).toContain("immutable");
     expect(manifest.files.at(-1).cacheControl).toContain("s-maxage=60");
-    expect(manifest.mutableKeys).toEqual(["site/404.html", "site/blog/example/index.html", "site/index.html"]);
+    expect(manifest.mutableKeys).toEqual(["site/404.html", "site/blog-search/en.json", "site/blog-search/pt-BR.json", "site/blog/example/index.html", "site/index.html"]);
     expect(manifest.files.every((file) => file.key.startsWith("site/"))).toBe(true);
     expect(manifest.files.find((file) => file.path === "index.html").contentType).toContain("text/html");
   }));
@@ -66,5 +70,10 @@ describe("release plan", () => {
     expect(() => assertReleaseManifest({ ...manifest, portuguesePosts: ["missing"] })).toThrow(/article lists/);
     await expect(buildReleaseManifest({ exportDirectory: root, sourceRevision: sha,
       publicationTime: "2026-09-28T00:00:00.000Z", releaseId, posts: ["example"], portuguesePosts: ["missing"] })).rejects.toThrow(/Portuguese post list/);
+  }));
+  it("rejects missing search data", async () => fixture(async (root) => {
+    await rm(join(root, "blog-search/en.json"));
+    await expect(buildReleaseManifest({ exportDirectory: root, sourceRevision: sha,
+      publicationTime: "2026-09-28T00:00:00.000Z", releaseId, posts: [] })).rejects.toThrow(/Missing public search index/);
   }));
 });

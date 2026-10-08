@@ -9,6 +9,10 @@ const scrollRevealBootstrap = `
     document.documentElement.dataset.scrollReveal = reducedMotion || !supportsObserver
       ? "disabled"
       : "enabled";
+    if (/^\\/(?:pt\\/)?blog\\/$/.test(location.pathname) &&
+        new URLSearchParams(location.search).get("q")?.trim()) {
+      document.documentElement.dataset.blogSearch = "pending";
+    }
   })();
 `;
 

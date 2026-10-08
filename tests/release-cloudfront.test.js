@@ -5,7 +5,8 @@ import { createReleaseRuntime } from "../scripts/release-cloudfront.mjs";
 afterEach(() => vi.unstubAllGlobals());
 
 const asset = { path: "_next/static/example.js", immutable: true, contentType: "text/javascript" };
-const manifest = { files: [asset, { path: "pt/blog/index.html" }], posts: ["example"], portuguesePosts: ["example"] };
+const manifest = { files: [asset, { path: "pt/blog/index.html" },
+  { path: "blog-search/en.json" }, { path: "blog-search/pt-BR.json" }], posts: ["example"], portuguesePosts: ["example"] };
 
 describe("CloudFront smoke paths", () => {
   it("checks both indexes and an approved Portuguese article", async () => {
@@ -14,20 +15,21 @@ describe("CloudFront smoke paths", () => {
       const pathname = new URL(url).pathname;
       requested.push(pathname);
       return new Response("ok", { status: pathname.includes("does-not-exist") ? 404 : 200,
-        headers: { "content-type": pathname.endsWith(".js") ? "text/javascript" : "text/html" } });
+        headers: { "content-type": pathname.endsWith(".js") ? "text/javascript" : pathname.endsWith(".json") ? "application/json" : "text/html" } });
     }));
     const runtime = createReleaseRuntime({ distributionId: "E123456789", domain: "sample.cloudfront.net" });
     await runtime.smoke(manifest);
     expect(requested).toContain("/pt/blog/");
     expect(requested).toContain("/pt/blog/example/");
     expect(requested).toContain("/blog/example/");
+    expect(requested).toContain("/blog-search/en.json");
   });
 
   it("rejects wrong content types on Portuguese routes and accepts older releases", async () => {
     vi.stubGlobal("fetch", vi.fn(async (url) => {
       const pathname = new URL(url).pathname;
       return new Response("ok", { status: pathname.includes("does-not-exist") ? 404 : 200,
-        headers: { "content-type": pathname.endsWith(".js") ? "text/javascript" : pathname === "/pt/blog/" ? "text/plain" : "text/html" } });
+        headers: { "content-type": pathname.endsWith(".js") ? "text/javascript" : pathname.endsWith(".json") ? "application/json" : pathname === "/pt/blog/" ? "text/plain" : "text/html" } });
     }));
     const runtime = createReleaseRuntime({ distributionId: "E123456789", domain: "sample.cloudfront.net" });
     await expect(runtime.smoke(manifest)).rejects.toThrow(/pt\/blog/);
@@ -38,9 +40,23 @@ describe("CloudFront smoke paths", () => {
     vi.stubGlobal("fetch", vi.fn(async (url) => {
       const pathname = new URL(url).pathname;
       return new Response("ok", { status: pathname === "/pt/blog/example/" ? 404 : 200,
-        headers: { "content-type": pathname.endsWith(".js") ? "text/javascript" : "text/html" } });
+        headers: { "content-type": pathname.endsWith(".js") ? "text/javascript" : pathname.endsWith(".json") ? "application/json" : "text/html" } });
     }));
     const runtime = createReleaseRuntime({ distributionId: "E123456789", domain: "sample.cloudfront.net" });
     await expect(runtime.smoke(manifest)).rejects.toThrow(/pt\/blog\/example/);
+  });
+  it("rejects missing or incorrectly typed search JSON", async () => {
+    const runtime = createReleaseRuntime({ distributionId: "E123456789", domain: "sample.cloudfront.net" });
+    for (const failure of ["missing", "html"]) {
+      vi.stubGlobal("fetch", vi.fn(async (url) => {
+        const pathname = new URL(url).pathname;
+        const search = pathname === "/blog-search/en.json";
+        return new Response("ok", { status: search && failure === "missing" ? 404 :
+          pathname.includes("does-not-exist") ? 404 : 200,
+        headers: { "content-type": pathname.endsWith(".js") ? "text/javascript" :
+          pathname.endsWith(".json") && !(search && failure === "html") ? "application/json" : "text/html" } });
+      }));
+      await expect(runtime.smoke(manifest)).rejects.toThrow(/blog-search\/en.json/);
+    }
   });
 });

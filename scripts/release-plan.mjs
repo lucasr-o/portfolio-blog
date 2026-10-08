@@ -89,6 +89,14 @@ export async function buildReleaseManifest({ exportDirectory, sourceRevision, pu
   if (!relativeFiles.includes("index.html") || !relativeFiles.includes("404.html")) {
     throw new Error("Incomplete export: home or 404 missing");
   }
+  for (const locale of ["en", "pt-BR"]) {
+    if (!relativeFiles.includes(`blog-search/${locale}.json`)) {
+      throw new Error(`Missing public search index: ${locale}`);
+    }
+    const index = JSON.parse(await readFile(path.join(exportDirectory, `blog-search/${locale}.json`), "utf8"));
+    if (index?.schema !== 1 || index.locale !== locale || !Array.isArray(index.posts) ||
+        !index.terms || typeof index.terms !== "object") throw new Error(`Invalid public search index: ${locale}`);
+  }
   for (const slug of portuguesePosts) {
     if (!relativeFiles.includes(`pt/blog/${slug}/index.html`)) throw new Error(`Missing Portuguese article: ${slug}`);
   }

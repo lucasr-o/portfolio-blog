@@ -24,6 +24,15 @@ try {
   const englishOnly = validatePost({ title: "English-only article", summary: "English summary", body: "Only English.", status: "published", publishedAt: "2026-09-18T12:00:00Z" }, "english-only");
   await writeFile(path.join(fixture, "content/posts/bilingual-demo.yaml"), serializePost(bilingual));
   await writeFile(path.join(fixture, "content/posts/english-only.yaml"), serializePost(englishOnly));
+  for (let index = 1; index <= 6; index += 1) {
+    const slug = `archive-fixture-${index}`;
+    const archived = validatePost({ title: `Archive fixture ${index}`, summary: "Archive example", status: "published",
+      publishedAt: `2026-09-${String(index).padStart(2, "0")}T12:00:00Z`,
+      body: index === 1 ? "A hiddenarchiveword appears only in this older body." : "Archive article body.",
+      pt: { publish: true, title: `Arquivo exemplo ${index}`, summary: "Resumo do arquivo",
+        body: index === 1 ? "Uma palavraescondida aparece apenas neste corpo." : "Corpo do artigo." } }, slug);
+    await writeFile(path.join(fixture, `content/posts/${slug}.yaml`), serializePost(archived));
+  }
   run(["scripts/build-site.mjs"], { BLOG_CONTENT_ROOT: fixture, BLOG_PUBLICATION_TIME: "2026-09-27T18:00:00Z" });
   run(["node_modules/@playwright/test/cli.js", "test", "e2e/bilingual.spec.js", "--config", "playwright.config.js"], { BLOG_TEST_BILINGUAL: "1" });
 } finally {

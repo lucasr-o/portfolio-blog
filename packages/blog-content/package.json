@@ -9,6 +9,8 @@
     "./reader": "./reader.js",
     "./media": "./media.js",
     "./locale": "./locale.js",
+    "./pagination": "./pagination.js",
+    "./search": "./search.js",
     "./publication": "./publication.js"
   },
   "dependencies": {

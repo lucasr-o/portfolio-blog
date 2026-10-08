@@ -30,8 +30,8 @@ describe("public routes", () => {
     expect(home.getAllByRole("link", { name: latestPost.title })[0]).toHaveAttribute("href", `/blog/${latestPost.slug}`);
     home.unmount();
     render(await BlogPage());
-    expect(screen.getByRole("heading", { level: 1, name: "Application security notes." })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { level: 2, name: "Latest notes" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Posts." })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Recent posts" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 3, name: latestPost.title })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: latestPost.title })).toHaveAttribute("href", `/blog/${latestPost.slug}`);
     expect(screen.getByRole("navigation", { name: "Blog language" }).getAttribute("aria-label")).toBe("Blog language");
@@ -39,7 +39,7 @@ describe("public routes", () => {
 
   it("renders the Portuguese index without English-only article cards", async () => {
     render(await PortugueseBlogPage());
-    expect(screen.getByRole("heading", { level: 1, name: "Notas sobre segurança de aplicações." })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Artigos." })).toBeInTheDocument();
     expect(screen.getByText("Ainda não há artigos em português. Novas notas aparecerão aqui.")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: latestPost.title })).not.toBeInTheDocument();
   });

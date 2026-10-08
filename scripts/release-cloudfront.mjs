@@ -48,7 +48,10 @@ export function createReleaseRuntime({ distributionId, domain, token }) {
       const asset = manifest.files.find((file) => file.immutable) ??
         manifest.files.find((file) => file.path.endsWith(".js"));
       if (!asset) throw new Error("Release has no testable asset");
-      const paths = ["/", "/blog/", `/${asset.path}`,
+      const searchPaths = ["en", "pt-BR"].filter((locale) =>
+        manifest.files.some((file) => file.path === `blog-search/${locale}.json`)).map((locale) => `/blog-search/${locale}.json`);
+      if (searchPaths.length === 1) throw new Error("Incomplete public search artifacts");
+      const paths = ["/", "/blog/", ...searchPaths, `/${asset.path}`,
         ...manifest.posts.slice(0, 1).map((slug) => `/blog/${slug}/`)];
       if (manifest.files.some((file) => file.path === "pt/blog/index.html")) {
         paths.push("/pt/blog/", ...(manifest.portuguesePosts ?? []).slice(0, 1).map((slug) => `/pt/blog/${slug}/`));
@@ -59,8 +62,9 @@ export function createReleaseRuntime({ distributionId, domain, token }) {
         });
         if (response.status !== 200) throw new Error(`CloudFront smoke failed: ${uri} HTTP ${response.status}`);
         const type = response.headers.get("content-type") ?? "";
-        if (uri === `/${asset.path}` ? !type.startsWith(asset.contentType.split(";")[0]) :
-          !type.startsWith("text/html")) throw new Error(`CloudFront content type mismatch: ${uri}`);
+        const expected = uri.startsWith("/blog-search/") ? "application/json" :
+          uri === `/${asset.path}` ? asset.contentType.split(";")[0] : "text/html";
+        if (!type.startsWith(expected)) throw new Error(`CloudFront content type mismatch: ${uri}`);
       }
       const missing = `/blog/does-not-exist-${randomBytes(8).toString("hex")}/`;
       const notFound = await fetch(`https://${domain}${missing}`, {
