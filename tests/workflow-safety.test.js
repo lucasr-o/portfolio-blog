@@ -42,14 +42,23 @@ describe("GitHub Actions security boundary", () => {
     expect(cmsImage).toMatch(/if: github\.ref == 'refs\/heads\/main'/);
     expect(cmsImage).toMatch(/needs: verify/);
     expect(cmsImage).toMatch(/packages: write/);
+    expect(cmsImage).toMatch(/runs-on: ubuntu-24\.04-arm/);
     expect(cmsImage).toMatch(/platforms: linux\/arm64/);
+    expect(cmsImage).toMatch(/containerd-snapshotter/);
+    expect(cmsImage).not.toMatch(/setup-qemu-action|setup-buildx-action/);
     expect(cmsImage).toMatch(/org\.opencontainers\.image\.revision=/);
     expect(cmsImage).toMatch(/test ! -e \/app\/apps\/cms\/\.env/);
     expect(cmsImage).toMatch(/candidate_v2:/);
     expect(cmsImage).toMatch(/elif test -f ops\/cms\/editor-v2-enabled/);
     expect(cmsImage).toMatch(/primary_tag=ghcr\.io\/lucasr-o\/portfolio-blog-cms:candidate-v2-/);
     expect(cmsImage).toMatch(/CMS_EDITOR_V2=\$\{\{ steps\.variant\.outputs\.editor_v2 \}\}/);
-    expect(cmsImage).not.toMatch(/AWS_DEPLOY_ROLE_ARN|id-token: write/);
+    expect(cmsImage).toMatch(/Generate SPDX SBOM from the verified image/);
+    expect(cmsImage).toMatch(/Attest the SBOM to the image digest/);
+    // The image job needs GitHub OIDC for its own attestation, but it has no
+    // protected prod environment or AWS role and cannot match the AWS trust.
+    expect(cmsImage.split("  image:\n")[0]).not.toMatch(/id-token: write/);
+    expect(cmsImage).toMatch(/id-token: write/);
+    expect(cmsImage).not.toMatch(/AWS_DEPLOY_ROLE_ARN|environment: prod|configure-aws-credentials/);
   });
 
   it("exposes only allowlisted OIDC claim names from a manual main run", () => {

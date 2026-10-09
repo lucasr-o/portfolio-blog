@@ -13,7 +13,7 @@ on:
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
-      - '.github/workflows/cms-image.yml'
+      # Workflow-only edits are validated through manual dispatch, not a new :main image.
   workflow_dispatch:
     inputs:
       candidate_v2:
@@ -34,11 +34,14 @@ jobs:
   image:
     needs: verify
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04-arm
     timeout-minutes: 45
     permissions:
       contents: read
       packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
     concurrency:
       group: portfolio-blog-cms-image
       cancel-in-progress: false
@@ -46,8 +49,19 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
-      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - name: Use native ARM64 Docker with an attestation-capable image store
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = 'aarch64'
+          if test -f /etc/docker/daemon.json; then
+            jq '.features."containerd-snapshotter" = true' /etc/docker/daemon.json > "$RUNNER_TEMP/portfolio-daemon.json"
+          else
+            printf '{"features":{"containerd-snapshotter":true}}\n' > "$RUNNER_TEMP/portfolio-daemon.json"
+          fi
+          sudo install -m 0644 "$RUNNER_TEMP/portfolio-daemon.json" /etc/docker/daemon.json
+          sudo systemctl restart docker
+          docker info --format '{{json .DriverStatus}}' | grep -F 'io.containerd.snapshotter.v1'
+          docker buildx inspect default | grep -E '^Driver:[[:space:]]+docker$'
       - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
           registry: ghcr.io
@@ -85,7 +99,6 @@ jobs:
           build-args: |
             CMS_EDITOR_V2=${{ steps.variant.outputs.editor_v2 }}
           provenance: true
-          sbom: true
           tags: |
             ${{ steps.variant.outputs.primary_tag }}
             ghcr.io/lucasr-o/portfolio-blog-cms:sha-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -115,3 +128,18 @@ jobs:
           done
           docker logs portfolio-blog-cms-image-ci
           exit 1
+      - name: Generate SPDX SBOM from the verified image
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
+        with:
+          image: ghcr.io/lucasr-o/portfolio-blog-cms@${{ steps.build.outputs.digest }}
+          format: spdx-json
+          output-file: ${{ github.workspace }}/cms-image.spdx.json
+          upload-artifact: false
+      - name: Attest the SBOM to the image digest
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: ghcr.io/lucasr-o/portfolio-blog-cms
+          subject-digest: ${{ steps.build.outputs.digest }}
+          sbom-path: ${{ github.workspace }}/cms-image.spdx.json
+          push-to-registry: true
+          create-storage-record: false
