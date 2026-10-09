@@ -15,6 +15,7 @@ tags:
 isPlaceholder: false
 cover:
   src: /media/review-cwes/cover/src.png
+  alt: CWES Exam Passed
 images:
   - src: /media/review-cwes/images/0/src.png
     alt: Sysreptor localhost
