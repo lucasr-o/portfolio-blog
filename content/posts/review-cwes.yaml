@@ -13,7 +13,8 @@ tags:
   - Certificate
   - Study
 isPlaceholder: false
-cover: {}
+cover:
+  src: /media/review-cwes/cover/src.png
 images:
   - src: /media/review-cwes/images/0/src.png
     alt: Sysreptor localhost
