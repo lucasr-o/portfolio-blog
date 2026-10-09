@@ -1,5 +1,6 @@
-# Official Node 24.19.0 Alpine 3.24 manifest includes linux/arm64/v8.
-FROM node:24.19.0-alpine3.24@sha256:d32cdf619f63fe0471182d08996dd516c6275bb5fd31ae06e55a570bd9e1ad43 AS builder
+# The verified Docker Official Images mirror has the same pinned multi-arch
+# digest as Docker Hub, without consuming Docker Hub's anonymous pull quota.
+FROM public.ecr.aws/docker/library/node:24.19.0-alpine3.24@sha256:d32cdf619f63fe0471182d08996dd516c6275bb5fd31ae06e55a570bd9e1ad43 AS builder
 ARG CMS_EDITOR_V2=0
 WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@11.25.0 --activate
@@ -14,7 +15,7 @@ COPY packages/blog-ui ./packages/blog-ui
 ENV NEXT_PUBLIC_CMS_STORAGE=github NEXT_PUBLIC_KEYSTATIC_GITHUB_APP_SLUG=portfolio-blog-keystatic-lucasr-o NEXT_PUBLIC_CMS_EDITOR_V2=$CMS_EDITOR_V2
 RUN pnpm build:cms && test ! -e /app/apps/cms/.next/standalone/apps/cms/.env
 
-FROM node:24.19.0-alpine3.24@sha256:d32cdf619f63fe0471182d08996dd516c6275bb5fd31ae06e55a570bd9e1ad43
+FROM public.ecr.aws/docker/library/node:24.19.0-alpine3.24@sha256:d32cdf619f63fe0471182d08996dd516c6275bb5fd31ae06e55a570bd9e1ad43
 ARG CMS_EDITOR_V2=0
 WORKDIR /app
 ENV NODE_ENV=production NEXT_PUBLIC_CMS_STORAGE=github NEXT_PUBLIC_KEYSTATIC_GITHUB_APP_SLUG=portfolio-blog-keystatic-lucasr-o NEXT_PUBLIC_CMS_EDITOR_V2=$CMS_EDITOR_V2 HOSTNAME=0.0.0.0 PORT=3000
