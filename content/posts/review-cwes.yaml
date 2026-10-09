@@ -1,404 +1,221 @@
 title: Review CWES
-summary: >-
-  In this article, I share my experience with the Hack The Box CWES
-  certification, covering the course, labs, preparation, and exam. I also
-  discuss which experience levels I think the certification is best suited for
-  and share a few tips that helped me during my studies and while writing the
-  final report.
-author: Lucas Reis de Oliveira da Silva
-status: published
-publishedAt: '2026-10-09T18:00:00.000Z'
-tags:
-  - CWES
-  - Certificate
-  - Study
-isPlaceholder: false
-cover:
-  src: /media/review-cwes/cover/src.png
-  alt: CWES Exam Passed
-images:
-  - src: /media/review-cwes/images/0/src.png
-    alt: Sysreptor localhost
-  - src: /media/review-cwes/images/1/src.png
-    alt: Example Skills Assessment
-  - src: /media/review-cwes/images/2/src.png
-    alt: Example "CTF" in sections
-  - src: /media/review-cwes/images/3/src.png
-    alt: helloge
-body: >-
-  Hellooo, my dear reader,
+editorial:
+  titleLocale: en
+  status: published
+  createdAt: 2026-10-09T18:00:00.000Z
+  author: Lucas Reis de Oliveira da Silva
+  isPlaceholder: false
+  cover:
+    src: /media/review-cwes/cover/src.png
+  images:
+    - src: /media/review-cwes/images/0/src.png
+      alt: Sysreptor localhost
+    - src: /media/review-cwes/images/1/src.png
+      alt: Example Skills Assessment
+    - src: /media/review-cwes/images/2/src.png
+      alt: Example "CTF" in sections
+    - src: /media/review-cwes/images/3/src.png
+      alt: helloge
+  pt:
+    publish: true
+    title: O que achei da CWES
+    summary: Neste artigo, compartilho minha experiência com a certificação CWES, da Hack The Box, passando pelo curso, pelos labs, pela preparação e pelo exame. Também comento para quais níveis de experiência acredito que a certificação realmente vale a pena e dou algumas dicas que me ajudaram durante os estudos e na elaboração do relatório final.
+    body: |-
+      Olaaa, meu bommm,
 
+      ![Pepe](/media/review-cwes/images/3/src.png)
 
-  ![Pepe](/media/review-cwes/images/3/src.png)
+      Primeiramente, prazer! Sou o Lucas Reis (ou luker, ou lukerking), atuo no cenário de segurança há alguns anos e também faço alguns CTFs.
 
+      Dito isso, estou aqui para fazer um review de como foi minha experiência com a CWES. Até o final desse artigo, espero te dar alguma luz sobre se vale a pena para você ou não.
 
-  First of all, nice to meet you! I’m Lucas Reis (or luker, or lukerking). I’ve
-  been working in the security field for a few years now, and I also play some
-  CTFs from time to time.
+      ### TL;DR
 
+      Se eu começasse na área agora, sem dúvidas compraria.
 
-  That said, I’m here to share a review of my experience with the CWES. By the
-  end of this article, I hope I can give you some idea of whether it’s worth it
-  for you or not.
+      O curso é ótimo, bastante prático e bem estruturado. Não tem aulas ao vivo, o conteúdo é em texto e existem alguns labs durante os “capítulos” dos módulos. No final de cada módulo, também tem uma espécie de prova.
 
+      Se você está em um nível júnior, vale a pena. Se já é pleno e tem conhecimento de Web Security, acredito que não. Se é pleno, mas ainda não tem muito conhecimento de segurança web, acho que vale a pena. Caso você seja sênior, provavelmente não vale.
 
-  ### TL;DR
+      ## 1. Contexto
 
+      O curso é dado pela [Hack the Box](https://www.hackthebox.com/) e você tem algumas formas de adquirir acesso a ele, pelo menos até o momento:
 
-  If I were starting in the field today, I would definitely buy it.
+      - Cubes;
+      - Assinatura Silver ou Gold;
+      - Assinatura de estudante.
 
+      Além disso, caso queira fazer a certificação, também precisa pagar pelo exame, que custa US$ 210.
 
-  The course is great, very hands-on, and well structured. There are no live
-  classes, the content is text-based, and there are some labs throughout the
-  “chapters” of the modules. At the end of each module, there is also something
-  like an exam.
+      No meu caso, utilizei o plano de estudante porque ainda sou universitário. Ficava em torno de R$ 45 por mês, aproximadamente US$ 8, e eu tinha acesso a todos os cursos Tier II. Então, para mim, valeu muito a pena.
 
+      ## 2. O curso
 
-  If you’re at a junior level, it’s worth it. If you’re already a mid-level
-  professional with good Web Security knowledge, I don’t think it is. If you’re
-  mid-level but don’t have much experience with Web Security yet, then I think
-  it’s worth it. If you’re already senior, it probably isn’t.
+      O curso em si é extremamente bem estruturado e já cobre uma boa parte do que você precisa saber em nível júnior/pleno no quesito Web.
 
+      Já consumi diversos conteúdos de Web Security, tanto pagos quanto gratuitos, e posso dizer tranquilamente que o custo-benefício é insanamente bom.
 
-  ## 1. Context
+      Ele começa com uma boa base sobre o protocolo HTTP, arquiteturas modernas utilizadas hoje pelas empresas e por aí vai.
 
+      Os labs são bem práticos. Em algumas seções dos módulos tinha meio que um “CTF” para fazer e, para progredir, você precisava obrigatoriamente completar.
 
-  The course is provided by [Hack the Box](https://www.hackthebox.com/), and
-  there are a few different ways to get access to it, at least at the time I’m
-  writing this:
+      ![Exemplo dos CTF nas seções](/media/review-cwes/images/2/src.png)
 
+      No final do módulo também tinha uma prova para concluir, que demandava mais tempo e esforço, já que revisava os conteúdos daquele módulo específico.
 
-  - Cubes;
+      ![Exemplo da provinha final](/media/review-cwes/images/1/src.png)
 
-  - Silver or Gold subscription;
+      ## 3. Estudos
 
-  - Student subscription.
+      Para os estudos: **ANOTA TUDO. TUDO MESMO.**
 
+      Anota payloads, comandos, conceitos e também o seu write-up das provas de cada módulo.
 
-  On top of that, if you want to take the certification exam, you also need to
-  pay for the exam voucher, which costs US$210.
+      Essas provas são mais complexas e se assemelham mais ao exame, então vale bastante a pena anotar o que você fez e como chegou até lá.
 
+      Utilizei o Notion porque estou mais acostumado com ele, mas fica à vontade para usar qualquer aplicativo de anotação: Obsidian, Notepad (KKKKKK), Sublime e por aí vai.
 
-  In my case, I used the student plan because I’m still in university. It cost
-  around R$45 per month, roughly US$8, and gave me access to all Tier II
-  courses. So for me, it was absolutely worth it.
+      Também tinha visto um pessoal falando para fazer outros labs além dos que existem no curso para praticar para o exame.
 
+      Eu não achei necessário, mas também já tenho uma certa experiência com pentest. Se você se sentir mais confiante fazendo mais labs antes da prova, vai na fé.
 
-  ## 2. The course
+      ## 4. Exame
 
+      No exame, você tem 7 dias para fazer tudo, incluindo o pentest inteiro e o envio do relatório.
 
-  The course itself is extremely well structured and already covers a good
-  amount of what you need to know at a junior/mid-level when it comes to Web
-  Security.
+      Durante esse período, existem algumas flags que você precisa enviar.
 
+      A nota do exame é baseada tanto na qualidade do seu relatório quanto nas flags que você conseguiu pegar.
 
-  I’ve consumed a lot of Web Security content over the years, both paid and
-  free, and I can honestly say that the cost-benefit here is insanely good.
+      O exame tenta cobrir uma boa parte dos conteúdos passados durante o curso, então não tem muito mistério. É basicamente aplicar aquilo que você aprendeu e fez nos labs que as flags vão vir.
 
+      Achei a prova bem justa e não achei nada muito frustrante. Você não cai em um “rabbit hole” infinito, por exemplo.
 
-  It starts by giving you a solid foundation on the HTTP protocol, modern
-  architectures used by companies today, and so on.
+      No meu caso, para fazer o relatório, utilizei o SysReptor localmente.
 
+      ![Sysreptor funcionando de forma local](/media/review-cwes/images/0/src.png)
 
-  The labs are very practical. In some sections of the modules, there was
-  basically a small “CTF” that you had to complete, and you needed to finish it
-  in order to move forward.
+      Existe um template específico para o SysReptor voltado para os cursos da Hack The Box, o que facilitou bastante. Inclusive, recomendo fortemente que você também utilize.
 
+      E é aquela coisa: se você estiver travado em uma parte, dá uma pausa, descansa, vai andar um pouco. A esperteza e a cabeça descansada valem demais nessas provas.
 
-  ![Example "CTF" in sections](/media/review-cwes/images/2/src.png)
+      Por último, um bom relatório é aquele em que **QUALQUER pessoa, seguindo seus passos, consegue reproduzir a vulnerabilidade**.
 
+      Então seja bem detalhista nas evidências. Mostre o passo a passo, destaque onde precisa destacar e também aumente a fonte do Burp antes dos prints. Ajuda bastante.
 
-  At the end of each module, there was also an exam-like challenge that required
-  more time and effort, since it reviewed the content covered in that specific
-  module.
+      ## 5. Resumo
 
+      Por fim, tive ótimos momentos tanto com o curso quanto com o exame.
 
-  ![Example Skills Assessment](/media/review-cwes/images/1/src.png)
+      Para quem está começando e quer se familiarizar com Web Security, eu recomendaria fortemente.
 
+      Se você já conhece e domina os conteúdos mais “padrões” de Web, como XSS, SQLi, SSRF, IDOR e outros, talvez o seu perfil já seja mais voltado para a CWEE ou para uma OSWE.
 
-  ## 3. Studying
+      Qualquer dúvida ou se precisar de algum apoio, pode me mandar mensagem. Terei prazer em ajudar você!
+    coverAlt: Resultado CWES!
+    tags:
+      - CWES
+      - Certificação
+      - Estudos
+    publishedAt: 2026-10-09T18:00:00.000Z
+  en:
+    publish: true
+    summary: In this article, I share my experience with the Hack The Box CWES certification, covering the course, labs, preparation, and exam. I also discuss which experience levels I think the certification is best suited for and share a few tips that helped me during my studies and while writing the final report.
+    body: |-
+      Hellooo, my dear reader,
 
+      ![Pepe](/media/review-cwes/images/3/src.png)
 
-  When studying: **TAKE NOTES ON EVERYTHING. EVERYTHING.**
+      First of all, nice to meet you! I’m Lucas Reis (or luker, or lukerking). I’ve been working in the security field for a few years now, and I also play some CTFs from time to time.
 
+      That said, I’m here to share a review of my experience with the CWES. By the end of this article, I hope I can give you some idea of whether it’s worth it for you or not.
 
-  Write down payloads, commands, concepts, and also your write-ups for the final
-  challenges of each module.
+      ### TL;DR
 
+      If I were starting in the field today, I would definitely buy it.
 
-  Those challenges are more complex and are closer to what you’ll find in the
-  actual exam, so it’s definitely worth documenting what you did and how you got
-  there.
+      The course is great, very hands-on, and well structured. There are no live classes, the content is text-based, and there are some labs throughout the “chapters” of the modules. At the end of each module, there is also something like an exam.
 
+      If you’re at a junior level, it’s worth it. If you’re already a mid-level professional with good Web Security knowledge, I don’t think it is. If you’re mid-level but don’t have much experience with Web Security yet, then I think it’s worth it. If you’re already senior, it probably isn’t.
 
-  I used Notion because I’m more used to it, but feel free to use whatever
-  note-taking app you prefer: Obsidian, Notepad (LMAOOO), Sublime, and so on.
+      ## 1. Context
 
+      The course is provided by [Hack the Box](https://www.hackthebox.com/), and there are a few different ways to get access to it, at least at the time I’m writing this:
 
-  I also saw some people recommending doing extra labs outside of the course
-  before taking the exam.
+      - Cubes;
+      - Silver or Gold subscription;
+      - Student subscription.
 
+      On top of that, if you want to take the certification exam, you also need to pay for the exam voucher, which costs US$210.
 
-  Personally, I didn’t feel like it was necessary, but I also already had some
-  pentesting experience. If doing extra labs makes you feel more confident
-  before the exam, go for it.
+      In my case, I used the student plan because I’m still in university. It cost around R$45 per month, roughly US$8, and gave me access to all Tier II courses. So for me, it was absolutely worth it.
 
+      ## 2. The course
 
-  ## 4. The exam
+      The course itself is extremely well structured and already covers a good amount of what you need to know at a junior/mid-level when it comes to Web Security.
 
+      I’ve consumed a lot of Web Security content over the years, both paid and free, and I can honestly say that the cost-benefit here is insanely good.
 
-  You get 7 days to complete the entire exam, including the full pentest and
-  submitting the report.
+      It starts by giving you a solid foundation on the HTTP protocol, modern architectures used by companies today, and so on.
 
+      The labs are very practical. In some sections of the modules, there was basically a small “CTF” that you had to complete, and you needed to finish it in order to move forward.
 
-  During that period, there are also some flags that you need to submit.
+      ![Example "CTF" in sections](/media/review-cwes/images/2/src.png)
 
+      At the end of each module, there was also an exam-like challenge that required more time and effort, since it reviewed the content covered in that specific module.
 
-  Your final score is based both on the quality of your report and on the flags
-  you managed to capture.
+      ![Example Skills Assessment](/media/review-cwes/images/1/src.png)
 
+      ## 3. Studying
 
-  The exam tries to cover a good amount of the content taught throughout the
-  course, so there isn’t really much of a mystery to it. You basically need to
-  apply what you learned and practiced in the labs, and the flags will come.
+      When studying: **TAKE NOTES ON EVERYTHING. EVERYTHING.**
 
+      Write down payloads, commands, concepts, and also your write-ups for the final challenges of each module.
 
-  I found the exam pretty fair, and I didn’t find anything particularly
-  frustrating. You don’t end up stuck in some infinite “rabbit hole,” for
-  example.
+      Those challenges are more complex and are closer to what you’ll find in the actual exam, so it’s definitely worth documenting what you did and how you got there.
 
+      I used Notion because I’m more used to it, but feel free to use whatever note-taking app you prefer: Obsidian, Notepad (LMAOOO), Sublime, and so on.
 
-  In my case, I used SysReptor locally to write the report.
+      I also saw some people recommending doing extra labs outside of the course before taking the exam.
 
+      Personally, I didn’t feel like it was necessary, but I also already had some pentesting experience. If doing extra labs makes you feel more confident before the exam, go for it.
 
-  ![Sysreptor localhost](/media/review-cwes/images/0/src.png)
+      ## 4. The exam
 
+      You get 7 days to complete the entire exam, including the full pentest and submitting the report.
 
-  There is a specific SysReptor template made for Hack The Box certifications,
-  which made things much easier. I definitely recommend using it as well.
+      During that period, there are also some flags that you need to submit.
 
+      Your final score is based both on the quality of your report and on the flags you managed to capture.
 
-  And it’s one of those things: if you get stuck somewhere, take a break, rest a
-  little, go for a walk. Having a clear head makes a huge difference in exams
-  like this.
+      The exam tries to cover a good amount of the content taught throughout the course, so there isn’t really much of a mystery to it. You basically need to apply what you learned and practiced in the labs, and the flags will come.
 
+      I found the exam pretty fair, and I didn’t find anything particularly frustrating. You don’t end up stuck in some infinite “rabbit hole,” for example.
 
-  Lastly, a good report is one where **ANYONE following your steps can reproduce
-  the vulnerability**.
+      In my case, I used SysReptor locally to write the report.
 
+      ![Sysreptor localhost](/media/review-cwes/images/0/src.png)
 
-  So be very detailed with your evidence. Show the full step-by-step process,
-  highlight what needs to be highlighted, and increase the Burp Suite font size
-  before taking screenshots. It helps a lot.
+      There is a specific SysReptor template made for Hack The Box certifications, which made things much easier. I definitely recommend using it as well.
 
+      And it’s one of those things: if you get stuck somewhere, take a break, rest a little, go for a walk. Having a clear head makes a huge difference in exams like this.
 
-  ## 5. Summary
+      Lastly, a good report is one where **ANYONE following your steps can reproduce the vulnerability**.
 
+      So be very detailed with your evidence. Show the full step-by-step process, highlight what needs to be highlighted, and increase the Burp Suite font size before taking screenshots. It helps a lot.
 
-  Overall, I had a great time with both the course and the exam.
+      ## 5. Summary
 
+      Overall, I had a great time with both the course and the exam.
 
-  For someone who is just getting started and wants to become more familiar with
-  Web Security, I would definitely recommend it.
+      For someone who is just getting started and wants to become more familiar with Web Security, I would definitely recommend it.
 
+      If you already know and are comfortable with the more “standard” Web Security topics, like XSS, SQLi, SSRF, IDOR, and so on, then maybe your profile is already a better fit for something like the CWEE or the OSWE.
 
-  If you already know and are comfortable with the more “standard” Web Security
-  topics, like XSS, SQLi, SSRF, IDOR, and so on, then maybe your profile is
-  already a better fit for something like the CWEE or the OSWE.
-
-
-  If you have any questions or need any help, feel free to message me. I’ll be
-  happy to help!
-pt:
-  publish: true
-  title: O que achei da CWES
-  summary: >-
-    Neste artigo, compartilho minha experiência com a certificação CWES, da Hack
-    The Box, passando pelo curso, pelos labs, pela preparação e pelo exame.
-    Também comento para quais níveis de experiência acredito que a certificação
-    realmente vale a pena e dou algumas dicas que me ajudaram durante os estudos
-    e na elaboração do relatório final.
-  body: >-
-    Olaaa, meu bommm,
-
-
-    ![Pepe](/media/review-cwes/images/3/src.png)
-
-
-    Primeiramente, prazer! Sou o Lucas Reis (ou luker, ou lukerking), atuo no
-    cenário de segurança há alguns anos e também faço alguns CTFs.
-
-
-    Dito isso, estou aqui para fazer um review de como foi minha experiência com
-    a CWES. Até o final desse artigo, espero te dar alguma luz sobre se vale a
-    pena para você ou não.
-
-
-    ### TL;DR
-
-
-    Se eu começasse na área agora, sem dúvidas compraria.
-
-
-    O curso é ótimo, bastante prático e bem estruturado. Não tem aulas ao vivo,
-    o conteúdo é em texto e existem alguns labs durante os “capítulos” dos
-    módulos. No final de cada módulo, também tem uma espécie de prova.
-
-
-    Se você está em um nível júnior, vale a pena. Se já é pleno e tem
-    conhecimento de Web Security, acredito que não. Se é pleno, mas ainda não
-    tem muito conhecimento de segurança web, acho que vale a pena. Caso você
-    seja sênior, provavelmente não vale.
-
-
-    ## 1. Contexto
-
-
-    O curso é dado pela [Hack the Box](https://www.hackthebox.com/) e você tem
-    algumas formas de adquirir acesso a ele, pelo menos até o momento:
-
-
-    - Cubes;
-
-    - Assinatura Silver ou Gold;
-
-    - Assinatura de estudante.
-
-
-    Além disso, caso queira fazer a certificação, também precisa pagar pelo
-    exame, que custa US$ 210.
-
-
-    No meu caso, utilizei o plano de estudante porque ainda sou universitário.
-    Ficava em torno de R$ 45 por mês, aproximadamente US$ 8, e eu tinha acesso a
-    todos os cursos Tier II. Então, para mim, valeu muito a pena.
-
-
-    ## 2. O curso
-
-
-    O curso em si é extremamente bem estruturado e já cobre uma boa parte do que
-    você precisa saber em nível júnior/pleno no quesito Web.
-
-
-    Já consumi diversos conteúdos de Web Security, tanto pagos quanto gratuitos,
-    e posso dizer tranquilamente que o custo-benefício é insanamente bom.
-
-
-    Ele começa com uma boa base sobre o protocolo HTTP, arquiteturas modernas
-    utilizadas hoje pelas empresas e por aí vai.
-
-
-    Os labs são bem práticos. Em algumas seções dos módulos tinha meio que um
-    “CTF” para fazer e, para progredir, você precisava obrigatoriamente
-    completar.
-
-
-    ![Exemplo dos CTF nas seções](/media/review-cwes/images/2/src.png)
-
-
-    No final do módulo também tinha uma prova para concluir, que demandava mais
-    tempo e esforço, já que revisava os conteúdos daquele módulo específico.
-
-
-    ![Exemplo da provinha final](/media/review-cwes/images/1/src.png)
-
-
-    ## 3. Estudos
-
-
-    Para os estudos: **ANOTA TUDO. TUDO MESMO.**
-
-
-    Anota payloads, comandos, conceitos e também o seu write-up das provas de
-    cada módulo.
-
-
-    Essas provas são mais complexas e se assemelham mais ao exame, então vale
-    bastante a pena anotar o que você fez e como chegou até lá.
-
-
-    Utilizei o Notion porque estou mais acostumado com ele, mas fica à vontade
-    para usar qualquer aplicativo de anotação: Obsidian, Notepad (KKKKKK),
-    Sublime e por aí vai.
-
-
-    Também tinha visto um pessoal falando para fazer outros labs além dos que
-    existem no curso para praticar para o exame.
-
-
-    Eu não achei necessário, mas também já tenho uma certa experiência com
-    pentest. Se você se sentir mais confiante fazendo mais labs antes da prova,
-    vai na fé.
-
-
-    ## 4. Exame
-
-
-    No exame, você tem 7 dias para fazer tudo, incluindo o pentest inteiro e o
-    envio do relatório.
-
-
-    Durante esse período, existem algumas flags que você precisa enviar.
-
-
-    A nota do exame é baseada tanto na qualidade do seu relatório quanto nas
-    flags que você conseguiu pegar.
-
-
-    O exame tenta cobrir uma boa parte dos conteúdos passados durante o curso,
-    então não tem muito mistério. É basicamente aplicar aquilo que você aprendeu
-    e fez nos labs que as flags vão vir.
-
-
-    Achei a prova bem justa e não achei nada muito frustrante. Você não cai em
-    um “rabbit hole” infinito, por exemplo.
-
-
-    No meu caso, para fazer o relatório, utilizei o SysReptor localmente.
-
-
-    ![Sysreptor funcionando de forma local](/media/review-cwes/images/0/src.png)
-
-
-    Existe um template específico para o SysReptor voltado para os cursos da
-    Hack The Box, o que facilitou bastante. Inclusive, recomendo fortemente que
-    você também utilize.
-
-
-    E é aquela coisa: se você estiver travado em uma parte, dá uma pausa,
-    descansa, vai andar um pouco. A esperteza e a cabeça descansada valem demais
-    nessas provas.
-
-
-    Por último, um bom relatório é aquele em que **QUALQUER pessoa, seguindo
-    seus passos, consegue reproduzir a vulnerabilidade**.
-
-
-    Então seja bem detalhista nas evidências. Mostre o passo a passo, destaque
-    onde precisa destacar e também aumente a fonte do Burp antes dos prints.
-    Ajuda bastante.
-
-
-    ## 5. Resumo
-
-
-    Por fim, tive ótimos momentos tanto com o curso quanto com o exame.
-
-
-    Para quem está começando e quer se familiarizar com Web Security, eu
-    recomendaria fortemente.
-
-
-    Se você já conhece e domina os conteúdos mais “padrões” de Web, como XSS,
-    SQLi, SSRF, IDOR e outros, talvez o seu perfil já seja mais voltado para a
-    CWEE ou para uma OSWE.
-
-
-    Qualquer dúvida ou se precisar de algum apoio, pode me mandar mensagem.
-    Terei prazer em ajudar você!
-  tags:
-    - CWES
-    - Certificação
-    - Estudos
-  coverAlt: Resultado CWES!
+      If you have any questions or need any help, feel free to message me. I’ll be happy to help!
+    coverAlt: CWES Exam Passed
+    tags:
+      - CWES
+      - Certificate
+      - Study
+    publishedAt: 2026-10-09T18:00:00.000Z
