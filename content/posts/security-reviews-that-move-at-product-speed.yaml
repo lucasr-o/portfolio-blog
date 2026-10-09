@@ -1,63 +1,110 @@
 title: Security reviews that move at product speed
-summary: A practical placeholder for turning application-security reviews into focused decisions without slowing delivery.
+summary: >-
+  A practical placeholder for turning application-security reviews into focused
+  decisions without slowing delivery.
 author: Lucas Reis de Oliveira da Silva
-status: published
-publishedAt: '2026-09-18T12:00:00Z'
-updatedAt: '2026-09-27T15:00:00Z'
+status: draft
+publishedAt: '2026-09-18T12:00:00.000Z'
+updatedAt: '2026-09-27T15:00:00.000Z'
 tags:
   - Application Security
   - Threat Modeling
   - Product Security
 isPlaceholder: true
+cover: {}
 images:
-  - src: /media/markdown-demo/ufabc.png
-    alt: Green and yellow emblem of the Federal University of ABC
-body: |
-  Security reviews work best when they reduce uncertainty for the people building the product. This placeholder article demonstrates the structure future writing will use on lucas-reis.com.
+  - alt: Green and yellow emblem of the Federal University of ABC
+body: >
+  Security reviews work best when they reduce uncertainty for the people
+  building the product. This placeholder article demonstrates the structure
+  future writing will use on lucas-reis.com.
+
 
   ## Start with the decision
 
-  A review should begin with the product decision that needs security context: what is changing, which trust boundary moves, and what failure would matter most.
 
-  That framing keeps the conversation anchored in risk instead of producing a catalogue of controls with no owner or delivery path.
+  A review should begin with the product decision that needs security context:
+  what is changing, which trust boundary moves, and what failure would matter
+  most.
+
+
+  That framing keeps the conversation anchored in risk instead of producing a
+  catalogue of controls with no owner or delivery path.
+
 
   ## Model the smallest useful system
 
-  Map the actors, sensitive data, entry points, and external dependencies needed to explain the change. Expand the model only when another boundary affects the decision.
 
-  A compact model is easier to challenge with engineers and more likely to remain current after the review.
+  Map the actors, sensitive data, entry points, and external dependencies needed
+  to explain the change. Expand the model only when another boundary affects the
+  decision.
+
+
+  A compact model is easier to challenge with engineers and more likely to
+  remain current after the review.
+
 
   ## Leave teams with an executable next step
 
-  Each finding should state the observed condition, credible abuse path, expected impact, and the smallest effective remediation. Assign an owner and a verification method before the review closes.
 
-  The result is not a perfect diagram. It is a shared understanding that improves the next product decision.
+  Each finding should state the observed condition, credible abuse path,
+  expected impact, and the smallest effective remediation. Assign an owner and a
+  verification method before the review closes.
+
+
+  The result is not a perfect diagram. It is a shared understanding that
+  improves the next product decision.
+
 
   ## Markdown examples
 
+
   The examples below demonstrate formatting, not a report about a real system.
+
 
   > Keep the trust boundary visible and the next step actionable.
 
+
   - **Describe** the decision.
+
   - Identify the owner.
+
   - Verify the fix with a small, repeatable check.
 
+
   | Boundary | Question |
+
   | --- | --- |
+
   | API | Who can access this resource? |
+
   | Storage | Which data must remain private? |
 
-  Use `Content-Type` to describe a response, and consult the [OWASP testing guide](https://owasp.org/www-project-web-security-testing-guide/).
+
+  Use `Content-Type` to describe a response, and consult the [OWASP testing
+  guide](https://owasp.org/www-project-web-security-testing-guide/).
+
 
   ```http
+
   GET /health HTTP/1.1
+
   Host: api.example.test
+
   Accept: application/json
+
   ```
+
 
   ### Local image example
 
-  This existing university emblem illustrates a locally stored, versioned image with alternative text.
 
-  ![Green and yellow emblem of the Federal University of ABC](/media/markdown-demo/ufabc.png)
+  This existing university emblem illustrates a locally stored, versioned image
+  with alternative text.
+
+
+  ![Green and yellow emblem of the Federal University of
+  ABC](/media/markdown-demo/ufabc.png)
+pt:
+  publish: false
+  tags: []
