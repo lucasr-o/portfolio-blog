@@ -39,7 +39,7 @@ body: >-
   for you or not.
 
 
-  ## TL;DR
+  ### TL;DR
 
 
   If I were starting in the field today, I would definitely buy it.
@@ -102,7 +102,7 @@ body: >-
   in order to move forward.
 
 
-  ![](/media/review-cwes/images/2/src.png)
+  ![Example "CTF" in sections](/media/review-cwes/images/2/src.png)
 
 
   At the end of each module, there was also an exam-like challenge that required
@@ -110,7 +110,7 @@ body: >-
   module.
 
 
-  ![](/media/review-cwes/images/1/src.png)
+  ![Example Skills Assessment](/media/review-cwes/images/1/src.png)
 
 
   ## 3. Studying
@@ -168,7 +168,7 @@ body: >-
   In my case, I used SysReptor locally to write the report.
 
 
-  ![](/media/review-cwes/images/0/src.png)
+  ![Sysreptor localhost](/media/review-cwes/images/0/src.png)
 
 
   There is a specific SysReptor template made for Hack The Box certifications,
@@ -291,14 +291,14 @@ pt:
     completar.
 
 
-    ![](/media/review-cwes/images/2/src.png)
+    ![Exemplo dos CTF nas seções](/media/review-cwes/images/2/src.png)
 
 
     No final do módulo também tinha uma prova para concluir, que demandava mais
     tempo e esforço, já que revisava os conteúdos daquele módulo específico.
 
 
-    ![](/media/review-cwes/images/1/src.png)
+    ![Exemplo da provinha final](/media/review-cwes/images/1/src.png)
 
 
     ## 3. Estudos
@@ -355,7 +355,7 @@ pt:
     No meu caso, para fazer o relatório, utilizei o SysReptor localmente.
 
 
-    ![](/media/review-cwes/images/0/src.png)
+    ![Sysreptor funcionando de forma local](/media/review-cwes/images/0/src.png)
 
 
     Existe um template específico para o SysReptor voltado para os cursos da
