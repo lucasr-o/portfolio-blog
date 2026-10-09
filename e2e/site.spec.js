@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const postPath = "/blog/security-reviews-that-move-at-product-speed/";
+const postPath = "/blog/review-cwes/";
 
 async function expectNoHorizontalOverflow(page) {
   const overflow = await page.evaluate(() => {
@@ -16,7 +16,7 @@ test("connects home anchors, latest writing, blog, and article navigation", asyn
   await expect(page).toHaveURL(/\/#work$/);
   await expect(page.locator("#work")).toBeInViewport();
 
-  await page.getByRole("link", { name: "Security reviews that move at product speed" }).click();
+  await page.getByRole("link", { name: "Review CWES" }).click();
   await expect(page).toHaveURL(new RegExp(`${postPath}$`));
   await page.getByRole("link", { name: /Back to blog/ }).click();
   await expect(page).toHaveURL(/\/blog\/$/);
@@ -44,7 +44,7 @@ test("brand returns from the blog to the beginning of the home page", async ({ p
   await expect(page.getByRole("heading", { name: "Security that moves with the product." })).toBeInViewport();
 });
 
-test("switches between the English index and an empty Portuguese index without a broken article link", async ({ page }) => {
+test("switches between the English and Portuguese blog indexes and article versions", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 760 });
   await page.goto("/blog/");
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
@@ -54,7 +54,7 @@ test("switches between the English index and an empty Portuguese index without a
   await expect(page).toHaveURL(/\/pt\/blog\/$/);
   await expect(page.locator("html")).toHaveAttribute("lang", "pt-BR");
   await expect(page.getByRole("heading", { level: 1, name: "Artigos." })).toBeVisible();
-  await expect(page.getByText("Ainda não há artigos em português.", { exact: false })).toBeVisible();
+  await expect(page.getByRole("link", { name: "O que achei da CWES" })).toBeVisible();
   await expectNoHorizontalOverflow(page);
   const portugueseSwitch = page.getByRole("navigation", { name: "Idioma do blog" });
   await expect(portugueseSwitch.getByRole("link", { name: "PT" })).toHaveAttribute("aria-current", "page");
@@ -62,7 +62,11 @@ test("switches between the English index and an empty Portuguese index without a
   await expect(page).toHaveURL(/\/blog\/$/);
   await expect(page.getByRole("heading", { level: 1, name: "Posts." })).toBeVisible();
   await page.goto(postPath);
-  await expect(page.getByRole("navigation", { name: "Article language" })).toHaveCount(0);
+  const articleSwitch = page.getByRole("navigation", { name: "Article language" });
+  await expect(articleSwitch.getByRole("link", { name: "EN" })).toHaveAttribute("aria-current", "page");
+  await articleSwitch.getByRole("link", { name: "PT" }).click();
+  await expect(page).toHaveURL(/\/pt\/blog\/review-cwes\/$/);
+  await expect(page.getByRole("heading", { level: 1, name: "O que achei da CWES" })).toBeVisible();
 });
 
 test("offers a readable recovery path for an unknown page", async ({ page }) => {
@@ -99,7 +103,7 @@ for (const viewport of [
     }
 
     await page.goto(postPath);
-    const paragraphWidth = await page.getByText("A review should begin with the product decision", { exact: false }).evaluate((element) => element.getBoundingClientRect().width);
+    const paragraphWidth = await page.locator("article p").first().evaluate((element) => element.getBoundingClientRect().width);
     expect(paragraphWidth).toBeLessThanOrEqual(720);
   });
 }

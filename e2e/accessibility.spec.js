@@ -5,7 +5,8 @@ const routes = [
   "/",
   "/blog/",
   "/pt/blog/",
-  "/blog/security-reviews-that-move-at-product-speed/",
+  "/blog/review-cwes/",
+  "/pt/blog/review-cwes/",
   "/no-such-page/",
 ];
 

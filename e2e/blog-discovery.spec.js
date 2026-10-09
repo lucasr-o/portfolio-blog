@@ -8,13 +8,13 @@ test("keeps search data lazy and finds body-only terms from a shared URL", async
   await page.goto("/blog/");
   await expect(page.getByRole("heading", { level: 1, name: "Posts." })).toBeVisible();
   expect(searchRequests).toHaveLength(0);
-  await page.getByRole("searchbox", { name: "Search posts" }).fill("uncertainty");
+  await page.getByRole("searchbox", { name: "Search posts" }).fill("voucher");
   await page.getByRole("button", { name: "Search", exact: true }).click();
-  await expect(page).toHaveURL(/\/blog\/\?q=uncertainty$/);
-  await expect(page.getByRole("region", { name: "Search results" }).getByRole("link", { name: "Security reviews that move at product speed" })).toBeVisible();
+  await expect(page).toHaveURL(/\/blog\/\?q=voucher$/);
+  await expect(page.getByRole("region", { name: "Search results" }).getByRole("link", { name: "Review CWES" })).toBeVisible();
   expect(searchRequests).toHaveLength(1);
   await page.reload();
-  await expect(page.getByRole("region", { name: "Search results" }).getByRole("link", { name: "Security reviews that move at product speed" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Search results" }).getByRole("link", { name: "Review CWES" })).toBeVisible();
   await page.getByRole("link", { name: "Clear search" }).click();
   await expect(page).toHaveURL(/\/blog\/$/);
   await expect(page.getByRole("region", { name: "Recent posts" })).toBeVisible();
@@ -28,10 +28,10 @@ test("distinguishes no result from index failure and supports retry", async ({ p
     if (!failed) { failed = true; return route.abort(); }
     return route.continue();
   });
-  await page.goto("/blog/?q=uncertainty");
+  await page.goto("/blog/?q=voucher");
   await expect(page.getByText("Search could not load.")).toBeVisible();
   await page.getByRole("button", { name: "Try again" }).click();
-  await expect(page.getByRole("region", { name: "Search results" }).getByRole("link", { name: "Security reviews that move at product speed" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Search results" }).getByRole("link", { name: "Review CWES" })).toBeVisible();
 });
 
 test("keeps hostile URL input inert and layout usable at narrow widths", async ({ page }) => {

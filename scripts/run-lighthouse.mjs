@@ -9,7 +9,7 @@ const routes = [
   ["home", "/"],
   ["blog", "/blog/"],
   ["pt-blog", "/pt/blog/"],
-  ["post", "/blog/security-reviews-that-move-at-product-speed/"],
+  ["post", "/blog/review-cwes/"],
 ];
 const outputDirectory = path.join(root, ".lighthouse");
 fs.mkdirSync(outputDirectory, { recursive: true });

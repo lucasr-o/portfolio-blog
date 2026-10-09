@@ -17,9 +17,14 @@ const expectedRoutes = [
     canonical: "https://lucas-reis.com/pt/blog/",
   },
   {
-    path: "/blog/security-reviews-that-move-at-product-speed/",
-    title: "Security reviews that move at product speed | Lucas Reis",
-    canonical: "https://lucas-reis.com/blog/security-reviews-that-move-at-product-speed/",
+    path: "/blog/review-cwes/",
+    title: "Review CWES | Lucas Reis",
+    canonical: "https://lucas-reis.com/blog/review-cwes/",
+  },
+  {
+    path: "/pt/blog/review-cwes/",
+    title: "O que achei da CWES | Lucas Reis",
+    canonical: "https://lucas-reis.com/pt/blog/review-cwes/",
   },
 ];
 
@@ -45,12 +50,12 @@ test("structured data matches visible person and article records", async ({ page
   });
   await expect(page.getByText(person.name, { exact: false })).toBeVisible();
 
-  await page.goto("/blog/security-reviews-that-move-at-product-speed/");
+  await page.goto("/blog/review-cwes/");
   const article = await page.locator('script[type="application/ld+json"]').evaluate((element) => JSON.parse(element.textContent));
   expect(article).toMatchObject({
     "@type": "BlogPosting",
-    headline: "Security reviews that move at product speed",
-    datePublished: "2026-09-18T12:00:00.000Z",
+    headline: "Review CWES",
+    datePublished: "2026-10-09T18:00:00.000Z",
   });
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(article.headline);
 });
@@ -64,20 +69,22 @@ test("robots and sitemap expose only eligible canonical public routes", async ({
   expect(sitemap.ok()).toBeTruthy();
   const xml = await sitemap.text();
   for (const route of expectedRoutes) expect(xml).toContain(route.canonical);
-  expect((xml.match(/<url>/g) ?? [])).toHaveLength(4);
-  expect(xml).not.toContain("/pt/blog/security-reviews-that-move-at-product-speed/");
+  expect((xml.match(/<url>/g) ?? [])).toHaveLength(5);
+  expect(xml).not.toContain("/blog/security-reviews-that-move-at-product-speed/");
 });
 
-test("indexes are reciprocal language alternates while English-only articles are not", async ({ page }) => {
+test("indexes and bilingual articles have reciprocal language alternates", async ({ page }) => {
   for (const path of ["/blog/", "/pt/blog/"]) {
     await page.goto(path);
     await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute("href", "https://lucas-reis.com/blog/");
     await expect(page.locator('link[rel="alternate"][hreflang="pt-BR"]')).toHaveAttribute("href", "https://lucas-reis.com/pt/blog/");
   }
-  await page.goto("/blog/security-reviews-that-move-at-product-speed/");
-  await expect(page.locator('link[rel="alternate"][hreflang="pt-BR"]')).toHaveCount(0);
+  await page.goto("/blog/review-cwes/");
+  await expect(page.locator('link[rel="alternate"][hreflang="pt-BR"]')).toHaveAttribute("href", "https://lucas-reis.com/pt/blog/review-cwes/");
   const article = await page.locator('script[type="application/ld+json"]').evaluate((element) => JSON.parse(element.textContent));
   expect(article.inLanguage).toBe("en");
+  await page.goto("/pt/blog/review-cwes/");
+  await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute("href", "https://lucas-reis.com/blog/review-cwes/");
 });
 
 test("uses the Lucas Reis mark as the site icon", async ({ page, request }) => {
