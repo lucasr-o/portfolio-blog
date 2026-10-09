@@ -9,7 +9,8 @@ export async function auditPublication({ root, contentRoot = root, publication }
   const allowedPortuguese = new Set(publication.ptPosts.map((post) => post.slug));
   const excluded = allPosts.filter((post) => !allowed.has(post.slug));
   const excludedPortuguese = allPosts.filter((post) => !allowedPortuguese.has(post.slug));
-  const allowedMedia = new Set(Object.values(publication.media).map((image) => image.url.slice(1)));
+  const allowedMedia = new Set(Object.values(publication.media).flatMap((image) =>
+    [image.url, image.posterUrl].filter(Boolean).map((url) => url.slice(1))));
   const forbidden = ["@keystatic/", "KEYSTATIC_GITHUB_CLIENT_SECRET", "KEYSTATIC_SECRET", "CLOUDFLARE_TUNNEL_TOKEN", "keystatic-gh-access-token", "https://lucas-reis.dev"];
   for (const key of ["KEYSTATIC_SECRET", "KEYSTATIC_GITHUB_CLIENT_SECRET", "CLOUDFLARE_TUNNEL_TOKEN", "AWS_SECRET_ACCESS_KEY"]) {
     if (process.env[key]?.length > 12) forbidden.push(process.env[key]);
@@ -33,7 +34,8 @@ export async function auditPublication({ root, contentRoot = root, publication }
     for (const marker of forbidden) if (text.includes(marker)) throw new Error(`Forbidden CMS/secret/canonical marker in ${relative}`);
     for (const post of excluded) {
       // Check source, JSON-escaped source and distinctive paragraph strings in RSC/HTML.
-      const pieces = [post.body, ...post.body.split(/\n\s*\n/)].filter((piece) => piece.length >= 40);
+      const body = post.en !== undefined || post.createdAt !== undefined ? post.en?.body ?? "" : post.body;
+      const pieces = [body, ...body.split(/\n\s*\n/)].filter((piece) => piece.length >= 40);
       for (const piece of pieces) {
         if (text.includes(piece) || text.includes(JSON.stringify(piece).slice(1, -1))) throw new Error(`Excluded article body in ${relative}: ${post.slug}`);
       }
@@ -47,7 +49,8 @@ export async function auditPublication({ root, contentRoot = root, publication }
   }
   for (const media of allowedMedia) await stat(path.join(output, media));
   const sitemap = await readFile(path.join(output, "sitemap.xml"), "utf8");
-  for (const post of excluded) if (sitemap.includes(`/blog/${post.slug}/`)) throw new Error(`Excluded article in sitemap: ${post.slug}`);
-  for (const post of excludedPortuguese) if (sitemap.includes(`/pt/blog/${post.slug}/`)) throw new Error(`Excluded Portuguese article in sitemap: ${post.slug}`);
+  const sitemapPaths = new Set([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => new URL(match[1]).pathname));
+  for (const post of excluded) if (sitemapPaths.has(`/blog/${post.slug}/`)) throw new Error(`Excluded article in sitemap: ${post.slug}`);
+  for (const post of excludedPortuguese) if (sitemapPaths.has(`/pt/blog/${post.slug}/`)) throw new Error(`Excluded Portuguese article in sitemap: ${post.slug}`);
   console.info(`Publication audit: ${allowed.size} English and ${allowedPortuguese.size} Portuguese articles; ${excluded.length} excluded parents; ${allowedMedia.size} images.`);
 }

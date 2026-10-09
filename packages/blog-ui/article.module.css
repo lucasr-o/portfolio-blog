@@ -27,5 +27,9 @@
 .tableScroll th, .tableScroll td { text-align: left; padding: 0.7rem; border-bottom: 1px solid var(--color-border); }
 .tableScroll th { background: #f0efec; }
 .image { display: block; width: auto; max-width: 100%; max-height: 36rem; object-fit: contain; height: auto; margin-inline: auto; background: #fff; }
+.gifFigure { display: grid; justify-items: center; gap: 0.6rem; margin: var(--space-5) 0; }
+.gifFigure figcaption { width: 100%; max-width: var(--measure); text-align: right; }
+.gifToggle { padding: 0.4rem 0.75rem; border: 1px solid var(--color-border); border-radius: 999px; background: #fff; color: var(--color-text); cursor: pointer; font: inherit; font-size: 0.78rem; }
+.gifToggle:hover, .gifToggle:focus-visible { border-color: var(--color-tertiary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-tertiary) 18%, transparent); }
 .cover { margin-top: var(--space-6); }
 .author { margin-top: var(--space-8); padding-top: var(--space-5); border-top: 1px solid var(--color-border); color: var(--color-text-muted); font-size: 0.88rem; }

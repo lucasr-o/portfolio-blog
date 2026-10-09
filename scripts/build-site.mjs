@@ -6,11 +6,13 @@ import { loadPublication } from "@portfolio/blog-content/publication";
 import { auditPublication } from "./audit-publication.mjs";
 import { writeSearchIndexes } from "./write-search-index.mjs";
 import { pageCount } from "@portfolio/blog-content/pagination";
+import { computePublicFingerprint } from "./public-fingerprint.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const contentRoot = process.env.BLOG_CONTENT_ROOT ? path.resolve(process.env.BLOG_CONTENT_ROOT) : root;
 const publicationTime = process.env.BLOG_PUBLICATION_TIME ?? new Date().toISOString();
 const publication = await loadPublication(contentRoot, publicationTime);
+publication.publicFingerprint = await computePublicFingerprint(root, publication);
 const snapshotPath = path.join(root, ".cache/publication.json");
 await mkdir(path.dirname(snapshotPath), { recursive: true });
 await writeFile(snapshotPath, JSON.stringify(publication));

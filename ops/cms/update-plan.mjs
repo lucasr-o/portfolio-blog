@@ -2,7 +2,7 @@ export const IMAGE_NAME = "ghcr.io/lucasr-o/portfolio-blog-cms";
 export const DIGEST_IMAGE = /^ghcr\.io\/lucasr-o\/portfolio-blog-cms@sha256:[a-f0-9]{64}$/;
 const REVISION = /^[a-f0-9]{40}$/;
 const IMAGE_INPUTS = ["apps/cms/", "packages/blog-content/", "packages/blog-ui/",
-  "ops/cms/Dockerfile", ".dockerignore", "package.json", "pnpm-lock.yaml",
+  "ops/cms/Dockerfile", "ops/cms/editor-v2-enabled", ".dockerignore", "package.json", "pnpm-lock.yaml",
   "pnpm-workspace.yaml", ".github/workflows/cms-image.yml"];
 
 const affectsImage = (name) => typeof name !== "string" ||

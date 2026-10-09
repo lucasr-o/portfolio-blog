@@ -20,6 +20,24 @@ describe("editorial media", () => {
     expect(media.url).toMatch(/^\/media\/posts\/[a-f0-9]{64}\.png$/);
     expect(await inspectImage(bytes, image.src)).toEqual(media);
   });
+  it("accepts a genuine GIF and creates a deterministic still poster", async () => {
+    const bytes = Buffer.from("R0lGODlhAQABAAD/ACwAAAAAAQABAAACAUwAOw==", "base64");
+    const asset = await inspectImage(bytes, "/media/example/loop.gif");
+    expect(asset).toMatchObject({ width: 1, height: 1, frames: 1 });
+    expect(asset.url).toMatch(/^\/media\/posts\/[a-f0-9]{64}\.gif$/);
+    expect(asset.posterUrl).toMatch(/^\/media\/posts\/[a-f0-9]{64}\.png$/);
+    expect(await inspectImage(bytes, "/media/example/loop.gif")).toEqual(asset);
+    await expect(inspectImage(bytes, "/media/example/loop.png")).rejects.toThrow(/extension/);
+    expect(() => article({ cover: { src: "/media/example/loop.gif", alt: "Loop" } })).toThrow(/still/);
+  });
+  it("blocks a GIF beyond the frame limit and a truncated GIF", async () => {
+    const oneFrame = Buffer.from("R0lGODlhAQABAAD/ACwAAAAAAQABAAACAUwAOw==", "base64");
+    const tooManyFrames = Buffer.concat([
+      oneFrame.subarray(0, 13), ...Array(121).fill(oneFrame.subarray(13, -1)), oneFrame.subarray(-1),
+    ]);
+    await expect(inspectImage(tooManyFrames, "/media/example/too-many.gif")).rejects.toThrow(/120 frames/);
+    await expect(inspectImage(oneFrame.subarray(0, 20), "/media/example/broken.gif")).rejects.toThrow(/Invalid/);
+  });
   it("rejects invalid, oversized, truncated and mismatched image files", async () => {
     await expect(inspectImage(Buffer.from("not an image"), image.src)).rejects.toThrow(/Invalid/);
     await expect(inspectImage(Buffer.alloc(MAX_IMAGE_BYTES + 1), image.src)).rejects.toThrow(/5 MiB/);

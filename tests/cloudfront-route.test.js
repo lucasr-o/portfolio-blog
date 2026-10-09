@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { runInNewContext } from "node:vm";
+import { getPublicContent } from "@/lib/public-content";
 
 const code = await readFile(join(process.cwd(), "infra/cloudfront/viewer-request.js"), "utf8");
 const edgeHandler = runInNewContext(`${code}\nhandler`, {});
@@ -31,8 +32,9 @@ async function filesUnder(directory, prefix = "") {
 describe("CloudFront viewer request routing", () => {
   it("resolves actual exported pages with and without the canonical trailing slash", async () => {
     const inventory = new Set(await filesUnder(exportDirectory));
+    const { posts } = await getPublicContent();
     for (const page of ["index.html", "blog/index.html",
-      "blog/security-reviews-that-move-at-product-speed/index.html"]) {
+      ...posts.map((post) => `blog/${post.slug}/index.html`)]) {
       expect(inventory.has(page)).toBe(true);
       const path = page === "index.html" ? "/" : `/${page.slice(0, -"index.html".length)}`;
       expect(route(path)).toBe(`/${page}`);

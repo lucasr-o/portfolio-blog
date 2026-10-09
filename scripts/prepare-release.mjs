@@ -14,7 +14,8 @@ const publication = JSON.parse(await readFile(path.join(root, ".cache/publicatio
 const manifest = await buildReleaseManifest({ exportDirectory: path.join(root, "out"),
   sourceRevision: revision, releaseId: `${revision}-${runId}-${attempt}`,
   publicationTime: publication.publicationTime, posts: publication.posts.map((post) => post.slug),
-  portuguesePosts: publication.ptPosts.map((post) => post.slug) });
+  portuguesePosts: publication.ptPosts.map((post) => post.slug),
+  publicFingerprint: publication.publicFingerprint });
 const destination = path.join(root, ".cache/release-manifest.json");
 await writeFile(destination, JSON.stringify(manifest, null, 2) + "\n");
 console.info(`Release plan ${manifest.releaseId}: ${manifest.files.length} files, ${manifest.posts.length} English and ${manifest.portuguesePosts.length} Portuguese posts, cutoff ${manifest.publicationTime}`);

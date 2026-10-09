@@ -1,8 +1,19 @@
 import { collection, config, fields } from "@keystatic/core";
 import { DEFAULT_AUTHOR, SLUG_PATTERN, normalizeInstant } from "@portfolio/blog-content/model";
 import { editorialImageField } from "./lib/image-field.js";
+import { editorialPrototypeField } from "./lib/editorial-field.jsx";
 
 const local = process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_CMS_STORAGE !== "github";
+const editorV2 = process.env.NEXT_PUBLIC_CMS_EDITOR_V2 === "1";
+
+const portugueseFirstSchema = {
+  title: fields.slug({
+    name: { label: "Título original", description: "Para posts novos, escreva em português. Este título define o slug; posts antigos em inglês mantêm seu título original aqui." },
+    slug: { label: "URL slug", description: "Não altere após a publicação sem planejar um redirecionamento.",
+      validation: { length: { min: 1, max: 120 }, pattern: { regex: SLUG_PATTERN, message: "Use letras minúsculas, números e hífens simples." } } },
+  }),
+  editorial: editorialPrototypeField(),
+};
 
 function instantField(label) {
   const field = fields.text({
@@ -27,9 +38,9 @@ export default config({
   collections: {
     posts: collection({
       label: "Blog posts", path: "content/posts/*", slugField: "title", format: "yaml",
-      columns: ["title", "status", "publishedAt"],
+      columns: editorV2 ? ["title"] : ["title", "status", "publishedAt"],
       previewUrl: local ? undefined : "/preview/{slug}",
-      schema: {
+      schema: editorV2 ? portugueseFirstSchema : {
         title: fields.slug({
           name: { label: "Title", description: "Required for publication; drafts may be incomplete." },
           slug: { label: "URL slug", description: "Do not rename a published slug without a URL migration.", validation: { length: { min: 1, max: 120 }, pattern: { regex: SLUG_PATTERN, message: "Use lowercase letters, numbers and single hyphens." } } },
@@ -39,8 +50,7 @@ export default config({
         status: fields.select({ label: "Publication state", defaultValue: "draft", options: [
           { label: "Draft — not on the website", value: "draft" },
           { label: "Published — visible when its date arrives", value: "published" },
-          { label: "Scheduled — visible after its date and the next deploy", value: "scheduled" },
-        ], description: "Saving writes to a PUBLIC GitHub repository. Drafts are not confidential. Work on main for the production workflow." }),
+        ], description: "Saving writes to a PUBLIC GitHub repository. Drafts are not confidential. There is no scheduled publication; work on main for the production workflow." }),
         publishedAt: instantField("Publication date and time"),
         updatedAt: instantField("Last updated (optional)"),
         tags: fields.array(fields.text({ label: "Tag", validation: { isRequired: true, length: { max: 60 } } }), { label: "Topics", itemLabel: (props) => props.value }),

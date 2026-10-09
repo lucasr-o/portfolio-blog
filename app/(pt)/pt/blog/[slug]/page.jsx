@@ -12,8 +12,9 @@ export const dynamicParams = false;
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const post = findPublicArticle(await getPublicContent(), slug, "pt-BR");
-  return post ? articleMetadata(post, true) : {};
+  const publication = await getPublicContent();
+  const post = findPublicArticle(publication, slug, "pt-BR");
+  return post ? articleMetadata(post, Boolean(findPublicArticle(publication, slug))) : {};
 }
 
 export default async function PortuguesePostPage({ params }) {
@@ -21,5 +22,5 @@ export default async function PortuguesePostPage({ params }) {
   const publication = await getPublicContent();
   const post = findPublicArticle(publication, slug, "pt-BR");
   if (!post) notFound();
-  return <PublicArticle post={post} media={publication.media} hasPortuguese />;
+  return <PublicArticle post={post} media={publication.media} hasCounterpart={Boolean(findPublicArticle(publication, slug))} />;
 }

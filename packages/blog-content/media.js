@@ -2,30 +2,12 @@ import { createHash } from "node:crypto";
 import { readFile, realpath, stat } from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
-import { unified } from "unified";
-import remarkParse from "remark-parse";
-import remarkGfm from "remark-gfm";
-import { visit } from "unist-util-visit";
 import { ContentError, MAX_IMAGE_BYTES, mediaRepositoryPath } from "./model.js";
+import { referencedImages } from "./references.js";
+export { referencedImages } from "./references.js";
 
-export function referencedImages(post) {
-  const tree = unified().use(remarkParse).use(remarkGfm).parse(post.body);
-  const definitions = new Map();
-  visit(tree, "definition", (node) => definitions.set(node.identifier.toLowerCase(), node.url));
-  const refs = [];
-  if (post.cover) refs.push(post.cover);
-  visit(tree, (node) => {
-    if (node.type === "image") refs.push({ src: node.url, alt: node.alt });
-    if (node.type === "imageReference") refs.push({ src: definitions.get(node.identifier.toLowerCase()), alt: node.alt });
-  });
-  const declared = new Map([...(post.cover ? [post.cover] : []), ...post.images].map((image) => [image.src, image]));
-  for (const reference of refs) {
-    const field = `${post.slug}:${post.locale === "pt-BR" ? "pt.body" : "body"}.image`;
-    try { mediaRepositoryPath(reference.src); } catch (error) { throw new ContentError([{ path: field, message: error.message }]); }
-    if (!reference.alt?.trim()) throw new ContentError([{ path: field, message: `Add descriptive alt text for ${reference.src}.` }]);
-    if (!declared.has(reference.src)) throw new ContentError([{ path: field, message: `Add ${reference.src} to the Images field before using it in Markdown.` }]);
-  }
-  return refs;
+export async function gifPoster(bytes) {
+  return sharp(bytes, { page: 0, failOn: "warning", limitInputPixels: 24_000_000 }).png().toBuffer();
 }
 
 export async function inspectImage(bytes, reference) {
@@ -33,19 +15,32 @@ export async function inspectImage(bytes, reference) {
   const fail = (message) => new ContentError([{ path: repositoryPath, message }]);
   if (bytes.length > MAX_IMAGE_BYTES) throw fail("Image exceeds the 5 MiB limit.");
   try {
-    const decoder = sharp(bytes, { failOn: "warning", limitInputPixels: 40_000_000 });
+    const gif = /\.gif$/.test(reference);
+    const decoder = sharp(bytes, { failOn: "warning", animated: gif, limitInputPixels: 24_000_000 });
     const metadata = await decoder.metadata();
     const expected = path.extname(reference).slice(1).replace("jpg", "jpeg");
-    if (!["png", "jpeg", "webp"].includes(metadata.format) || expected !== metadata.format) throw fail("Image bytes do not match an allowed file extension.");
-    if (metadata.pages > 1) throw fail("Use a still PNG, JPEG or WebP image, not an animation.");
+    if (!["png", "jpeg", "webp", "gif"].includes(metadata.format) || expected !== metadata.format) throw fail("Image bytes do not match an allowed file extension.");
+    const frames = metadata.pages ?? 1;
+    const frameHeight = metadata.pageHeight ?? metadata.height;
+    if (gif) {
+      if (!Number.isSafeInteger(frames) || frames < 1 || frames > 120) throw fail("GIF must have at most 120 frames.");
+      if (!Number.isSafeInteger(frameHeight) || !Number.isSafeInteger(metadata.width) ||
+          metadata.width * frameHeight * frames > 24_000_000) throw fail("GIF exceeds the decoded-pixel budget.");
+    } else if (frames > 1) throw fail("Use a still PNG, JPEG or WebP image, not an animation.");
     // Decode the whole image, not only its header, so truncated/corrupt files fail.
     await decoder.clone().raw().toBuffer();
-    const { width, height } = metadata.autoOrient ?? metadata;
+    const width = metadata.width;
+    const height = gif ? frameHeight : metadata.height;
     const hash = createHash("sha256").update(bytes).digest("hex");
-    return { repositoryPath, url: `/media/posts/${hash}.${metadata.format === "jpeg" ? "jpg" : metadata.format}`, hash, width, height, bytes: bytes.length };
+    const poster = gif ? await gifPoster(bytes) : null;
+    const posterHash = poster ? createHash("sha256").update(poster).digest("hex") : null;
+    return {
+      repositoryPath, url: `/media/posts/${hash}.${metadata.format === "jpeg" ? "jpg" : metadata.format}`,
+      hash, width, height, bytes: bytes.length, ...(gif ? { frames, posterHash, posterUrl: `/media/posts/${posterHash}.png` } : {}),
+    };
   } catch (error) {
     if (error instanceof ContentError) throw error;
-    throw fail("Invalid or corrupt image; upload a valid PNG, JPEG or WebP below 5 MiB and 40 megapixels.");
+    throw fail("Invalid or corrupt image; upload a valid PNG, JPEG, WebP or bounded GIF below 5 MiB.");
   }
 }
 

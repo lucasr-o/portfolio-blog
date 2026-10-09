@@ -1,0 +1,218 @@
+.editor {
+  --editor-line: color-mix(in srgb, currentColor 20%, transparent);
+  --editor-muted: color-mix(in srgb, currentColor 68%, transparent);
+  display: grid;
+  gap: 24px;
+  max-width: 900px;
+  color: inherit;
+  font: 14px/1.5 system-ui, sans-serif;
+}
+
+.intro {
+  border-top: 1px solid var(--editor-line);
+  padding-top: 24px;
+}
+
+.eyebrow,
+.localeBadge {
+  color: var(--editor-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .11em;
+}
+
+.intro p,
+.sectionHeader p,
+.hint,
+.footnote {
+  color: var(--editor-muted);
+}
+
+.intro p {
+  margin: 8px 0 0;
+  max-width: 65ch;
+}
+
+.meta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 16px;
+}
+
+.field {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  margin: 0 0 16px;
+  font-weight: 600;
+}
+
+.control {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  padding: 9px 11px;
+  border: 1px solid var(--editor-line);
+  border-radius: 8px;
+  background: color-mix(in srgb, currentColor 4%, transparent);
+  color: inherit;
+  font: 400 14px/1.5 system-ui, sans-serif;
+}
+
+.control:focus-visible,
+.fileLabel:focus-within,
+.action:focus-visible,
+.secondaryAction:focus-visible,
+.approval:focus-within {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.section {
+  min-width: 0;
+  border: 1px solid var(--editor-line);
+  border-radius: 14px;
+  padding: clamp(18px, 3vw, 28px);
+}
+
+.sectionHeader {
+  margin-bottom: 22px;
+}
+
+.sectionHeader h2 {
+  margin: 5px 0 0;
+  font: 700 clamp(21px, 3vw, 25px)/1.2 system-ui, sans-serif;
+}
+
+.sectionHeader p {
+  margin: 6px 0 0;
+}
+
+.markdown {
+  min-height: 260px;
+  resize: vertical;
+  font: 13px/1.65 ui-monospace, SFMono-Regular, Consolas, monospace;
+  white-space: pre-wrap;
+}
+
+.mediaControls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin: -4px 0 22px;
+}
+
+.hint {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: 13px;
+}
+
+.fileLabel,
+.action,
+.secondaryAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 7px 12px;
+  border: 1px solid var(--editor-line);
+  border-radius: 8px;
+  color: inherit;
+  background: transparent;
+  font: 600 13px/1.2 system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.fileLabel:hover,
+.secondaryAction:hover {
+  background: color-mix(in srgb, currentColor 9%, transparent);
+}
+
+.fileLabel input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.pending {
+  flex-basis: 100%;
+  border: 1px solid var(--editor-line);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.pending p {
+  margin: 0 0 12px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+.action:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.action:disabled,
+.secondaryAction:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+.approval {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 22px;
+  padding: 14px;
+  border: 1px solid var(--editor-line);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.approval input {
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
+  accent-color: #2563eb;
+}
+
+.approval span {
+  display: grid;
+  gap: 2px;
+}
+
+.approval small {
+  color: var(--editor-muted);
+  font-size: 12px;
+}
+
+.error {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #ef4444;
+  border-radius: 8px;
+  color: #ef4444;
+}
+
+.footnote {
+  margin: 0;
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .meta { grid-template-columns: 1fr; gap: 0; }
+  .section { padding: 18px; }
+  .actions { flex-wrap: wrap; }
+}

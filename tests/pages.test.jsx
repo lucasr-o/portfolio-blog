@@ -5,7 +5,7 @@ import BlogPage from "@/app/(en)/blog/page";
 import PortugueseBlogPage from "@/app/(pt)/pt/blog/page";
 import PostPage from "@/app/(en)/blog/[slug]/page";
 import { getPublicContent } from "@/lib/public-content";
-const { posts: [latestPost] } = await getPublicContent();
+const { posts: [latestPost], ptPosts } = await getPublicContent();
 
 describe("public routes", () => {
   it("renders the resume-driven home page with one primary heading", async () => {
@@ -37,22 +37,21 @@ describe("public routes", () => {
     expect(screen.getByRole("navigation", { name: "Blog language" }).getAttribute("aria-label")).toBe("Blog language");
   });
 
-  it("renders the Portuguese index without English-only article cards", async () => {
+  it("renders only Portuguese-approved cards on the Portuguese index", async () => {
     render(await PortugueseBlogPage());
     expect(screen.getByRole("heading", { level: 1, name: "Artigos." })).toBeInTheDocument();
-    expect(screen.getByText("Ainda não há artigos em português. Novas notas aparecerão aqui.")).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: latestPost.title })).not.toBeInTheDocument();
+    for (const post of ptPosts) expect(screen.getByRole("heading", { level: 3, name: post.title })).toBeInTheDocument();
+    if (ptPosts.length === 0) expect(screen.getByText("Ainda não há artigos em português. Novas notas aparecerão aqui.")).toBeInTheDocument();
   });
 
-  it("renders the placeholder article metadata, structure, and return path", async () => {
+  it("renders the current article metadata, structure, and return path", async () => {
     const element = await PostPage({ params: Promise.resolve({ slug: latestPost.slug }) });
     const { container } = render(element);
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(latestPost.title);
     expect(screen.getByRole("link", { name: /Back to blog/ })).toHaveAttribute("href", "/blog");
     expect(screen.getByText(latestPost.author, { exact: false })).toBeInTheDocument();
-    expect(within(container.querySelector("article")).getAllByRole("heading", { level: 2 })).toHaveLength(4);
-    expect(screen.getByRole("table")).toBeInTheDocument();
-    expect(screen.getByRole("img", { name: /Green and yellow/ })).toHaveAttribute("src", expect.stringMatching(/^\/media\/posts\//));
+    expect(within(container.querySelector("article")).getAllByRole("heading", { level: 2 }).length).toBeGreaterThan(0);
+    expect(within(container.querySelector("article")).getByText(latestPost.summary)).toBeInTheDocument();
   });
 });

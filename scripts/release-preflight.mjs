@@ -4,16 +4,14 @@ import { fileURLToPath } from "node:url";
 import { loadPublication } from "@portfolio/blog-content/publication";
 import { assertCurrentState } from "./release-deploy.mjs";
 import { withAwsObjectStore } from "./release-upload.mjs";
+import { computePublicFingerprint } from "./public-fingerprint.mjs";
 
-export function shouldDeploy({ eventName, sourceRevision, eligibleSlugs, eligiblePortugueseSlugs = [], current }) {
-  if (eventName === "push" || eventName === "workflow_dispatch") return true;
-  if (eventName !== "schedule") throw new Error("Unsupported release trigger");
+export function shouldDeploy({ eventName, fingerprint, current }) {
+  if (eventName !== "push" && eventName !== "workflow_dispatch") throw new Error("Unsupported release trigger");
   assertCurrentState(current);
-  if (!current || current.sourceRevision !== sourceRevision) return true;
-  const previous = [...current.manifest.posts].sort();
-  const previousPortuguese = [...(current.manifest.portuguesePosts ?? [])].sort();
-  return JSON.stringify([...eligibleSlugs].sort()) !== JSON.stringify(previous) ||
-    JSON.stringify([...eligiblePortugueseSlugs].sort()) !== JSON.stringify(previousPortuguese);
+  if (eventName === "workflow_dispatch") return true;
+  if (!/^[a-f0-9]{64}$/.test(fingerprint ?? "")) throw new Error("Invalid public fingerprint");
+  return !current?.manifest.publicFingerprint || current.manifest.publicFingerprint !== fingerprint;
 }
 
 async function run() {
@@ -25,15 +23,14 @@ async function run() {
   if (!/^[a-f0-9]{40}$/.test(sourceRevision ?? "") || !outputFile ||
       !Number.isFinite(Date.parse(cutoff))) throw new Error("Invalid preflight context");
   const publication = await loadPublication(root, cutoff);
+  const fingerprint = await computePublicFingerprint(root, publication);
   const current = await withAwsObjectStore(process.env.S3_BUCKET, async (store) => {
     const bytes = await store.getOptionalCurrent();
     return bytes ? assertCurrentState(JSON.parse(bytes.toString("utf8"))) : null;
   });
-  const deploy = shouldDeploy({ eventName, sourceRevision,
-    eligibleSlugs: publication.posts.map((post) => post.slug),
-    eligiblePortugueseSlugs: publication.ptPosts.map((post) => post.slug), current });
+  const deploy = shouldDeploy({ eventName, fingerprint, current });
   await appendFile(path.resolve(outputFile), `deploy=${deploy}\n`);
-  console.info(`Preflight: ${deploy ? "release required" : "unchanged"}; ${publication.posts.length} eligible posts at ${cutoff}`);
+  console.info(`Preflight: ${deploy ? "release required" : "public output unchanged"}; ${publication.posts.length} English and ${publication.ptPosts.length} Portuguese posts.`);
 }
 
 if (process.argv[1] && import.meta.url.startsWith("file:") &&

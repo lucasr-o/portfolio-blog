@@ -7,10 +7,10 @@ import Article from "@portfolio/blog-ui/Article";
 import { articlePath, blogCopy, blogPath, PORTUGUESE } from "@portfolio/blog-content/locale";
 import { createBlogPostingSchema } from "@/lib/structured-data";
 
-export default function PublicArticle({ post, media, hasPortuguese }) {
+export default function PublicArticle({ post, media, hasCounterpart }) {
   const locale = post.locale ?? "en";
   const copy = blogCopy(locale);
-  const switcher = hasPortuguese ? <LanguageSwitch locale={locale} englishHref={articlePath(post)} portugueseHref={articlePath(post, PORTUGUESE)} /> : null;
+  const switcher = hasCounterpart ? <LanguageSwitch locale={locale} englishHref={articlePath(post)} portugueseHref={articlePath(post, PORTUGUESE)} /> : null;
   return <>
     <JsonLd data={createBlogPostingSchema(post)} />
     <SiteHeader />

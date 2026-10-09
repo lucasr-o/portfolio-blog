@@ -1,4 +1,5 @@
 import { readingTime } from "./format.js";
+import { ContentError, normalizeInstant, validatePost } from "./model.js";
 
 export const ENGLISH = "en";
 export const PORTUGUESE = "pt-BR";
@@ -12,6 +13,20 @@ export function blogPath(locale = ENGLISH) {
 }
 
 export function projectPost(post, locale = ENGLISH) {
+  if (post.en !== undefined || post.createdAt !== undefined) {
+    const version = locale === PORTUGUESE ? post.pt : post.en;
+    if (!version) return null;
+    return {
+      slug: post.slug, status: post.status, createdAt: post.createdAt,
+      author: post.author, isPlaceholder: post.isPlaceholder,
+      images: post.images, locale,
+      title: version.title, summary: version.summary, body: version.body,
+      tags: version.tags, publishedAt: version.publishedAt,
+      updatedAt: version.updatedAt,
+      cover: post.cover ? { ...post.cover, alt: version.coverAlt } : null,
+      readingTime: readingTime(version.body, locale),
+    };
+  }
   if (locale !== PORTUGUESE) return { ...post, locale: ENGLISH };
   const pt = post.pt ?? { title: "", summary: "", body: "", tags: [], coverAlt: "" };
   return {
@@ -24,6 +39,33 @@ export function projectPost(post, locale = ENGLISH) {
     cover: post.cover ? { ...post.cover, alt: pt.coverAlt ?? "" } : null,
     readingTime: readingTime(pt.body ?? "", PORTUGUESE),
   };
+}
+
+export function isLocalePublic(post, locale, publicationTime) {
+  const cutoff = normalizeInstant(publicationTime);
+  if (post.status === "draft") return false;
+  if (post.en !== undefined || post.createdAt !== undefined) {
+    if (post.status !== "published") return false;
+    const version = locale === PORTUGUESE ? post.pt : post.en;
+    return version?.publish === true && Boolean(version.publishedAt) && version.publishedAt <= cutoff;
+  }
+  return Boolean(post.publishedAt) && post.publishedAt <= cutoff &&
+    (locale !== PORTUGUESE || post.pt?.publish === true);
+}
+
+export function selectLocalizedPosts(records, publicationTime, locale = ENGLISH) {
+  const cutoff = normalizeInstant(publicationTime);
+  const slugs = new Set();
+  const selected = [];
+  for (const record of records) {
+    if (slugs.has(record.slug)) throw new ContentError([{ path: `${record.slug}:slug`, message: "Duplicate slug." }]);
+    slugs.add(record.slug);
+    const { readingTime: _readingTime, locale: _locale, ...source } = record;
+    const post = validatePost(source, record.slug);
+    if (isLocalePublic(post, locale, cutoff)) selected.push(projectPost(post, locale));
+  }
+  return selected.sort((left, right) =>
+    right.publishedAt.localeCompare(left.publishedAt) || left.slug.localeCompare(right.slug, "en"));
 }
 
 export function selectPortuguesePosts(publishedEnglishPosts) {

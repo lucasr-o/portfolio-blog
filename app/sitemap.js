@@ -7,9 +7,10 @@ export const dynamic = "force-static";
 
 export default async function sitemap() {
   const { posts, ptPosts } = await getPublicContent();
-  const translatedSlugs = new Set(ptPosts.map((post) => post.slug));
+  const englishSlugs = new Set(posts.map((post) => post.slug));
+  const portugueseSlugs = new Set(ptPosts.map((post) => post.slug));
   const indexLanguages = { en: `${site.url}/blog/`, "pt-BR": `${site.url}/pt/blog/` };
-  const articleLanguages = (post) => translatedSlugs.has(post.slug) ? {
+  const articleLanguages = (post) => englishSlugs.has(post.slug) && portugueseSlugs.has(post.slug) ? {
     alternates: { languages: { en: `${site.url}${articlePath(post)}`, "pt-BR": `${site.url}${articlePath(post, "pt-BR")}` } },
   } : {};
   return [

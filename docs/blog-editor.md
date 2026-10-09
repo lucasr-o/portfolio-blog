@@ -2,7 +2,7 @@
 
 ## Estado atual
 
-O editor e as prévias foram validados localmente com o GitHub real. O painel no Raspberry Pi, a senha HTTP, o hostname hexadecimal e a publicação automática na AWS ainda não foram ativados. Até isso acontecer, **salvar não atualiza o site em produção**.
+Este guia descreve o **editor antigo, ainda em produção**. O painel no Raspberry Pi, a senha HTTP, o hostname hexadecimal e a publicação automática por push já estão ativos. O [novo fluxo português-primeiro](blog-editor-v2.md) está em preparação e só passa a valer após migração e corte aprovados. No fluxo atual, salvar um post público aciona o workflow de publicação; o resultado no site depende de uma release bem-sucedida.
 
 Repositório: [lucasr-o/portfolio-blog](https://github.com/lucasr-o/portfolio-blog). O aplicativo `portfolio-blog-keystatic-lucasr-o` está instalado somente nele, com escrita em conteúdo e leitura de metadados/pull requests. Não ampliar a instalação para outros repositórios.
 
@@ -10,7 +10,7 @@ Repositório: [lucasr-o/portfolio-blog](https://github.com/lucasr-o/portfolio-bl
 
 Em desenvolvimento, `pnpm dev:cms` usa arquivos locais por padrão. Para testar o GitHub, use `NEXT_PUBLIC_CMS_STORAGE=github pnpm dev:cms` e abra `http://127.0.0.1:3001/keystatic`. As credenciais ficam em `apps/cms/.env`, ignorado pelo Git; nunca compartilhe esse arquivo ou seu conteúdo. Não exponha o servidor de desenvolvimento à internet.
 
-Após a implantação, o acesso será pelo hostname hexadecimal registrado na documentação operacional: primeiro a senha HTTP, depois **Log in with GitHub**. São duas proteções diferentes. O acesso do GitHub não substitui a senha HTTP.
+O acesso de produção é pelo hostname hexadecimal registrado na documentação operacional: primeiro a senha HTTP, depois **Log in with GitHub**. São duas proteções diferentes. O acesso do GitHub não substitui a senha HTTP.
 
 ## Escrever e salvar
 
@@ -38,13 +38,12 @@ Para inserir uma imagem:
 
 O primeiro campo **Image file**, fora de **Images**, é a capa opcional. Para uma imagem aparecer no corpo, use sua referência Markdown. Imagens externas não são baixadas automaticamente. O build e a prévia verificam a decodificação, o tamanho e a correspondência entre formato e extensão.
 
-## Publicação, agendamento e retirada
+## Publicação e retirada
 
 Depois que a entrega automática for ativada:
 
 - **Draft**: o artigo não entra no site nem no sitemap.
-- **Published**: entra em uma entrega bem-sucedida quando a data de publicação já tiver chegado.
-- **Scheduled**: entra após a data e a próxima entrega automática; não há garantia de minuto exato.
+- **Published**: entra em uma entrega bem-sucedida quando a data de publicação já tiver chegado. O fluxo em preparação remove a opção Scheduled e a verificação periódica; não planeje publicações futuras por data.
 
 Preencha título, resumo, autor, corpo, data com fuso e textos alternativos antes de publicar. A data futura não é antecipada por selecionar Published. Salvar, visualizar uma prévia e publicar são eventos distintos: confira o resultado do workflow e o site público.
 

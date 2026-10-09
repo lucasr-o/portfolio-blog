@@ -1,6 +1,6 @@
 import { ContentError, isSlug, MAX_IMAGE_BYTES, mediaRepositoryPath, parsePostYaml, validatePost } from "@portfolio/blog-content/model";
-import { inspectImage, referencedImages } from "@portfolio/blog-content/media";
-import { PORTUGUESE, projectPost } from "@portfolio/blog-content/locale";
+import { gifPoster, inspectImage, referencedImages } from "@portfolio/blog-content/media";
+import { ENGLISH, PORTUGUESE, projectPost } from "@portfolio/blog-content/locale";
 
 export const REPOSITORY = "lucasr-o/portfolio-blog";
 export const REVISION_PATTERN = /^[a-f0-9]{40}$/;
@@ -73,41 +73,56 @@ export function markdownImageReference(image) {
 }
 
 export async function preparePreview(snapshot, slug) {
-  const post = await snapshot.readPost(slug);
+  const sourcePost = await snapshot.readPost(slug);
+  const localized = sourcePost.en !== undefined || sourcePost.createdAt !== undefined;
+  const post = localized ? projectPost(sourcePost, ENGLISH) : sourcePost;
+  const ptPost = projectPost(sourcePost, PORTUGUESE);
   const issues = [];
   const ptIssues = [];
-  const ptPost = projectPost(post, PORTUGUESE);
-  const { readingTime: _readingTime, ...record } = post;
-  try { validatePost({ ...record, status: "published" }, slug); }
-  catch (error) { if (!(error instanceof ContentError)) throw error; issues.push(...error.issues); }
-  try { referencedImages(post); }
-  catch (error) { if (!(error instanceof ContentError)) throw error; issues.push(...error.issues); }
-  try { validatePost({ ...record, status: "published", pt: { ...post.pt, publish: true } }, slug); }
-  catch (error) { if (!(error instanceof ContentError)) throw error; ptIssues.push(...error.issues.filter((issue) => issue.path.includes(":pt."))); }
-  try { referencedImages(ptPost); }
-  catch (error) { if (!(error instanceof ContentError)) throw error; ptIssues.push(...error.issues); }
+  const { readingTime: _readingTime, ...record } = sourcePost;
+  if (localized) {
+    for (const [locale, version, target] of [["en", sourcePost.en, issues], ["pt", sourcePost.pt, ptIssues]]) {
+      if (!version) { target.push({ path: `${slug}:${locale}`, message: "This language has not been written yet." }); continue; }
+      try { validatePost({ ...record, status: "published", [locale]: { ...version, publish: true } }, slug); }
+      catch (error) { if (!(error instanceof ContentError)) throw error; target.push(...error.issues.filter((issue) => issue.path.includes(`:${locale}.`))); }
+    }
+  } else {
+    try { validatePost({ ...record, status: "published" }, slug); }
+    catch (error) { if (!(error instanceof ContentError)) throw error; issues.push(...error.issues); }
+    try { validatePost({ ...record, status: "published", pt: { ...sourcePost.pt, publish: true } }, slug); }
+    catch (error) { if (!(error instanceof ContentError)) throw error; ptIssues.push(...error.issues.filter((issue) => issue.path.includes(":pt."))); }
+  }
+  for (const [version, target] of [[post, issues], [ptPost, ptIssues]]) {
+    if (!version) continue;
+    try { referencedImages(version); }
+    catch (error) { if (!(error instanceof ContentError)) throw error; target.push(...error.issues); }
+  }
   const media = {};
-  const images = [...(post.cover ? [post.cover] : []), ...post.images];
+  const images = [...(sourcePost.cover ? [sourcePost.cover] : []), ...sourcePost.images];
   for (const image of images) {
     if (media[image.src]) continue;
     try {
       const asset = await inspectImage(await snapshot.readImage(image.src), image.src);
-      media[image.src] = { ...asset, alt: image.alt, url: `/preview/media/${snapshot.revision}/${slug}/${asset.url.split("/").at(-1)}` };
+      media[image.src] = { ...asset, alt: image.alt,
+        url: `/preview/media/${snapshot.revision}/${slug}/${asset.url.split("/").at(-1)}`,
+        ...(asset.posterUrl ? { posterUrl: `/preview/media/${snapshot.revision}/${slug}/${asset.posterUrl.split("/").at(-1)}` } : {}),
+      };
     } catch (error) {
       if (error instanceof PreviewError && error.status === 401) throw error;
       issues.push({ path: image.src, message: error instanceof ContentError || error instanceof PreviewError ? error.message : "Cannot load this image." });
     }
   }
-  return { post, ptPost, media, images, issues, ptIssues, revision: snapshot.revision };
+  return { post, ptPost, sourcePost, media, images, issues, ptIssues, revision: snapshot.revision };
 }
 
 export async function readPreviewImage(snapshot, slug, filename) {
-  if (!isSlug(slug) || !/^[a-f0-9]{64}\.(png|jpg|webp)$/.test(filename)) throw new PreviewError("Invalid preview image.", 400);
+  if (!isSlug(slug) || !/^[a-f0-9]{64}\.(png|jpg|webp|gif)$/.test(filename)) throw new PreviewError("Invalid preview image.", 400);
   const post = await snapshot.readPost(slug);
   for (const image of [...(post.cover ? [post.cover] : []), ...post.images]) {
     const bytes = await snapshot.readImage(image.src);
     const asset = await inspectImage(bytes, image.src);
     if (asset.url.split("/").at(-1) === filename) return bytes;
+    if (asset.posterUrl?.split("/").at(-1) === filename) return gifPoster(bytes);
   }
   throw new PreviewError("Image not declared in this saved article.", 404);
 }

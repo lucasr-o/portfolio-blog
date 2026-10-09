@@ -23,7 +23,9 @@ describe("GitHub Actions security boundary", () => {
     expect(release).toMatch(/needs: \[preflight, verify\]/);
     expect(release).toMatch(/group: portfolio-blog-production\n\s+cancel-in-progress: false/);
     expect(release).toMatch(/if: github\.ref == 'refs\/heads\/main' && needs\.preflight\.outputs\.deploy == 'true'/);
-    expect(release).toMatch(/7,22,37,52 \* \* \* \*/);
+    expect(release).not.toMatch(/\bschedule:|\bcron:/);
+    expect(release).toMatch(/verify:\n\s+needs: preflight\n\s+if: needs\.preflight\.outputs\.deploy == 'true'/);
+    expect(release).toMatch(/fetch-depth: 0/);
     expect(release).toMatch(/workflow_dispatch:/);
     for (const source of [checks, release, cmsImage]) {
       for (const use of source.matchAll(/^\s+- uses: ([^\s#]+)/gm)) {
@@ -43,6 +45,10 @@ describe("GitHub Actions security boundary", () => {
     expect(cmsImage).toMatch(/platforms: linux\/arm64/);
     expect(cmsImage).toMatch(/org\.opencontainers\.image\.revision=/);
     expect(cmsImage).toMatch(/test ! -e \/app\/apps\/cms\/\.env/);
+    expect(cmsImage).toMatch(/candidate_v2:/);
+    expect(cmsImage).toMatch(/elif test -f ops\/cms\/editor-v2-enabled/);
+    expect(cmsImage).toMatch(/primary_tag=ghcr\.io\/lucasr-o\/portfolio-blog-cms:candidate-v2-/);
+    expect(cmsImage).toMatch(/CMS_EDITOR_V2=\$\{\{ steps\.variant\.outputs\.editor_v2 \}\}/);
     expect(cmsImage).not.toMatch(/AWS_DEPLOY_ROLE_ARN|id-token: write/);
   });
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { credentials, education, experience, profile, terminalSteps } from "@/data/profile";
 import { getPublicContent } from "@/lib/public-content";
 import { selectPublishedPosts } from "@portfolio/blog-content/model";
+import { readPosts } from "@portfolio/blog-content/reader";
 import { posts as legacyPosts } from "./fixtures/legacy-post";
 import { validateProfileContent } from "@/lib/content-validation";
 
@@ -37,24 +38,27 @@ describe("portfolio content", () => {
 });
 
 describe("blog content", () => {
-  it("validates the documented example, preserving the original slug, author and prose", async () => {
+  it("validates the saved demonstration draft while selecting only published content", async () => {
     const { posts, media } = await getPublicContent();
     const latestPost = posts[0];
     const original = legacyPosts[0];
-    expect(posts.some((post) => post.slug === "security-reviews-that-move-at-product-speed")).toBe(true);
-    expect(latestPost).toMatchObject({ slug: original.slug, title: original.title, summary: original.summary, author: original.author, isPlaceholder: true });
-    expect(latestPost.body).toContain(original.introduction.replace("lucas-reis.dev", "lucas-reis.com"));
+    const records = await readPosts(process.cwd());
+    const demonstration = records.find((post) => post.slug === original.slug);
+    expect(demonstration).toMatchObject({ slug: original.slug, title: original.title, summary: original.summary, author: original.author, status: "draft" });
+    expect(posts.some((post) => post.slug === original.slug)).toBe(false);
+    expect(demonstration.body).toContain(original.introduction.replace("lucas-reis.dev", "lucas-reis.com"));
     for (const section of original.sections) {
-      expect(latestPost.body).toContain(`## ${section.heading}`);
-      for (const paragraph of section.paragraphs) expect(latestPost.body).toContain(paragraph);
+      expect(demonstration.body).toContain(`## ${section.heading}`);
+      for (const paragraph of section.paragraphs) expect(demonstration.body).toContain(paragraph);
     }
-    expect(Object.keys(media)).toHaveLength(1);
+    expect(latestPost.status).toBe("published");
+    expect(Object.keys(media).length).toBeGreaterThan(0);
   });
 
   it("selects a newly added later article without duplicated home data", async () => {
     const { posts } = await getPublicContent();
-    const collection = [...posts, { ...posts[0], slug: "newer", publishedAt: "2026-09-28T00:00:00Z", updatedAt: null }];
-    const latest = selectPublishedPosts(collection, "2026-09-28T00:00:00Z")[0];
+    const collection = [...posts, { ...posts[0], slug: "newer", publishedAt: "2030-09-28T00:00:00Z", updatedAt: null }];
+    const latest = selectPublishedPosts(collection, "2030-09-28T00:00:00Z")[0];
     expect(latest.slug).toBe("newer");
   });
 });

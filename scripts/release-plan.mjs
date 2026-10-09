@@ -14,6 +14,7 @@ const CONTENT_TYPES = {
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
   ".webp": "image/webp",
+  ".gif": "image/gif",
   ".ico": "image/x-icon",
   ".woff": "font/woff",
   ".woff2": "font/woff2",
@@ -51,7 +52,7 @@ export function validateSitePath(relative) {
 export function classifySiteFile(relative) {
   validateSitePath(relative);
   const immutable = relative.startsWith("_next/static/") ||
-    /^media\/posts\/[a-f0-9]{64}\.(?:png|jpg|jpeg|webp)$/.test(relative);
+    /^media\/posts\/[a-f0-9]{64}\.(?:png|jpg|jpeg|webp|gif)$/.test(relative);
   return {
     contentType: CONTENT_TYPES[path.posix.extname(relative)],
     cacheControl: immutable ? IMMUTABLE : MUTABLE,
@@ -73,7 +74,7 @@ async function listFiles(directory, prefix = "") {
 }
 
 export async function buildReleaseManifest({ exportDirectory, sourceRevision, publicationTime,
-  releaseId, posts, portuguesePosts = [] }) {
+  releaseId, posts, portuguesePosts = [], publicFingerprint }) {
   if (!SHA.test(sourceRevision ?? "")) throw new Error("Invalid source revision");
   validateReleaseId(releaseId);
   if (!Number.isFinite(Date.parse(publicationTime)) || new Date(publicationTime).toISOString() !== publicationTime) {
@@ -82,7 +83,7 @@ export async function buildReleaseManifest({ exportDirectory, sourceRevision, pu
   if (!Array.isArray(posts) || posts.some((slug) => !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug))) {
     throw new Error("Invalid published post list");
   }
-  if (!Array.isArray(portuguesePosts) || portuguesePosts.some((slug) => !posts.includes(slug))) {
+  if (!Array.isArray(portuguesePosts) || portuguesePosts.some((slug) => !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug))) {
     throw new Error("Invalid Portuguese post list");
   }
   const relativeFiles = await listFiles(exportDirectory);
@@ -100,6 +101,9 @@ export async function buildReleaseManifest({ exportDirectory, sourceRevision, pu
   for (const slug of portuguesePosts) {
     if (!relativeFiles.includes(`pt/blog/${slug}/index.html`)) throw new Error(`Missing Portuguese article: ${slug}`);
   }
+  for (const slug of posts) {
+    if (!relativeFiles.includes(`blog/${slug}/index.html`)) throw new Error(`Missing English article: ${slug}`);
+  }
   const files = [];
   for (const relative of relativeFiles) {
     const metadata = classifySiteFile(relative);
@@ -112,6 +116,7 @@ export async function buildReleaseManifest({ exportDirectory, sourceRevision, pu
     left.path.localeCompare(right.path, "en"));
   return {
     schema: 1, releaseId, sourceRevision, publicationTime,
+    ...(publicFingerprint ? { publicFingerprint } : {}),
     posts: [...posts].sort(), portuguesePosts: [...portuguesePosts].sort(), files,
     mutableKeys: files.filter((file) => !file.immutable).map((file) => file.key).sort(),
   };
@@ -124,8 +129,9 @@ export function assertReleaseManifest(manifest) {
     throw new Error("Invalid release manifest");
   }
   validateReleaseId(manifest.releaseId);
+  if (manifest.publicFingerprint !== undefined && !/^[a-f0-9]{64}$/.test(manifest.publicFingerprint)) throw new Error("Invalid public fingerprint");
   if (!Array.isArray(manifest.posts) || manifest.posts.some((slug) => !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) ||
-      (manifest.portuguesePosts !== undefined && (!Array.isArray(manifest.portuguesePosts) || manifest.portuguesePosts.some((slug) => !manifest.posts.includes(slug))))) {
+      (manifest.portuguesePosts !== undefined && (!Array.isArray(manifest.portuguesePosts) || manifest.portuguesePosts.some((slug) => !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug))))) {
     throw new Error("Invalid release article lists");
   }
   const keys = new Set();
@@ -138,6 +144,12 @@ export function assertReleaseManifest(manifest) {
         file.cacheControl !== metadata.cacheControl ||
         file.contentType !== metadata.contentType) throw new Error("Invalid release file");
     keys.add(file.key);
+  }
+  for (const slug of manifest.posts) {
+    if (!keys.has(`site/blog/${slug}/index.html`)) throw new Error("Invalid release article lists");
+  }
+  for (const slug of manifest.portuguesePosts ?? []) {
+    if (!keys.has(`site/pt/blog/${slug}/index.html`)) throw new Error("Invalid release article lists");
   }
   const expectedMutable = manifest.files.filter((file) => !file.immutable).map((file) => file.key).sort();
   if (JSON.stringify([...manifest.mutableKeys].sort()) !== JSON.stringify(expectedMutable)) {

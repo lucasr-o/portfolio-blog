@@ -8,12 +8,19 @@ on:
       - 'packages/blog-content/**'
       - 'packages/blog-ui/**'
       - 'ops/cms/Dockerfile'
+      - 'ops/cms/editor-v2-enabled'
       - '.dockerignore'
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
       - '.github/workflows/cms-image.yml'
   workflow_dispatch:
+    inputs:
+      candidate_v2:
+        description: 'Build and test a Portuguese-first candidate without changing the main image tag'
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -50,6 +57,24 @@ jobs:
         run: |
           head="$(git ls-remote https://github.com/lucasr-o/portfolio-blog.git refs/heads/main | cut -f1)"
           test "$head" = "$GITHUB_SHA"
+      - name: Select editor variant and safe image tags
+        id: variant
+        env:
+          CANDIDATE_V2: ${{ inputs.candidate_v2 }}
+        run: |
+          if test "$CANDIDATE_V2" = 'true'; then
+            echo 'editor_v2=1' >> "$GITHUB_OUTPUT"
+            echo "primary_tag=ghcr.io/lucasr-o/portfolio-blog-cms:candidate-v2-${GITHUB_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+          elif test -f ops/cms/editor-v2-enabled && test "$(tr -d '\r\n' < ops/cms/editor-v2-enabled)" = 'enabled'; then
+            echo 'editor_v2=1' >> "$GITHUB_OUTPUT"
+            echo 'primary_tag=ghcr.io/lucasr-o/portfolio-blog-cms:main' >> "$GITHUB_OUTPUT"
+          elif test -e ops/cms/editor-v2-enabled; then
+            echo 'Invalid editor-v2 cutover marker.' >&2
+            exit 1
+          else
+            echo 'editor_v2=0' >> "$GITHUB_OUTPUT"
+            echo 'primary_tag=ghcr.io/lucasr-o/portfolio-blog-cms:main' >> "$GITHUB_OUTPUT"
+          fi
       - id: build
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
@@ -57,22 +82,27 @@ jobs:
           file: ops/cms/Dockerfile
           platforms: linux/arm64
           push: true
+          build-args: |
+            CMS_EDITOR_V2=${{ steps.variant.outputs.editor_v2 }}
           provenance: true
           sbom: true
           tags: |
-            ghcr.io/lucasr-o/portfolio-blog-cms:main
+            ${{ steps.variant.outputs.primary_tag }}
             ghcr.io/lucasr-o/portfolio-blog-cms:sha-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
           labels: |
             org.opencontainers.image.source=https://github.com/lucasr-o/portfolio-blog
             org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.cms-editor-v2=${{ steps.variant.outputs.editor_v2 }}
       - name: Verify architecture, secret exclusion and health by digest
         env:
           IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+          EXPECTED_EDITOR_V2: ${{ steps.variant.outputs.editor_v2 }}
         run: |
           set -euo pipefail
           image="ghcr.io/lucasr-o/portfolio-blog-cms@${IMAGE_DIGEST}"
           docker buildx imagetools inspect --raw "$image" | node -e 'const fs=require("node:fs");const m=JSON.parse(fs.readFileSync(0,"utf8"));if(!m.manifests?.some(x=>x.platform?.os==="linux"&&x.platform?.architecture==="arm64"))process.exit(1)'
           docker run --rm --platform linux/arm64 --network none --entrypoint sh "$image" -c 'test ! -e /app/apps/cms/.env && test -f /app/apps/cms/server.js'
+          test "$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.cms-editor-v2" }}' "$image")" = "$EXPECTED_EDITOR_V2"
           docker run -d --name portfolio-blog-cms-image-ci --platform linux/arm64 --read-only --tmpfs /tmp:rw,noexec,nosuid,size=32m --tmpfs /app/apps/cms/.next/cache:rw,noexec,nosuid,size=32m --cap-drop ALL --security-opt no-new-privileges:true --memory 768m --publish 127.0.0.1::3000 "$image"
           trap 'docker rm --force portfolio-blog-cms-image-ci >/dev/null 2>&1 || true' EXIT
           port="$(docker port portfolio-blog-cms-image-ci 3000/tcp | cut -d: -f2)"

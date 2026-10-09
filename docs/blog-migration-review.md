@@ -1,0 +1,13 @@
+# Revisão antes de migrar os posts
+
+Simulação local, somente leitura, em 2026-10-09. Lucas confirmou preservar a data atual do CWES nos dois idiomas, descartar as datas antigas do rascunho placeholder e aceitar uma janela curta de manutenção somente para o editor. Execute `node scripts/migration-dry-run.mjs` novamente imediatamente antes do corte: os hashes mudam se você editar um post no painel. **Nenhum YAML existente foi convertido ou publicado por esta simulação.**
+
+| Post | Estado | Resultado proposto | Revisão necessária |
+| --- | --- | --- | --- |
+| `review-cwes` | Publicado em inglês e português | Manter as mesmas URLs, Markdown, imagens, títulos, metadados e data `2026-10-09T18:00:00.000Z` para ambos | Confirmar a data existente como pin histórico. Ela antecede o primeiro commit encontrado para o arquivo por cerca de 34 minutos, então não deve ser substituída automaticamente. |
+| `cms-markdown-demonstration` | Rascunho | Continuar rascunho, fora do site | Confirmar que permanece apenas demonstração. |
+| `security-reviews-that-move-at-product-speed` | Rascunho placeholder | Continuar rascunho, fora do site | Descartar os campos antigos `publishedAt` e `updatedAt` presentes nesse rascunho; eles não representam publicação real. |
+
+O comparador do dry run encontrou hashes públicos idênticos antes/depois para `/blog/review-cwes/` e `/pt/blog/review-cwes/`; nenhum outro post entra nas rotas públicas. A home inglesa continua destacando CWES; índices de busca, lista de rotas do sitemap e cinco referências de mídia também ficaram idênticos. Os hashes de busca `e0ed47…` (EN) e `766798…` (PT) coincidem com o [baseline](blog-rollout-baseline.md). A execução bloqueia registros `scheduled` para revisão individual. Ela não compara uma release ativa da AWS, pois este checkout não tem credenciais AWS; conferir o manifesto atual e preservar o rollback antes do corte.
+
+O plano de corte exige, nesta ordem: testar a nova imagem ARM64 com dados migrados antes da produção; preservar a imagem atual e o estado de release; pausar somente o editor CMS na janela aprovada; aplicar a migração e trocar a imagem juntas; verificar autenticação/saúde, deploy por push, as duas rotas, blog, home, busca, sitemap e imagens; reabrir o editor. O Keystatic instalado não edita com segurança os dois formatos ao mesmo tempo. Antes da migração, a imagem antiga pode ser restaurada. Depois que um registro for salvo no formato novo, **não** voltar ao editor inglês-primeiro antigo: ele não lê esse formato. Se o CMS novo falhar, manter o editor pausado até corrigir ou restaurar uma imagem que leia `editorial`.

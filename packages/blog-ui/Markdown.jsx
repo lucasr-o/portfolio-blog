@@ -4,6 +4,7 @@ import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import { blogCopy } from "@portfolio/blog-content/locale";
 import styles from "./article.module.css";
+import GifImage from "./GifImage.jsx";
 
 export function safeLink(value) {
   // Do not allow protocol-relative URLs, encoded control characters or executables.
@@ -28,6 +29,7 @@ export default function Markdown({ body, media = {}, locale = "en" }) {
         img: ({ src, alt }) => {
           const image = media[src];
           if (!image) return null;
+          if (image.posterUrl) return <GifImage image={image} alt={alt} locale={locale} />;
           // Trusted build/preview manifest supplies the URL and intrinsic dimensions.
           // eslint-disable-next-line @next/next/no-img-element
           return <img className={styles.image} src={image.url} alt={alt || image.alt} width={image.width} height={image.height} loading="lazy" decoding="async" />;

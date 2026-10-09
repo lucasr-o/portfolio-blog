@@ -25,5 +25,5 @@ export default async function PostPage({ params }) {
   const publication = await getPublicContent();
   const post = findPublicArticle(publication, slug);
   if (!post) notFound();
-  return <PublicArticle post={post} media={publication.media} hasPortuguese={Boolean(findPublicArticle(publication, slug, "pt-BR"))} />;
+  return <PublicArticle post={post} media={publication.media} hasCounterpart={Boolean(findPublicArticle(publication, slug, "pt-BR"))} />;
 }

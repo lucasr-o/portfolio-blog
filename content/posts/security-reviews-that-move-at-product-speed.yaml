@@ -13,7 +13,8 @@ tags:
 isPlaceholder: true
 cover: {}
 images:
-  - alt: Green and yellow emblem of the Federal University of ABC
+  - src: /media/markdown-demo/ufabc.png
+    alt: Green and yellow emblem of the Federal University of ABC
 body: >
   Security reviews work best when they reduce uncertainty for the people
   building the product. This placeholder article demonstrates the structure
