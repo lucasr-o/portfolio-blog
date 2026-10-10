@@ -52,6 +52,7 @@ jobs:
       - run: CI=1 pnpm test:bilingual:e2e
       - run: CI=1 pnpm test:cms
       - run: CI=1 pnpm test:cms:v2
+      - run: CI=1 pnpm test:gif:e2e
       - run: pnpm test:cms:production
       - run: pnpm lighthouse
       - name: Prepare immutable release manifest

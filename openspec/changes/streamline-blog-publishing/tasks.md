@@ -8,15 +8,15 @@
 
 ## 2. Prove the editor lifecycle before migrating content
 
-- [ ] 2.1 Prototype the installed Keystatic version's top-level title/slug field plus one Portuguese-first compound editorial/assets field for global status, per-language approval, Markdown and media, with no date field; verify parse/serialize, first save, retry after failed save and edit of an existing English-origin record in an isolated test collection.
+- [x] 2.1 Prototype the installed Keystatic version's top-level title/slug field plus one Portuguese-first compound editorial/assets field for global status, per-language approval, Markdown and media, with no date field; verify parse/serialize, first save, retry after failed save and edit of an existing English-origin record in an isolated test collection.
 - [x] 2.2 Resolve creation, first-publication and modification instants from the first qualifying commits in full production `main` history; preserve reviewed legacy pins, cache per build, fail closed for missing/rewritten/shallow history or invalid public content, and test drafts, failed saves, edits, withdrawal/re-publication and later English publication.
-- [ ] 2.3 Gate the rest of this change on proof that the root slug stays stable and the complete `editorial` transition, including pasted media bytes, is validated and saved in one Keystatic Git commit; if the pinned form API cannot guarantee this, record the failing case and revise the design before any schema migration or production write.
+- [x] 2.3 Gate the rest of this change on proof that the root slug stays stable and the complete `editorial` transition, including pasted media bytes, is validated and saved in one Keystatic Git commit; if the pinned form API cannot guarantee this, record the failing case and revise the design before any schema migration or production write.
 - [x] 2.4 Replace the authoring form with Portuguese first, optional English, stable shared slug and no manual date or Scheduled controls; verify a Portuguese-only article can be saved/published and update the CMS authoring guide with the new lifecycle.
 
 ## 3. Make raw Markdown media authoring direct and safe
 
-- [ ] 3.1 Prototype the raw-Markdown field plus asset state so pasted or dropped image bytes and the inserted local Markdown reference are saved in the same Keystatic commit; test multiple pastes, retry, deduplication and removal without orphaned or broken references.
-- [ ] 3.2 Implement Ctrl+V, drop and file-picker insertion at the cursor while preserving ordinary text paste, fenced code and exact Markdown round-tripping; verify keyboard navigation, visible save/error feedback, editable alt text and reuse of one asset in both languages with locale-specific alt text.
+- [x] 3.1 Prototype the raw-Markdown field plus asset state so pasted or dropped image bytes and the inserted local Markdown reference are saved in the same Keystatic commit; test multiple pastes, retry, deduplication and removal without orphaned or broken references.
+- [x] 3.2 Implement Ctrl+V, drop and file-picker insertion at the cursor while preserving ordinary text paste, fenced code and exact Markdown round-tripping; verify keyboard navigation, visible save/error feedback, editable alt text and reuse of one asset in both languages with locale-specific alt text.
 - [x] 3.3 Give new inline media stable content-addressed paths while retaining legacy indexed-media reads; reject remote fetches and unsafe asset paths, and test that reordering or editing media never breaks existing Markdown references.
 - [x] 3.4 Keep protected preview tied to the last saved Git revision and make unsaved media state explicit; document the paste/fallback workflow and verify no preview claims that unsaved images are live.
 
@@ -24,8 +24,8 @@
 
 - [x] 4.1 Extend CMS upload and content validation to accept real GIF bytes for body media only, with byte, dimension, frame-count and decoded-pixel limits; test spoofed extensions/MIME, oversized files, malformed GIFs and cover rejection.
 - [x] 4.2 Generate a deterministic still poster and preserve validated GIF/poster paths through preview, static export, S3 upload metadata and public routes; verify `image/gif`, image cache headers and no HTML fallback for either asset.
-- [ ] 4.3 Render body GIFs with reserved dimensions, lazy loading, a keyboard-accessible Pause/Play control and a poster-first reduced-motion path; test keyboard, screen-reader labels, reduced-motion behavior and representative mobile transfer/CPU budgets.
-- [ ] 4.4 Update the authoring/media documentation with GIF limits, paste-versus-file behavior and a short accessible-alt example; verify the documented steps in the CMS preview.
+- [x] 4.3 Render body GIFs with reserved dimensions, lazy loading, a keyboard-accessible Pause/Play control and a poster-first reduced-motion path; test keyboard, screen-reader labels, reduced-motion behavior and representative mobile transfer/CPU budgets.
+- [x] 4.4 Update the authoring/media documentation with GIF limits, paste-versus-file behavior and a short accessible-alt example; verify the documented steps in the CMS preview.
 
 ## 5. Project independent language versions to the public site
 

@@ -17,6 +17,7 @@
     "test:e2e": "playwright test",
     "test:cms": "playwright test --config playwright.cms.config.js",
     "test:cms:v2": "playwright test --config playwright.cms-v2.config.js",
+    "test:gif:e2e": "node scripts/test-gif-browser.mjs",
     "test:cms:production": "node scripts/test-cms-production.mjs",
     "test:cms:proxy": "node scripts/test-cms-proxy.mjs",
     "test:cms:compose": "node scripts/test-cms-compose.mjs",

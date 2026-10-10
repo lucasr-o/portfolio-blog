@@ -86,4 +86,21 @@ describe("saved GitHub previews", () => {
     expect(preview.media[image.src].url).toContain(`/preview/media/${revision}/saved-draft/`);
     expect(preview.issues).toEqual([]);
   });
+  it("serves a saved draft GIF and its still poster from the same protected revision", async () => {
+    const gif = Buffer.from("R0lGODlhAQABAAD/ACwAAAAAAQABAAACAUwAOw==", "base64");
+    const source = "/media/gif-draft/hello.gif";
+    const post = validatePost({ title: "Rascunho com GIF", editorial: {
+      titleLocale: "pt", status: "draft", images: [{ src: source }],
+      pt: { publish: false, summary: "Resumo", body: `![Pepe](${source})` },
+      en: { publish: false, title: "", summary: "", body: "" },
+    } }, "gif-draft");
+    const snapshot = { revision, readPost: async () => post, readImage: async () => gif };
+    const preview = await preparePreview(snapshot, "gif-draft");
+    expect(preview.ptPost.body).toContain("![Pepe]");
+    expect(preview.media[source].url).toMatch(new RegExp(`^/preview/media/${revision}/gif-draft/[a-f0-9]{64}\\.gif$`));
+    expect(preview.media[source].posterUrl).toMatch(new RegExp(`^/preview/media/${revision}/gif-draft/[a-f0-9]{64}\\.png$`));
+    expect(await readPreviewImage(snapshot, "gif-draft", preview.media[source].url.split("/").at(-1))).toEqual(gif);
+    const poster = await readPreviewImage(snapshot, "gif-draft", preview.media[source].posterUrl.split("/").at(-1));
+    expect(poster.subarray(0, 8)).toEqual(Buffer.from("89504e470d0a1a0a", "hex"));
+  });
 });
