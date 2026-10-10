@@ -40,25 +40,28 @@ try {
 
   const results = [];
   for (const [name, route] of routes) {
-    const outputPath = path.join(outputDirectory, `${name}.json`);
-    await runPnpm([
-      "exec", "lighthouse", `${baseUrl}${route}`,
-      "--quiet",
-      "--output=json",
-      `--output-path=${outputPath}`,
-      "--only-categories=performance,accessibility,best-practices,seo",
-      "--chrome-path=/usr/bin/google-chrome",
-      "--chrome-flags=--headless --no-sandbox --disable-gpu",
-    ]);
-    const report = JSON.parse(fs.readFileSync(outputPath, "utf8"));
-    const scores = Object.fromEntries(Object.entries(report.categories).map(([key, value]) => [key, Math.round(value.score * 100)]));
-    results.push({ route, scores });
+    for (const profile of ["mobile", "desktop"]) {
+      const outputPath = path.join(outputDirectory, `${name}-${profile}.json`);
+      await runPnpm([
+        "exec", "lighthouse", `${baseUrl}${route}`,
+        "--quiet",
+        "--output=json",
+        `--output-path=${outputPath}`,
+        "--only-categories=performance,accessibility,best-practices,seo",
+        ...(profile === "desktop" ? ["--preset=desktop"] : []),
+        "--chrome-path=/usr/bin/google-chrome",
+        "--chrome-flags=--headless --no-sandbox --disable-gpu",
+      ]);
+      const report = JSON.parse(fs.readFileSync(outputPath, "utf8"));
+      const scores = Object.fromEntries(Object.entries(report.categories).map(([key, value]) => [key, Math.round(value.score * 100)]));
+      results.push({ route, profile, scores });
+    }
   }
 
-  console.table(results.flatMap(({ route, scores }) => Object.entries(scores).map(([category, score]) => ({ route, category, score }))));
-  const failures = results.flatMap(({ route, scores }) => Object.entries(scores)
+  console.table(results.flatMap(({ route, profile, scores }) => Object.entries(scores).map(([category, score]) => ({ route, profile, category, score }))));
+  const failures = results.flatMap(({ route, profile, scores }) => Object.entries(scores)
     .filter(([, score]) => score < 90)
-    .map(([category, score]) => `${route} ${category}: ${score}`));
+    .map(([category, score]) => `${route} ${profile} ${category}: ${score}`));
   if (failures.length) throw new Error(`Lighthouse scores below 90:\n${failures.join("\n")}`);
 } finally {
   if (process.platform === "win32") server.kill("SIGTERM");

@@ -52,4 +52,4 @@
 
 - [ ] 8.1 Run unit, editor, static-export and security tests covering Portuguese-first creation, paste/GIF, English-later publication dates, same-slug edits, partial withdrawal and draft-only no-op; resolve failures without weakening validation.
 - [ ] 8.2 Measure representative mobile and desktop performance/accessibility, including reduced motion, image loading and GIF controls; inspect exported MIME/cache headers and verify the live English home, blog, article and 404 routes after release.
-- [ ] 8.3 Reconcile and sync earlier unsynchronized OpenSpec deltas in chronological order, then sync this change's final specs and validate that the main specs no longer require English-first authoring or scheduled publication.
+- [x] 8.3 Reconcile and sync earlier unsynchronized OpenSpec deltas in chronological order, then sync this change's final specs and validate that the main specs no longer require English-first authoring or scheduled publication.
