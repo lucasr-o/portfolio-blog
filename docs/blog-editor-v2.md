@@ -1,6 +1,6 @@
 # Novo fluxo de escrita do blog
 
-> Este guia descreve o editor português-primeiro em preparação. **Não use como guia da produção até a migração e o corte serem aprovados.** O [guia atual](blog-editor.md) continua válido para o painel que está no ar.
+> Este é o guia do editor português-primeiro em produção desde o corte do commit `3e1a8c2`. O [guia anterior](blog-editor.md) permanece apenas como referência histórica; não use seus campos de data nem seu fluxo de upload no painel atual.
 
 ## Escrever e publicar
 

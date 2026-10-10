@@ -14,7 +14,7 @@ Este roteiro é para uma única migração supervisionada. O CMS está no Raspbe
 1. Avisar que o editor ficará indisponível e não iniciar nenhuma edição nele. Pausar o timer **somente** `portfolio-blog-cms-update.timer` e parar apenas o serviço `tunnel` do Compose `portfolio-blog-cms`, deixando o túnel do Overleaf intacto. Confirmar que o subdomínio do CMS não dá acesso externo durante o corte.
 2. Reexecutar `node scripts/migration-dry-run.mjs` e usar o `planSha256` **daquela execução**, sem novas edições, em `node scripts/migration-dry-run.mjs --apply <planSha256>`. A aplicação recusa plano alterado e guarda os YAML anteriores em `.cache/blog-migration-backup/<planSha256>/`. Criar `ops/cms/editor-v2-enabled` contendo exatamente `enabled`. Fazer **um commit** na `main` com os três YAML e o marcador, sem segredos. Esse marcador faz o workflow de imagem publicar a variante V2 em `:main` nas próximas mudanças do CMS; não removê-lo após o corte.
 3. Aguardar **Publish site** e **Build CMS ARM64 image** dessa revisão. Se qualquer um falhar, manter o túnel do CMS parado e investigar. A release do site não deve publicar rascunhos nem alterar as URLs existentes.
-4. Com a nova imagem `:main` validada, iniciar/confirmar a saúde do serviço `cms` no Compose dedicado e executar o atualizador do CMS uma vez, verificando que ele escolheu o digest V2. Só então iniciar novamente o serviço `tunnel` dedicado e o timer de atualização.
+4. Com a nova imagem `:main` validada, iniciar/confirmar a saúde do serviço `cms` no Compose dedicado e executar o atualizador do CMS uma vez, verificando que ele escolheu o digest V2. Só então iniciar novamente o serviço `tunnel` dedicado. Retomar o timer de atualização **apenas se ele existia e estava ativo antes do corte**; não instalar um timer novo como parte desta migração.
 5. Entrar pelo subdomínio hexadecimal com HTTP Auth + GitHub. Reabrir CWES, confirmar português e inglês, salvar um rascunho sem publicação e testar a prévia salva. Conferir `/`, `/blog/`, `/blog/review-cwes/`, `/pt/blog/review-cwes/`, busca, sitemap, imagens e 404 no domínio público. Registrar os digests/commits finais.
 
 ## Reversão
@@ -24,3 +24,11 @@ Este roteiro é para uma única migração supervisionada. O CMS está no Raspbe
 - **Após um save V2:** **não** voltar ao editor inglês-primeiro. Manter o túnel do CMS parado e reparar o editor V2, ou usar outra imagem que leia `editorial`. Para falha do site, usar o snapshot de S3/CloudFront existente; isso não modifica o conteúdo no GitHub.
 
 Não expor o token do Tunnel, `.env`, senha HTTP ou credenciais em logs, commits ou comandos compartilhados.
+
+## Registro do corte de 9–10/10/2026
+
+- Migração aplicada com plano SHA-256 `fe192cc2a9df523648f0cb35b5c8a1bd6236be6cceff77810c50dbe70270224c` e publicada no commit `3e1a8c2c854c76cb602b9c53f9778192f23f8543`. A comparação antes/depois manteve rotas, conteúdo público, busca e mídia; CWES reteve sua data aprovada em ambos os idiomas.
+- Workflows da revisão: **Publish site** `37995190622` e **Build CMS ARM64 image** `37995190562`, ambos concluídos com sucesso. A imagem `:main` verificada é ARM64, tem marcador V2 e aponta para o mesmo commit.
+- O atualizador dedicado trocou `sha256:894284f4eef261e0e9a0e596ffa6f6e02bb7caf2ffa2cc5723f915c77ce45296` por `sha256:f19e0648f0196a6f12e88f705449b72d91f48069e6d732017efd2f6512361263`; o CMS e o proxy ficaram saudáveis. O túnel dedicado foi reaberto após essa verificação. Sem autenticação, seu hostname retorna HTTP 401.
+- O unit `portfolio-blog-cms-update.timer` estava `not-found` e `inactive` antes e depois; nenhum timer foi instalado ou ativado. Nenhum serviço do Overleaf foi alterado.
+- Verificação pública inicial: home, índices EN/PT, artigo CWES EN/PT, busca EN/PT, sitemap, imagem e 404 responderam com status e tipos adequados. Ainda conferir no navegador autenticado a experiência do editor e a prévia de um rascunho salvo.

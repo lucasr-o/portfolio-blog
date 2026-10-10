@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createReleaseRuntime } from "../scripts/release-cloudfront.mjs";
+import { classifySiteFile } from "../scripts/release-plan.mjs";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -57,6 +58,24 @@ describe("CloudFront smoke paths", () => {
           pathname.endsWith(".json") && !(search && failure === "html") ? "application/json" : "text/html" } });
       }));
       await expect(runtime.smoke(manifest)).rejects.toThrow(/blog-search\/en.json/);
+    }
+  });
+
+  it("checks a GIF and a still poster instead of accepting an HTML fallback", async () => {
+    const gif = { path: `media/posts/${"a".repeat(64)}.gif`, ...classifySiteFile(`media/posts/${"a".repeat(64)}.gif`) };
+    const poster = { path: `media/posts/${"b".repeat(64)}.png`, ...classifySiteFile(`media/posts/${"b".repeat(64)}.png`) };
+    const withMedia = { ...manifest, files: [...manifest.files, gif, poster] };
+    const runtime = createReleaseRuntime({ distributionId: "E123456789", domain: "sample.cloudfront.net" });
+    for (const broken of [gif.path, poster.path]) {
+      vi.stubGlobal("fetch", vi.fn(async (url) => {
+        const pathname = new URL(url).pathname;
+        const type = pathname === `/${broken}` ? "text/html" : pathname === `/${gif.path}` ? "image/gif" :
+          pathname === `/${poster.path}` ? "image/png" : pathname.endsWith(".js") ? "text/javascript" :
+            pathname.endsWith(".json") ? "application/json" : "text/html";
+        return new Response("ok", { status: pathname.includes("does-not-exist") ? 404 : 200,
+          headers: { "content-type": type } });
+      }));
+      await expect(runtime.smoke(withMedia)).rejects.toThrow(broken);
     }
   });
 });

@@ -2,7 +2,7 @@
 
 ## Estado atual
 
-Este guia descreve o **editor antigo, ainda em produção**. O painel no Raspberry Pi, a senha HTTP, o hostname hexadecimal e a publicação automática por push já estão ativos. O [novo fluxo português-primeiro](blog-editor-v2.md) está em preparação e só passa a valer após migração e corte aprovados. No fluxo atual, salvar um post público aciona o workflow de publicação; o resultado no site depende de uma release bem-sucedida.
+**Referência histórica do editor antigo; não use este fluxo em produção.** O painel atual usa o [fluxo português-primeiro](blog-editor-v2.md), sem data manual nem upload em duas gravações. As instruções abaixo ficam preservadas apenas para entender registros e operações anteriores ao corte.
 
 Repositório: [lucasr-o/portfolio-blog](https://github.com/lucasr-o/portfolio-blog). O aplicativo `portfolio-blog-keystatic-lucasr-o` está instalado somente nele, com escrita em conteúdo e leitura de metadados/pull requests. Não ampliar a instalação para outros repositórios.
 
