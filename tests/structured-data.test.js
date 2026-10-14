@@ -13,6 +13,7 @@ describe("structured data", () => {
       url: site.url,
       jobTitle: profile.role,
       email: "contato@lucas-reis.com",
+      address: { addressLocality: "São Paulo", addressRegion: "SP", addressCountry: "BR" },
       sameAs: [
         "https://www.linkedin.com/in/lucas-reis-o",
         "https://github.com/lucasr-o",

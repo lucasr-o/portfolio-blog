@@ -35,7 +35,7 @@ export default async function HomePage() {
           <div className={styles.heroInner}>
             <p className="eyebrow">Application Security Engineer</p>
             <p className={styles.identity}>{profile.name} · {profile.location}</p>
-            <h1 id="hero-title">Security that moves with the product.</h1>
+            <h1 id="hero-title">I find security flaws in software.</h1>
             <p className={styles.lead}>{profile.summary}</p>
             <div className={styles.actions}>
               <Link className={`${styles.buttonPrimary} touch-feedback`} href="#work">View my work</Link>
@@ -75,9 +75,9 @@ export default async function HomePage() {
         </section>}
 
         <section className={`container ${styles.section}`} id="about" tabIndex="-1" aria-labelledby="about-title">
-          <div className={`${styles.sectionHeader} reveal-on-scroll`}><p className="eyebrow">About</p><h2 id="about-title">Practical security, shared clearly.</h2></div>
+          <div className={`${styles.sectionHeader} reveal-on-scroll`}><p className="eyebrow">About</p><h2 id="about-title">About me.</h2></div>
           <div className={`${styles.aboutGrid} reveal-on-scroll`}>
-            <div className={styles.aboutNarrative}><p className={styles.aboutCopy}>{profile.summary}</p><p className={styles.objective}>{profile.objective}</p></div>
+            <div className={styles.aboutNarrative}><p className={styles.aboutCopy}>{profile.about}</p><p className={styles.objective}>{profile.objective}</p></div>
             <figure className={styles.portrait}>
               {profile.photo ? <div className={styles.portraitMedia}><Image className={styles.portraitImage} src={profile.photo} alt={`Portrait of ${profile.shortName}`} fill sizes="(max-width: 736px) 100vw, 38vw" /></div> : <div className={styles.portraitPlaceholder} role="img" aria-label="Portrait placeholder for Lucas Reis"><span>LR</span></div>}
               <figcaption><strong>Lucas Reis</strong><span>Application Security Engineer</span></figcaption>

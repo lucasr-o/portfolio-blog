@@ -41,7 +41,9 @@ test("brand returns from the blog to the beginning of the home page", async ({ p
   await page.getByRole("link", { name: "lucas-reis — home" }).click();
 
   await expect(page).toHaveURL(/\/#main-content$/);
-  await expect(page.getByRole("heading", { name: "Security that moves with the product." })).toBeInViewport();
+  await expect(page.getByRole("heading", { name: "I find security flaws in software." })).toBeInViewport();
+  await expect(page.getByText("Lucas Reis de Oliveira da Silva · São Paulo, SP")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "About me." })).toBeVisible();
 });
 
 test("switches between the English and Portuguese blog indexes and article versions", async ({ page }) => {

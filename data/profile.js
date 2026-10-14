@@ -11,12 +11,14 @@ export const profile = {
   name: site.legalName,
   shortName: site.name,
   role: site.title,
-  location: "Santo André, SP",
+  location: "São Paulo, SP",
   objective:
-    "I am growing as a security engineer by going deeper into penetration testing, strengthening how security supports product delivery, and building toward technical leadership.",
+    "I want to keep improving as a penetration tester and eventually lead a team.",
   photo: "/lucas-reis-profile.jpeg",
   summary:
-    "I work across security reviews, threat modeling, vulnerability management, and offensive testing to help teams turn security findings into product decisions they can act on.",
+    "I test web apps, mobile apps, and APIs. Alongside testing, I help teams model threats and fix vulnerabilities.",
+  about:
+    "Outside work, I coordinate information security at Green Team Hacker Club at UFABC. I teach web hacking, cryptography, and reverse engineering, and I still play CTFs.",
   contact: {
     email: "contato@lucas-reis.com",
     emailHref: "mailto:contato@lucas-reis.com",
