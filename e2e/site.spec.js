@@ -203,6 +203,30 @@ test("shows organization marks and the supplied portrait without replacing text 
   await expect(page.getByText("SENAI-SP", { exact: true })).toBeAttached();
 });
 
+test("shows the complete UFABC mark in Academic Background", async ({ page }) => {
+  await page.goto("/");
+  const workLogo = page.locator('#work [data-logo="ufabc"] img');
+  const academicLogo = page.locator("li").filter({ hasText: "Bachelor of Computer Science" }).locator("img");
+  await expect(academicLogo).toHaveAttribute("src", await workLogo.getAttribute("src"));
+
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await academicLogo.scrollIntoViewIfNeeded();
+    await expect(academicLogo).toHaveJSProperty("complete", true);
+    const image = await academicLogo.evaluate((element) => {
+      const imageBox = element.getBoundingClientRect();
+      const frameBox = element.parentElement.getBoundingClientRect();
+      return {
+        loaded: element.naturalWidth > 0,
+        contained: imageBox.left >= frameBox.left && imageBox.right <= frameBox.right &&
+          imageBox.top >= frameBox.top && imageBox.bottom <= frameBox.bottom,
+        fit: getComputedStyle(element).objectFit,
+      };
+    });
+    expect(image).toEqual({ loaded: true, contained: true, fit: "contain" });
+  }
+});
+
 test("uses quick tactile feedback on links without changing the Contact interaction", async ({ page }) => {
   await page.goto("/");
 
