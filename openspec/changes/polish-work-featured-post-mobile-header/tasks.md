@@ -18,4 +18,4 @@
 ## 4. Integration and publication
 
 - [x] 4.1 Run the project test/build checks and inspect desktop/mobile screenshots, including reduced-motion behavior; verify no regressions on home, blog index, and an article page.
-- [ ] 4.2 Commit only this change's scoped source, tests, and OpenSpec artifacts, push to `main`, and verify the `Publish site` workflow succeeds and public home/blog URLs reflect the release; keep unrelated pre-existing modified files out of the commit.
+- [x] 4.2 Commit only this change's scoped source, tests, and OpenSpec artifacts, push to `main`, and verify the `Publish site` workflow succeeds and public home/blog URLs reflect the release; keep unrelated pre-existing modified files out of the commit.
