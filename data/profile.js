@@ -31,18 +31,23 @@ export const profile = {
 const organizationLogos = {
   mercadoLivre: {
     src: "/brands/mercado-livre.png",
+    presentation: "mercado-livre",
   },
   pagBank: {
     src: "/brands/pagbank.svg",
+    presentation: "pagbank",
   },
   goAhead: {
     src: "/brands/go-ahead.png",
+    presentation: "go-ahead",
   },
   ufabc: {
     src: "/brands/ufabc.png",
+    presentation: "ufabc",
   },
   greenTeam: {
     src: "/brands/green-team.png",
+    presentation: "green-team",
   },
   senai: {
     src: "/brands/senai.svg",

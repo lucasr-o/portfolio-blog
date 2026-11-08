@@ -123,6 +123,44 @@
   transform: translateX(0.32rem);
 }
 
+.homeFeature,
+.homeFeature.featured {
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border-color: var(--color-border);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+}
+
+.homeFeature .latest,
+.homeFeature.featured .title a:hover,
+.homeFeature.featured .readLink:hover {
+  color: var(--color-tertiary);
+}
+
+.homeFeature .meta {
+  color: var(--color-text-muted);
+  opacity: 1;
+}
+
+.homeFeature .title {
+  margin-block: var(--space-4) var(--space-3);
+  font-size: clamp(1.75rem, 3.4vw, 2.65rem);
+}
+
+.homeFeature > p {
+  color: var(--color-text-muted);
+  opacity: 1;
+}
+
+.homeFeature .tags {
+  margin-block: var(--space-4);
+}
+
+.homeFeature .tags li {
+  border-color: var(--color-border);
+  opacity: 1;
+}
+
 .minimal,
 .minimal.featured {
   display: grid;

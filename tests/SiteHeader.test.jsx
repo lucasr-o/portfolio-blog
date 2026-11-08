@@ -9,7 +9,9 @@ describe("SiteHeader", () => {
     expect(screen.getByRole("link", { name: "Work" })).toHaveAttribute("href", "/#work");
     expect(screen.getByRole("link", { name: "Blog" })).toHaveAttribute("href", "/blog");
     expect(screen.getByRole("link", { name: "About" })).toHaveAttribute("href", "/#about");
-    expect(screen.getByRole("link", { name: "Contact" })).toHaveAttribute("href", "/#contact");
+    const contactLinks = screen.getAllByRole("link", { name: "Contact" });
+    expect(contactLinks).toHaveLength(2);
+    for (const link of contactLinks) expect(link).toHaveAttribute("href", "/#contact");
   });
 
   it("keeps slash separators out of accessible link names", () => {

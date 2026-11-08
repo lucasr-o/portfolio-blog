@@ -4,7 +4,9 @@ import HomePage from "@/app/(en)/page";
 import BlogPage from "@/app/(en)/blog/page";
 import PortugueseBlogPage from "@/app/(pt)/pt/blog/page";
 import PostPage from "@/app/(en)/blog/[slug]/page";
+import { experience } from "@/data/profile";
 import { getPublicContent } from "@/lib/public-content";
+import { formatPostDate } from "@portfolio/blog-content/format";
 const { posts: [latestPost], ptPosts } = await getPublicContent();
 
 describe("public routes", () => {
@@ -27,14 +29,34 @@ describe("public routes", () => {
 
   it("uses the same latest post on the home page and blog index", async () => {
     const home = render(await HomePage());
+    const homePreview = home.container.querySelector('section[aria-labelledby="latest-title"] article');
     expect(home.getAllByRole("link", { name: latestPost.title })[0]).toHaveAttribute("href", `/blog/${latestPost.slug}`);
+    expect(within(homePreview).getByText(latestPost.summary)).toBeInTheDocument();
+    expect(within(homePreview).getByText(formatPostDate(latestPost.publishedAt, "en"))).toBeInTheDocument();
+    expect(within(homePreview).getByText(latestPost.readingTime)).toBeInTheDocument();
+    expect(homePreview.className).toMatch(/homeFeature/);
     home.unmount();
-    render(await BlogPage());
+    const blog = render(await BlogPage());
     expect(screen.getByRole("heading", { level: 1, name: "Posts." })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2, name: "Recent posts" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 3, name: latestPost.title })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: latestPost.title })).toHaveAttribute("href", `/blog/${latestPost.slug}`);
+    expect(blog.container.querySelector('section[aria-labelledby="articles-title"] article').className).not.toMatch(/homeFeature/);
     expect(screen.getByRole("navigation", { name: "Blog language" }).getAttribute("aria-label")).toBe("Blog language");
+  });
+
+  it("keeps each Work logo decorative beside its readable organization name", async () => {
+    const { container } = render(await HomePage());
+    const work = container.querySelector("#work");
+    const logos = work.querySelectorAll("[data-logo] img");
+
+    expect(logos).toHaveLength(experience.length);
+    for (const [index, item] of experience.entries()) {
+      expect(within(work).getByText(item.organization)).toBeInTheDocument();
+      expect(decodeURIComponent(logos[index].getAttribute("src"))).toContain(item.logo.src);
+      expect(logos[index]).toHaveAttribute("alt", "");
+      expect(logos[index].parentElement).toHaveAttribute("data-logo", item.logo.presentation);
+    }
   });
 
   it("renders only Portuguese-approved cards on the Portuguese index", async () => {

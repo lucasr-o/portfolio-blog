@@ -24,6 +24,9 @@ export default function SiteHeader() {
           />
           <span>lucas-reis</span>
         </Link>
+        <div className={styles.mobileContact}>
+          <InteractiveHoverButton href="/#contact" text="Contact" />
+        </div>
         <nav className={styles.navigation} aria-label="Primary navigation">
           <div className={styles.primaryLinks}>
             {navigation.map((item, index) => (
@@ -33,7 +36,9 @@ export default function SiteHeader() {
               </span>
             ))}
           </div>
-          <InteractiveHoverButton href="/#contact" text="Contact" />
+          <div className={styles.desktopContact}>
+            <InteractiveHoverButton href="/#contact" text="Contact" />
+          </div>
         </nav>
       </div>
     </header>

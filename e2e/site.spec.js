@@ -179,6 +179,24 @@ test("shows organization marks and the supplied portrait without replacing text 
     frames.map((frame) => getComputedStyle(frame).backgroundColor),
   );
   expect(new Set(logoBackgrounds)).toEqual(new Set(["rgb(255, 255, 255)"]));
+  const logoFrames = page.locator("#work [data-logo]");
+  for (const frame of await logoFrames.all()) {
+    await frame.scrollIntoViewIfNeeded();
+    await expect(frame.locator("img")).toHaveJSProperty("complete", true);
+  }
+  const workLogos = await page.locator("#work [data-logo]").evaluateAll((frames) => frames.map((frame) => {
+    const image = frame.querySelector("img");
+    const box = frame.getBoundingClientRect();
+    return {
+      width: box.width,
+      height: box.height,
+      fit: getComputedStyle(image).objectFit,
+      loaded: image.complete && image.naturalWidth > 0,
+    };
+  }));
+  expect(workLogos).toHaveLength(5);
+  expect(new Set(workLogos.map(({ width, height }) => `${width}x${height}`)).size).toBe(1);
+  expect(workLogos.every(({ fit, loaded }) => fit === "contain" && loaded)).toBe(true);
   await expect(page.getByRole("img", { name: "Portrait of Lucas Reis" })).toBeVisible();
   await expect(page.getByRole("img", { name: "Portrait of Lucas Reis" })).toHaveAttribute("src", /lucas-reis-profile\.jpeg/);
   await expect(page.getByText("Federal University of ABC", { exact: true })).toBeAttached();

@@ -11,6 +11,7 @@ export default function PostPreview({ post, featured = false, variant = "card", 
     styles.card,
     featured ? styles.featured : null,
     variant === "minimal" ? styles.minimal : null,
+    variant === "home" ? styles.homeFeature : null,
   ].filter(Boolean).join(" ");
 
   return (

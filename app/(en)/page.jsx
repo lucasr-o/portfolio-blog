@@ -55,7 +55,7 @@ export default async function HomePage() {
             {experience.map((item) => (
               <li className={`${styles.experienceItem} reveal-on-scroll`} key={`${item.organization}-${item.role}`}>
                 <div className={styles.experienceMeta}>
-                  <div className={styles.organizationLogoFrame}>
+                  <div className={styles.organizationLogoFrame} data-logo={item.logo.presentation}>
                     <Image className={styles.organizationLogo} src={item.logo.src} alt="" width={160} height={80} sizes="160px" />
                   </div>
                   <p>{item.period}</p><p>{item.location}</p>
@@ -71,7 +71,7 @@ export default async function HomePage() {
 
         {latestPost && <section className={`container ${styles.latest}`} aria-labelledby="latest-title">
           <div className={`${styles.sectionHeader} reveal-on-scroll`}><p className="eyebrow">Latest writing</p><h2 id="latest-title">Notes from the work.</h2></div>
-          <div className="reveal-on-scroll"><PostPreview post={latestPost} featured headingLevel={3} /></div>
+          <div className="reveal-on-scroll"><PostPreview post={latestPost} featured variant="home" headingLevel={3} /></div>
         </section>}
 
         <section className={`container ${styles.section}`} id="about" tabIndex="-1" aria-labelledby="about-title">

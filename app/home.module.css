@@ -18,8 +18,14 @@
 .experienceList, .simpleList, .credentialList { margin: 0; padding: 0; list-style: none; }
 .experienceItem { display: grid; grid-template-columns: minmax(11rem, 0.5fr) minmax(0, 1fr); gap: var(--space-6); padding-block: var(--space-6); border-top: 1px solid var(--color-border); }
 .organizationLogoFrame, .institutionLogoFrame { display: grid; overflow: hidden; place-items: center; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface-raised); }
-.organizationLogoFrame { width: 10rem; min-height: 4.75rem; margin-bottom: var(--space-4); padding: var(--space-3); }
-.organizationLogo, .institutionLogo { width: 100%; height: 100%; object-fit: contain; }
+.organizationLogoFrame { width: 9.5rem; height: 5.25rem; margin-bottom: var(--space-4); padding: var(--space-2); }
+.organizationLogo { display: block; width: var(--logo-width, 100%); height: var(--logo-height, 100%); max-width: 100%; max-height: 100%; object-fit: contain; }
+.organizationLogoFrame[data-logo="mercado-livre"] { --logo-width: 7.9rem; --logo-height: 2.4rem; }
+.organizationLogoFrame[data-logo="pagbank"] { --logo-width: 7.7rem; --logo-height: 2.7rem; }
+.organizationLogoFrame[data-logo="go-ahead"] { --logo-width: 3.4rem; --logo-height: 3.4rem; }
+.organizationLogoFrame[data-logo="ufabc"] { --logo-width: 3.55rem; --logo-height: 3.55rem; }
+.organizationLogoFrame[data-logo="green-team"] { --logo-width: 4rem; --logo-height: 4rem; }
+.institutionLogo { width: 100%; height: 100%; object-fit: contain; }
 .experienceMeta p, .experienceBody p { margin-bottom: var(--space-2); }
 .experienceMeta p { color: var(--color-text-muted); font-size: 0.82rem; }
 .experienceBody h3 { margin-bottom: var(--space-3); }

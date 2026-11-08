@@ -8,8 +8,19 @@
 .primaryLinks, .navItem { gap: 0.6rem; }
 .navigation a { text-decoration: none; }
 .separator { color: var(--color-text-muted); font-weight: 400; }
+.mobileContact { display: none; }
+.desktopContact { display: flex; }
 @media (max-width: 34rem) {
-  .inner { align-items: flex-start; flex-direction: column; gap: var(--space-3); }
-  .navigation { width: 100%; justify-content: space-between; gap: var(--space-3); }
+  .inner { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); }
+  .mobileContact { display: flex; grid-column: 2; justify-self: end; }
+  .navigation { grid-column: 1 / -1; width: 100%; justify-content: flex-start; }
+  .desktopContact { display: none; }
   .primaryLinks, .navItem { gap: 0.4rem; }
+}
+@media (max-width: 16rem) {
+  .inner { grid-template-columns: minmax(0, 1fr); }
+  .brand { font-size: 0.84rem; }
+  .brandLogo { width: 1.75rem; height: 1.75rem; }
+  .mobileContact, .navigation { grid-column: 1; justify-self: start; }
+  .primaryLinks { flex-wrap: wrap; }
 }
